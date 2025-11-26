@@ -1,5 +1,101 @@
-import { db, authManager } from './firebase-config.js';
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
+// Authentication system
+class AuthManager {
+    constructor() {
+        this.isAuthenticated = false;
+        this.currentUser = null;
+        this.setupAuthListener();
+    }
+
+    // Setup authentication state listener
+    setupAuthListener() {
+        auth.onAuthStateChanged((user) => {
+            console.log('Auth state changed:', user ? 'User signed in' : 'User signed out');
+            if (user) {
+                this.isAuthenticated = true;
+                this.currentUser = user;
+                localStorage.setItem('adminAuth', 'true');
+                localStorage.setItem('adminEmail', user.email);
+                console.log('User authenticated:', user.email);
+            } else {
+                this.isAuthenticated = false;
+                this.currentUser = null;
+                localStorage.removeItem('adminAuth');
+                localStorage.removeItem('adminEmail');
+                console.log('User signed out');
+            }
+        });
+    }
+
+    // Firebase authentication
+    async login(email, password) {
+        try {
+            console.log('Attempting login for:', email);
+            const userCredential = await auth.signInWithEmailAndPassword(email, password);
+            this.isAuthenticated = true;
+            this.currentUser = userCredential.user;
+            localStorage.setItem('adminAuth', 'true');
+            localStorage.setItem('adminEmail', email);
+            console.log('Login successful for:', email);
+            return { success: true, user: userCredential.user };
+        } catch (error) {
+            console.error('Login error:', error);
+            let errorMessage = 'حدث خطأ أثناء تسجيل الدخول';
+            
+            switch (error.code) {
+                case 'auth/invalid-email':
+                    errorMessage = 'البريد الإلكتروني غير صحيح';
+                    break;
+                case 'auth/user-disabled':
+                    errorMessage = 'هذا الحساب معطل';
+                    break;
+                case 'auth/user-not-found':
+                    errorMessage = 'المستخدم غير موجود';
+                    break;
+                case 'auth/wrong-password':
+                    errorMessage = 'كلمة المرور غير صحيحة';
+                    break;
+                case 'auth/too-many-requests':
+                    errorMessage = 'محاولات تسجيل دخول كثيرة، حاول لاحقاً';
+                    break;
+                case 'auth/network-request-failed':
+                    errorMessage = 'خطأ في الشبكة، تحقق من اتصال الإنترنت';
+                    break;
+            }
+            
+            return { success: false, error: errorMessage };
+        }
+    }
+
+    async logout() {
+        try {
+            await auth.signOut();
+            this.isAuthenticated = false;
+            this.currentUser = null;
+            localStorage.removeItem('adminAuth');
+            localStorage.removeItem('adminEmail');
+            console.log('Logout successful');
+            return { success: true };
+        } catch (error) {
+            console.error('Logout error:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    checkAuth() {
+        const storedAuth = localStorage.getItem('adminAuth');
+        this.isAuthenticated = storedAuth === 'true' && auth.currentUser !== null;
+        console.log('Auth check:', this.isAuthenticated ? 'Authenticated' : 'Not authenticated');
+        return this.isAuthenticated;
+    }
+
+    // Get current user
+    getCurrentUser() {
+        return this.currentUser;
+    }
+}
+
+// Create global auth instance
+const authManager = new AuthManager();
 
 // Main application
 class BeinSportApp {
@@ -27,8 +123,7 @@ class BeinSportApp {
             channelsContainer.innerHTML = '<div class="loading">جاري تحميل القنوات...</div>';
             
             // Load from Firebase
-            const channelsQuery = query(collection(db, 'channels'), orderBy('order'));
-            const snapshot = await getDocs(channelsQuery);
+            const snapshot = await db.collection('channels').orderBy('order').get();
             
             if (!snapshot.empty) {
                 this.channels = snapshot.docs.map(doc => ({
@@ -52,10 +147,19 @@ class BeinSportApp {
                 id: '1',
                 name: 'bein sport 1',
                 image: 'https://via.placeholder.com/100',
-                url: 'xmtv://WwoKICAKICAKIAogIAogICJodHRwczovL2JkZDAwLjRyb3V3YW5kYS1zaG9wLnN0b3JlL2xpdmUvMzEwMDk5ODgwMDUvaW5kZXgubTN1OD90PWIydm9SNHZJREE5WGItcUJrenZrX3cmZT0xNzU4MTE2NTM2fGNhc3Q9ZmFsc2V8bmFtZT0nICAgICAgWUMgKDI0NFApICAgICAg4oCYfGFwcGxvZ29ibD1odHRwczovL3d3dzIuMHp6MC5jb20vMjAyNS8wMy8zMS8xNy83MDY1ODM2NDQucG5nIiwKICAKICAiaHR0cDovLzE3Ni4xMTkuMjkuNTQvMTMxZjI2ZDktYWZiMC00ODBlLTg2OTAtZTQ2MDA3ZGU5ZmM4Lm0zdTh8Y2FzdD1mYWxzZXxuYW1lPScgICAgICBudW1iZXIgKDM2MFApICAgICAg4oCYfGFwcGxvZ29ibD1odHRwczovL3d3dzIuMHp6MC5jb20vMjAyNS8wMy8zMvMTcvNzA2NTgzNjQ0LnBuZyIsCiAgCiAgCiAgImh0dHA6Ly8xNzYuMTE5LjI5LjU0L2JiMWE0MTE5LTY1ZjktNDBkYy05ODY3LTEyN2YyYTY5NzNkMS5tM3U4fGRldmljZWNhbmFyeT1mYWxzZXxjYXN0PWZhbHNlfG5hbWU9JyAgIG51bWJlciAgKDQ4MFApIOKAmHxhcHBsb2dvYmw9aHR0cHM6Ly93d3cyLjB6ejAuY29tLzIwMjUvMDMvMzEvMTcvNzA2NTgzNjQ0LnBuZyIsCiAgCiAgCiAgCiAgCiAgImh0dHBzOi8vY2RuZmVzdC5jb20vRzEtNzIwcC92aWRlby5tM3U4P3Rva2VuPTJaUnZ1bTVSeEl3ZUczZGV2aWNlY2FuYXJ5PWZhbHNlfGNhc3Q9ZmFsc2V8bmFtZT0nICAgICBHMSAoNzIwUCkgIOKAmHxhcHBsb2dvYmw9aHR0cHM6Ly93d3cyLjB6ejAuY29tLzIwMjUvMDMvMzEvMTcvNzA2NTgzNjQ0LnBuZyIsCiAgCiAgCiAgCiAgCiAgCgoKCgogICAgImh0dHBzOi8vZG9ra28xbmV3Lm5ld2tzby5ydS9kb2trbzEvcHJlbWl1bTkxL21vbm8ubTN1OHx1c2VyLWFnZW50PU1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS8xMjkuMC4wLjAgU2FmYXJpLzUzNy4zNnxyZWZlcmVyPWh0dHBzOi8vbmV3ZW1iZWRwbGF5Lnh5ei98bmFtZT0gJyAgICAgIERPSyAoNzIwUCkgIOKAmHxhcHBsb2dvYmw9aHR0cHM6Ly93d3cyLjB6ejAuY29tLzIwMjUvMDMvMzEvMTcvNzA2NTgzNjQ0LnBuZyIsCiAgCiAgImh0dHBzOi8vd28uY21hLmZvb3RiYWxsaWkuaXIvaGxzMi9iMi5tM3U4fGNhc3Q9ZmFsc2V8bmFtZT0nICAgICAgV0FDRUwtVFYgICAgICDigJh8YXBwbG9nb2JsPWh0dHBzOi8vd3d3Mi4wenowLmNvbS8yMDI1LzAzLzMxLzE3LzcwNjU4MzY0NC5wbmciLAogIAoKCiJodHRwczovL2dpdGh1Yi5jb20vbzJ3cy94cG9sYS1wbGF5ZXIvcmF3L3JlZnMvaGVhZHMvbWFpbi8xLm0zdTh8dXNlci1hZ2VudD1Nb3ppbGxhLy81LjAgKGlQaG9uZTsgQ1BVIGlQaG9uZSBPUyAxNl82IGxpa2UgTWFjIE9TIFgpIEFwcGxlV2ViS2l0Ly82MDUuMS4xNSAoS0hUTUwsIGxpa2UgR2Vja28pIFZlcnNpb24vLzE2LjYgTW9iaWxlLy8xNUUxNDggU2FmYXJpLy82MDQuMXxyZWZlcmVyPWh0dHBzOi8vd3d3LnlhcmlnYS5saXZlL3xuYW1lPSAnICAgICB4cCAo2YXYqti52K/YrykgIOKAmHxhcHBsb2dvYmw9aHR0cHM6Ly93d3cyLjB6ejAuY29tLzIwMjUvMDMvMzEvMTcvNzA2NTgzNjQ0LnBuZyIKXQ==',
+                url: 'xmtv://base64encodedurl1',
                 appUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
                 downloadUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
                 order: 1
+            },
+            {
+                id: '2',
+                name: 'bein sport 2',
+                image: 'https://via.placeholder.com/100',
+                url: 'xmtv://base64encodedurl2',
+                appUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
+                downloadUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
+                order: 2
             }
         ];
         this.renderChannels();
@@ -243,5 +347,5 @@ class BeinSportApp {
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, initializing app...');
-    new BeinSportApp();
+    window.app = new BeinSportApp();
 });
