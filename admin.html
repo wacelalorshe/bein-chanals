@@ -88,6 +88,44 @@
         .btn-custom:hover {
             transform: translateY(-2px);
         }
+        
+        .service-status {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #6c757d;
+            transition: all 0.3s ease;
+        }
+        
+        .service-status:hover {
+            background: rgba(255,255,255,0.15);
+        }
+        
+        .status-success { border-left-color: #28a745; }
+        .status-warning { border-left-color: #ffc107; }
+        .status-error { border-left-color: #dc3545; }
+        .status-unknown { border-left-color: #6c757d; }
+        
+        .firebase-checker-panel {
+            background: rgba(0,0,0,0.7);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid #42318F;
+        }
+        
+        .log-container {
+            background: #1a1a1a;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            border: 1px solid #42318F;
+        }
     </style>
 </head>
 <body>
@@ -104,6 +142,37 @@
                 
                 <!-- Admin Panel (shown when authenticated) -->
                 <div id="adminPanel" class="admin-panel" style="display: none;">
+                    <!-- Firebase Checker Section -->
+                    <div class="firebase-checker-panel">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="text-white mb-0">
+                                <i class="uil uil-fire"></i> فحص حالة Firebase
+                            </h4>
+                            <div>
+                                <button id="runFirebaseCheck" class="btn btn-primary btn-sm me-2">
+                                    <i class="uil uil-refresh"></i> فحص الآن
+                                </button>
+                                <button id="toggleFirebaseLogs" class="btn btn-secondary btn-sm">
+                                    <i class="uil uil-list-ui-alt"></i> عرض السجلات
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="firebaseStatusResults">
+                            <div class="text-center py-3">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">جاري الفحص...</span>
+                                </div>
+                                <p class="mt-2 text-muted">جاري فحص حالة Firebase...</p>
+                            </div>
+                        </div>
+                        
+                        <div id="firebaseLogs" class="log-container" style="display: none;">
+                            <strong>سجل فحص Firebase:</strong>
+                            <div id="firebaseEventLog"></div>
+                        </div>
+                    </div>
+
                     <!-- Add Channel Form -->
                     <div class="card mb-5" style="background: rgba(0,0,0,0.7); border: 1px solid #42318F;">
                         <div class="card-header card-header-custom">
@@ -209,6 +278,265 @@
     <script src="js/firebase-config.js"></script>
     
     <script>
+        // ==============================================
+        // Firebase Checker - Integrated into Admin Panel
+        // ==============================================
+        
+        class FirebaseChecker {
+            constructor() {
+                this.results = {
+                    firebase: { status: 'unknown', message: '' },
+                    auth: { status: 'unknown', message: '' },
+                    firestore: { status: 'unknown', message: '' },
+                    rules: { status: 'unknown', message: '' }
+                };
+            }
+
+            // إضافة رسالة إلى سجل الأحداث
+            addToLog(message, type = 'info') {
+                const log = document.getElementById('firebaseEventLog');
+                if (!log) return;
+                
+                const timestamp = new Date().toLocaleTimeString();
+                const color = type === 'error' ? 'color: #dc3545' : 
+                             type === 'success' ? 'color: #28a745' : 
+                             type === 'warning' ? 'color: #ffc107' : 'color: #17a2b8';
+                
+                log.innerHTML += `<div style="${color}">[${timestamp}] ${message}</div>`;
+                log.scrollTop = log.scrollHeight;
+            }
+
+            // التحقق الشامل من Firebase
+            async checkAll() {
+                this.addToLog('بدء الفحص الشامل لـ Firebase...', 'info');
+                
+                await this.checkFirebaseSDK();
+                await this.checkAuthentication();
+                await this.checkFirestore();
+                await this.checkFirestoreRules();
+                
+                this.addToLog('تم الانتهاء من الفحص', 'success');
+                return this.results;
+            }
+
+            // التحقق من تحميل Firebase SDK
+            checkFirebaseSDK() {
+                return new Promise((resolve) => {
+                    this.addToLog('جاري التحقق من Firebase SDK...', 'info');
+                    
+                    if (typeof firebase === 'undefined') {
+                        this.results.firebase = {
+                            status: 'error',
+                            message: 'Firebase SDK لم يتم تحميله بشكل صحيح'
+                        };
+                        this.addToLog('❌ Firebase SDK غير محمل', 'error');
+                        resolve(false);
+                        return;
+                    }
+
+                    if (!firebase.apps.length) {
+                        this.results.firebase = {
+                            status: 'error',
+                            message: 'لم يتم تهيئة تطبيق Firebase'
+                        };
+                        this.addToLog('❌ تطبيق Firebase غير مهيأ', 'error');
+                        resolve(false);
+                        return;
+                    }
+
+                    try {
+                        const app = firebase.app();
+                        this.results.firebase = {
+                            status: 'success',
+                            message: `Firebase مهيأ باسم: ${app.name}`
+                        };
+                        this.addToLog('✅ Firebase SDK محمل ومهيأ بشكل صحيح', 'success');
+                        resolve(true);
+                    } catch (error) {
+                        this.results.firebase = {
+                            status: 'error',
+                            message: `خطأ في تهيئة Firebase: ${error.message}`
+                        };
+                        this.addToLog(`❌ خطأ في تهيئة Firebase: ${error.message}`, 'error');
+                        resolve(false);
+                    }
+                });
+            }
+
+            // التحقق من خدمة المصادقة
+            async checkAuthentication() {
+                this.addToLog('جاري التحقق من Authentication...', 'info');
+                
+                if (typeof auth === 'undefined') {
+                    this.results.auth = {
+                        status: 'error',
+                        message: 'خدمة Authentication غير متاحة'
+                    };
+                    this.addToLog('❌ خدمة Authentication غير متاحة', 'error');
+                    return false;
+                }
+
+                try {
+                    const user = auth.currentUser;
+                    
+                    if (user) {
+                        this.results.auth = {
+                            status: 'success',
+                            message: `مستخدم مسجل: ${user.email}`
+                        };
+                        this.addToLog(`✅ Authentication نشط - مستخدم مسجل: ${user.email}`, 'success');
+                    } else {
+                        this.results.auth = {
+                            status: 'warning',
+                            message: 'لا يوجد مستخدم مسجل حاليًا'
+                        };
+                        this.addToLog('⚠️ Authentication نشط - لا يوجد مستخدم مسجل', 'warning');
+                    }
+                    
+                    return true;
+                } catch (error) {
+                    this.results.auth = {
+                        status: 'error',
+                        message: `خطأ في Authentication: ${error.message}`
+                    };
+                    this.addToLog(`❌ خطأ في Authentication: ${error.message}`, 'error');
+                    return false;
+                }
+            }
+
+            // التحقق من Firestore
+            async checkFirestore() {
+                this.addToLog('جاري التحقق من Firestore...', 'info');
+                
+                if (typeof db === 'undefined') {
+                    this.results.firestore = {
+                        status: 'error',
+                        message: 'خدمة Firestore غير متاحة'
+                    };
+                    this.addToLog('❌ خدمة Firestore غير متاحة', 'error');
+                    return false;
+                }
+
+                try {
+                    const testQuery = db.collection('channels').limit(1);
+                    const snapshot = await testQuery.get();
+                    
+                    this.results.firestore = {
+                        status: 'success',
+                        message: `Firestore نشط - ${snapshot.size} قناة موجودة`
+                    };
+                    this.addToLog('✅ Firestore نشط - اتصال ناجح', 'success');
+                    return true;
+                } catch (error) {
+                    this.results.firestore = {
+                        status: 'error',
+                        message: `خطأ في Firestore: ${error.message}`
+                    };
+                    this.addToLog(`❌ خطأ في Firestore: ${error.message}`, 'error');
+                    return false;
+                }
+            }
+
+            // التحقق من قواعد Firestore
+            async checkFirestoreRules() {
+                this.addToLog('جاري التحقق من قواعد Firestore...', 'info');
+                
+                if (typeof db === 'undefined') {
+                    this.results.rules = {
+                        status: 'error',
+                        message: 'لا يمكن التحقق من القواعد - Firestore غير متاح'
+                    };
+                    this.addToLog('❌ لا يمكن التحقق من القواعد - Firestore غير متاح', 'error');
+                    return false;
+                }
+
+                try {
+                    const testDoc = db.collection('test_rules').doc('permission_test');
+                    
+                    await testDoc.set({
+                        test: true,
+                        timestamp: new Date()
+                    });
+                    
+                    const doc = await testDoc.get();
+                    await testDoc.delete();
+                    
+                    this.results.rules = {
+                        status: 'success',
+                        message: 'قواعد Firestore تعمل بشكل صحيح'
+                    };
+                    this.addToLog('✅ قواعد Firestore تعمل بشكل صحيح', 'success');
+                    return true;
+                } catch (error) {
+                    let message = `خطأ في القواعد: ${error.message}`;
+                    let status = 'error';
+                    
+                    if (error.code === 'permission-denied') {
+                        message = 'صلاحيات الكتابة مرفوضة - تحقق من قواعد Firestore';
+                        status = 'warning';
+                        this.addToLog('⚠️ صلاحيات الكتابة مرفوضة - قد يكون هذا متوقعًا', 'warning');
+                    } else {
+                        this.addToLog(`❌ خطأ في قواعد Firestore: ${error.message}`, 'error');
+                    }
+                    
+                    this.results.rules = { status, message };
+                    return false;
+                }
+            }
+
+            // عرض النتائج في واجهة المستخدم
+            displayResults() {
+                const container = document.getElementById('firebaseStatusResults');
+                if (!container) {
+                    console.error('❌ عنصر عرض النتائج غير موجود');
+                    return;
+                }
+
+                let html = '';
+
+                Object.entries(this.results).forEach(([service, result]) => {
+                    const serviceNames = {
+                        firebase: 'Firebase SDK',
+                        auth: 'خدمة المصادقة',
+                        firestore: 'قاعدة البيانات',
+                        rules: 'قواعد الأمان'
+                    };
+
+                    const icons = {
+                        success: '✅',
+                        warning: '⚠️',
+                        error: '❌',
+                        unknown: '❓'
+                    };
+
+                    const statusClasses = {
+                        success: 'status-success',
+                        warning: 'status-warning',
+                        error: 'status-error',
+                        unknown: 'status-unknown'
+                    };
+
+                    html += `
+                        <div class="service-status ${statusClasses[result.status]}">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <div>
+                                    <strong style="color: #fff;">${serviceNames[service]}</strong>
+                                    <div style="color: #ccc; font-size: 14px; margin-top: 5px;">${result.message}</div>
+                                </div>
+                                <span style="font-size: 20px;">${icons[result.status]}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            }
+        }
+
+        // ==============================================
+        // Admin Panel Main Code
+        // ==============================================
+        
         // Authentication system for admin
         class AdminAuthManager {
             constructor() {
@@ -292,6 +620,7 @@
                 this.authManager = new AdminAuthManager();
                 this.channels = [];
                 this.unsubscribeChannels = null;
+                this.firebaseChecker = new FirebaseChecker();
                 this.init();
             }
 
@@ -302,6 +631,8 @@
                 if (this.authManager.checkAuth()) {
                     await this.setupChannelsListener();
                     this.setupEventListeners();
+                    // Run initial Firebase check
+                    await this.runFirebaseCheck();
                 } else {
                     console.log('User not authenticated, waiting for auth state...');
                 }
@@ -451,6 +782,29 @@
             retryLoadChannels() {
                 console.log('Retrying to load channels...');
                 this.setupChannelsListener();
+            }
+
+            // تشغيل فحص Firebase
+            async runFirebaseCheck() {
+                const button = document.getElementById('runFirebaseCheck');
+                const originalText = button.innerHTML;
+                
+                button.disabled = true;
+                button.innerHTML = '<i class="uil uil-refresh"></i> جاري الفحص...';
+                
+                // Clear previous logs
+                const logContainer = document.getElementById('firebaseEventLog');
+                if (logContainer) {
+                    logContainer.innerHTML = '';
+                }
+                
+                const results = await this.firebaseChecker.checkAll();
+                this.firebaseChecker.displayResults();
+                
+                button.disabled = false;
+                button.innerHTML = originalText;
+                
+                return results;
             }
 
             // دالة للتحقق من صحة البيانات قبل الإضافة
@@ -619,6 +973,31 @@
                         }
                     });
                     console.log('Logout button event listener added');
+                }
+
+                // Firebase check button
+                const firebaseCheckButton = document.getElementById('runFirebaseCheck');
+                if (firebaseCheckButton) {
+                    firebaseCheckButton.addEventListener('click', () => {
+                        this.runFirebaseCheck();
+                    });
+                    console.log('Firebase check button event listener added');
+                }
+
+                // Toggle Firebase logs
+                const toggleLogsButton = document.getElementById('toggleFirebaseLogs');
+                if (toggleLogsButton) {
+                    toggleLogsButton.addEventListener('click', () => {
+                        const logsContainer = document.getElementById('firebaseLogs');
+                        if (logsContainer.style.display === 'none') {
+                            logsContainer.style.display = 'block';
+                            toggleLogsButton.innerHTML = '<i class="uil uil-list-ui-alt"></i> إخفاء السجلات';
+                        } else {
+                            logsContainer.style.display = 'none';
+                            toggleLogsButton.innerHTML = '<i class="uil uil-list-ui-alt"></i> عرض السجلات';
+                        }
+                    });
+                    console.log('Toggle logs button event listener added');
                 }
 
                 console.log('All event listeners setup completed');
