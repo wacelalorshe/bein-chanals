@@ -1,55 +1,3 @@
-
-/* إضافة تنسيقات زر Login في الأعلى */
-.login-toggle {
-    position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    border: none;
-    border-radius: 25px;
-    padding: 8px 20px;
-    font-size: 14px;
-    cursor: pointer;
-    z-index: 1001;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: all 0.3s ease;
-    font-weight: bold;
-}
-
-.login-toggle:hover {
-    transform: translateY(-50%) scale(1.05);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-}
-
-.login-toggle i {
-    font-size: 16px;
-}
-
-/* تحسين تنسيقات الهيدر لاستيعاب زر Login */
-header {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    background-image: linear-gradient(to right, #322769, #654FD4, #372B74, #322769, #5A47BE, #654FD4, #372B74,#231086, #2F2562, #322769, #654FD4, #372B74, #322769, #5A47BE, #654FD4, #372B74,#322769, #654FD4, #372B74);
-    border-bottom: 11px double #42318F;
-    height: 70px;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0px 0px 10px 10px;
-    box-shadow: 0 0px 10px  rgba(0, 0, 0, 100);
-    position: relative; /* لإضافة زر Login داخله */
-}
-
-/* بقية التنسيقات تبقى كما هي */
-/* ... */
-
 :root {
     --primary-color: #3545FF;
     --secondary-color: #FF5200;
@@ -91,7 +39,6 @@ header {
     align-items: center;
     justify-content: center;
     border-radius: 0px 0px 10px 10px;
-    
     box-shadow: 0 0px 10px  rgba(0, 0, 0, 100);
 }
 
@@ -100,16 +47,15 @@ header {
 }
 
 .header-title .text-box {
-    
     display: inline-block;
     padding: 5px 15px;
     background-image: linear-gradient(to right, #322769, #654FD4, #372B74, #322769, #5A47BE, #654FD4, #372B74,#231086, #2F2562, #322769, #654FD4, #372B74, #322769, #5A47BE, #654FD4, #372B74,#322769, #654FD4, #372B74);
     border-radius: 10px 100px 10px 100px;
     border: 2px outset #fff;
-     border-bottom: 1px groove  #fff; 
-  border-top: 1px ridge  #fff; 
-border-left: 0px ridge #2F2562;
-border-right: 0px groove #2F2562;
+    border-bottom: 1px groove  #fff; 
+    border-top: 1px ridge  #fff; 
+    border-left: 0px ridge #2F2562;
+    border-right: 0px groove #2F2562;
     color: var(--text-light);
     font-weight: bold;
     text-decoration: none;
@@ -120,8 +66,38 @@ border-right: 0px groove #2F2562;
 }
 
 .header-title .text-box:hover {
-    
     transform: translateY(-2px);
+}
+
+/* Login Toggle Button */
+.login-toggle {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 8px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    z-index: 1001;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+.login-toggle:hover {
+    transform: translateY(-50%) scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+.login-toggle i {
+    font-size: 16px;
 }
 
 /* Main Content */
@@ -174,9 +150,9 @@ border-right: 0px groove #2F2562;
     text-align: center;
     align-items: center;
     border-bottom: 1px double  #fff; 
-  border-top: 1px double #fff; 
-border-left: 0px ridge #2F2562;
-border-right: 0px groove #2F2562;
+    border-top: 1px double #fff; 
+    border-left: 0px ridge #2F2562;
+    border-right: 0px groove #2F2562;
 }
 
 .ticker-content {
@@ -396,67 +372,6 @@ border-right: 0px groove #2F2562;
     margin: 15px 0;
 }
 
-/* Admin Panel */
-.admin-panel {
-    background: rgba(0, 0, 0, 0.7);
-    padding: 20px;
-    border-radius: 10px;
-    margin: 20px 0;
-    display: none;
-}
-
-.admin-toggle {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    font-size: 20px;
-    cursor: pointer;
-    z-index: 100;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-control {
-    width: 100%;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-}
-
-.btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.btn-primary {
-    background: var(--primary-color);
-    color: white;
-}
-
-.btn-success {
-    background: var(--success-color);
-    color: black;
-}
-
-.btn-danger {
-    background: var(--danger-color);
-    color: white;
-}
-
 /* Login Modal */
 .login-modal {
     display: none;
@@ -495,6 +410,19 @@ border-right: 0px groove #2F2562;
     display: none;
 }
 
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
 /* Footer */
 .footer {
     position: fixed;
@@ -515,6 +443,12 @@ border-right: 0px groove #2F2562;
     color: #ff4d4d;
 }
 
+.loading {
+    text-align: center;
+    padding: 20px;
+    font-size: 18px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .channels-container {
@@ -533,6 +467,12 @@ border-right: 0px groove #2F2562;
     
     .ticker ul {
         animation-duration: 20s;
+    }
+    
+    .login-toggle {
+        padding: 6px 15px;
+        font-size: 12px;
+        left: 10px;
     }
 }
 
@@ -568,10 +508,10 @@ border-right: 0px groove #2F2562;
     .modal-button {
         margin: 5px 0;
     }
-}
-
-.loading {
-    text-align: center;
-    padding: 20px;
-    font-size: 18px;
+    
+    .login-toggle {
+        padding: 5px 12px;
+        font-size: 11px;
+        left: 5px;
+    }
 }
