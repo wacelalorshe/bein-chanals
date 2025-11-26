@@ -10,10 +10,24 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-
-// Initialize Firebase services
-const db = firebase.firestore();
-const auth = firebase.auth();
-
-console.log("Firebase initialized successfully");
+try {
+    firebase.initializeApp(firebaseConfig);
+    console.log("Firebase initialized successfully");
+    
+    // Initialize Firebase services
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    
+    // إعدادات Firestore
+    db.settings({
+        timestampsInSnapshots: true
+    });
+    
+    // اختبار الاتصال
+    db.collection('channels').limit(1).get()
+        .then(() => console.log('Firestore connection successful'))
+        .catch(error => console.error('Firestore connection failed:', error));
+        
+} catch (error) {
+    console.error("Firebase initialization error:", error);
+}
