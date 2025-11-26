@@ -18,7 +18,7 @@ class BeinSportApp {
         // Setup event listeners
         this.setupEventListeners();
         
-        console.log('App initialized');
+        console.log('App initialized successfully');
     }
 
     async loadChannels() {
@@ -52,19 +52,10 @@ class BeinSportApp {
                 id: '1',
                 name: 'bein sport 1',
                 image: 'https://via.placeholder.com/100',
-                url: 'xmtv://WwoKICAKICAKIAogIAogICJodHRwczovL2JkZDAwLjRyb3V3YW5kYS1zaG9wLnN0b3JlL2xpdmUvMzEwMDk5ODgwMDUvaW5kZXgubTN1OD90PWIydm9SNHZJREE5WGItcUJrenZrX3cmZT0xNzU4MTE2NTM2fGNhc3Q9ZmFsc2V8bmFtZT0nICAgICAgWUMgKDI0NFApICAgICAg4oCYfGFwcGxvZ29ibD1odHRwczovL3d3dzIuMHp6MC5jb20vMjAyNS8wMy8zMS8xNy83MDY1ODM2NDQucG5nIiwKICAKICAiaHR0cDovLzE3Ni4xMTkuMjkuNTQvMTMxZjI2ZDktYWZiMC00ODBlLTg2OTAtZTQ2MDA3ZGU5ZmM4Lm0zdTh8Y2FzdD1mYWxzZXxuYW1lPScgICAgICBudW1iZXIgKDM2MFApICAgICAg4oCYfGFwcGxvZ29ibD1odHRwczovL3d3dzIuMHp6MC5jb20vMjAyNS8wMy8zMS8xNy83MDY1ODM2NDQucG5nIiwKICAKICAKICAiaHR0cDovLzE3Ni4xMTkuMjkuNTQvYmIxYTQxMTktNjVmOS00MGRjLTk4NjctMTI3ZjJhNjk3M2QxLm0zdTh8ZGV2aWNlY2FuYXJ5PWZhbHNlfGNhc3Q9ZmFsc2V8bmFtZT0nICAgbnVtYmVyICAoNDgwUCkg4oCYfGFwcGxvZ29ibD1odHRwczovL3d3dzIuMHp6MC5jb20vMjAyNS8wMy8zMS8xNy83MDY1ODM2NDQucG5nIiwKICAKICAKICAKICAKICAiaHR0cHM6Ly9jZG5mZXN0LmNvbS9HMS03MjBwL3ZpZGVvLm0zdTg/dG9rZW49MlpSdnVtNVJ4SXdlRzNkZXZpY2VjYW5hcnk9ZmFsc2V8Y2FzdD1mYWxzZXxuYW1lPScgICAgRzEgKDcyMFApICDigJh8YXBwbG9nb2JsPWh0dHBzOi8vd3d3Mi4wenowLmNvbS8yMDI1LzAzLzMxLzE3LzcwNjU4MzY0NC5wbmciLAogIAogIAogIAogIAogIAoKCgoKICAgICJodHRwczovL2Rva2tvMW5ldy5uZXdrc28ucnUvZG9ra28xL3ByZW1pdW05MS9tb25vLm0zdTh8dXNlci1hZ2VudD1Nb3ppbGxhLzUuMCAoV2luZG93cyBOVCAxMC4wOyBXaW42NDsgeDY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvMTI5LjAuMC4wIFNhZmFyaS81MzcuMzZ8cmVmZXJlcj1odHRwczovL25ld2VtYmVkcGxheS54eXovfG5hbWU9ICcgICAgIERPSyAoNzIwUCkgIOKAmHxhcHBsb2dvYmw9aHR0cHM6Ly93d3cyLjB6ejAuY29tLzIwMjUvMDMvMzEvMTcvNzA2NTgzNjQ0LnBuZyIsCiAgCiAgImh0dHBzOi8vd28uY21hLmZvb3RiYWxsaWkuaXIvaGxzMi9iMi5tM3U4fGNhc3Q9ZmFsc2V8bmFtZT0nICAgICAgV0FDRUwtVFYgICAgICDigJh8YXBwbG9nb2JsPWh0dHBzOi8vd3d3Mi4wenowLmNvbS8yMDI1LzAzLzMxLzE3LzcwNjU4MzY0NC5wbmciLAogIAoKCiJodHRwczovL2dpdGh1Yi5jb20vbzJ3cy94cG9sYS1wbGF5ZXIvcmF3L3JlZnMvaGVhZHMvbWFpbi8xLm0zdTh8dXNlci1hZ2VudD1Nb3ppbGxhLy81LjAgKGlQaG9uZTsgQ1BVIGlQaG9uZSBPUyAxNl82IGxpa2UgTWFjIE9TIFgpIEFwcGxlV2ViS2l0Ly82MDUuMS4xNSAoS0hUTUwsIGxpa2UgR2Vja28pIFZlcnNpb24vLzE2LjYgTW9iaWxlLy8xNUUxNDggU2FmYXJpLy82MDQuMXxyZWZlcmVyPWh0dHBzOi8vd3d3LnlhcmlnYS5saXZlL3xuYW1lPSAnICAgICB4cCAo2YXYqti52K/YrykgIOKAmHxhcHBsb2dvYmw9aHR0cHM6Ly93d3cyLjB6ejAuY29tLzIwMjUvMDMvMzEvMTcvNzA2NTgzNjQ0LnBuZyIKXQ==',
+                url: 'xmtv://WwoKICAKICAKIAogIAogICJodHRwczovL2JkZDAwLjRyb3V3YW5kYS1zaG9wLnN0b3JlL2xpdmUvMzEwMDk5ODgwMDUvaW5kZXgubTN1OD90PWIydm9SNHZJREE5WGItcUJrenZrX3cmZT0xNzU4MTE2NTM2fGNhc3Q9ZmFsc2V8bmFtZT0nICAgICAgWUMgKDI0NFApICAgICAg4oCYfGFwcGxvZ29ibD1odHRwczovL3d3dzIuMHp6MC5jb20vMjAyNS8wMy8zMS8xNy83MDY1ODM2NDQucG5nIiwKICAKICAiaHR0cDovLzE3Ni4xMTkuMjkuNTQvMTMxZjI2ZDktYWZiMC00ODBlLTg2OTAtZTQ2MDA3ZGU5ZmM4Lm0zdTh8Y2FzdD1mYWxzZXxuYW1lPScgICAgICBudW1iZXIgKDM2MFApICAgICAg4oCYfGFwcGxvZ29ibD1odHRwczovL3d3dzIuMHp6MC5jb20vMjAyNS8wMy8zMvMTcvNzA2NTgzNjQ0LnBuZyIsCiAgCiAgCiAgImh0dHA6Ly8xNzYuMTE5LjI5LjU0L2JiMWE0MTE5LTY1ZjktNDBkYy05ODY3LTEyN2YyYTY5NzNkMS5tM3U4fGRldmljZWNhbmFyeT1mYWxzZXxjYXN0PWZhbHNlfG5hbWU9JyAgIG51bWJlciAgKDQ4MFApIOKAmHxhcHBsb2dvYmw9aHR0cHM6Ly93d3cyLjB6ejAuY29tLzIwMjUvMDMvMzEvMTcvNzA2NTgzNjQ0LnBuZyIsCiAgCiAgCiAgCiAgCiAgImh0dHBzOi8vY2RuZmVzdC5jb20vRzEtNzIwcC92aWRlby5tM3U4P3Rva2VuPTJaUnZ1bTVSeEl3ZUczZGV2aWNlY2FuYXJ5PWZhbHNlfGNhc3Q9ZmFsc2V8bmFtZT0nICAgICBHMSAoNzIwUCkgIOKAmHxhcHBsb2dvYmw9aHR0cHM6Ly93d3cyLjB6ejAuY29tLzIwMjUvMDMvMzEvMTcvNzA2NTgzNjQ0LnBuZyIsCiAgCiAgCiAgCiAgCiAgCgoKCgogICAgImh0dHBzOi8vZG9ra28xbmV3Lm5ld2tzby5ydS9kb2trbzEvcHJlbWl1bTkxL21vbm8ubTN1OHx1c2VyLWFnZW50PU1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS8xMjkuMC4wLjAgU2FmYXJpLzUzNy4zNnxyZWZlcmVyPWh0dHBzOi8vbmV3ZW1iZWRwbGF5Lnh5ei98bmFtZT0gJyAgICAgIERPSyAoNzIwUCkgIOKAmHxhcHBsb2dvYmw9aHR0cHM6Ly93d3cyLjB6ejAuY29tLzIwMjUvMDMvMzEvMTcvNzA2NTgzNjQ0LnBuZyIsCiAgCiAgImh0dHBzOi8vd28uY21hLmZvb3RiYWxsaWkuaXIvaGxzMi9iMi5tM3U4fGNhc3Q9ZmFsc2V8bmFtZT0nICAgICAgV0FDRUwtVFYgICAgICDigJh8YXBwbG9nb2JsPWh0dHBzOi8vd3d3Mi4wenowLmNvbS8yMDI1LzAzLzMxLzE3LzcwNjU4MzY0NC5wbmciLAogIAoKCiJodHRwczovL2dpdGh1Yi5jb20vbzJ3cy94cG9sYS1wbGF5ZXIvcmF3L3JlZnMvaGVhZHMvbWFpbi8xLm0zdTh8dXNlci1hZ2VudD1Nb3ppbGxhLy81LjAgKGlQaG9uZTsgQ1BVIGlQaG9uZSBPUyAxNl82IGxpa2UgTWFjIE9TIFgpIEFwcGxlV2ViS2l0Ly82MDUuMS4xNSAoS0hUTUwsIGxpa2UgR2Vja28pIFZlcnNpb24vLzE2LjYgTW9iaWxlLy8xNUUxNDggU2FmYXJpLy82MDQuMXxyZWZlcmVyPWh0dHBzOi8vd3d3LnlhcmlnYS5saXZlL3xuYW1lPSAnICAgICB4cCAo2YXYqti52K/YrykgIOKAmHxhcHBsb2dvYmw9aHR0cHM6Ly93d3cyLjB6ejAuY29tLzIwMjUvMDMvMzEvMTcvNzA2NTgzNjQ0LnBuZyIKXQ==',
                 appUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
                 downloadUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
                 order: 1
-            },
-            {
-                id: '2',
-                name: 'bein sport 2',
-                image: 'https://via.placeholder.com/100',
-                url: 'xmtv://WwoKICAKICAKICJodHRwOi8vMTM1LjEyNS4xMDkuNzM6OTAwMC9iZWluc3BvcnQyXy5tM3U4fGNhc3Q9ZmFsc2V8bmFtZT0nICAgV0FDRUwtVFYgICgzNjBQKSAgICAgIOKAmHxhcHBsb2dvYmw9IGh0dHBzOi8vaS5wb3N0aW1nLmNjL2h2dzdCMzhLL3dhY2VsLXR2LnBuZyAiLAogIAogICJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vS0ROVFYvVFZUL3JlZnMvaGVhZHMvbWFpbi92cDIubTN1OHxjYXN0PWZhbHNlfG5hbWU9JyAgV0FDRUwtVFYgICjZhdiq2LnYr9iv2KfZhNis2YjYr9in2KopICAgICAg4oCYfGFwcGxvZ29ibD0gaHR0cHM6Ly9pLnBvc3RpbWcuY2MvaHZ3N0CMzhLL3dhY2VsLXR2LnBuZyAiLAogIAogIAogIAogIAogIAogIAogICJodHRwczovL2FmLmF5YXNzcG9ydC5pci9obHMyL2JlaW4yLm0zdTh8Y2FzdD1mYWxzZXxuYW1lPScgICAgICBXQUNFTC1UViAgICAgIOKAmHxhcHBsb2dvYmw9IGh0dHBzOi8vaS5wb3N0aW1nLmNjL2h2dzdCMzhLL3dhY2VsLXR2LnBuZyAiLAogIAogICJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vYWx5c2pjNy1kb3QvbWF0aC9yZWZzL2hlYWRzL21haW4vdG8yLm0zdTh8Y2FzdD1mYWxzZXxuYW1lPScgICAgICjZhdiq2LnYr9ivINin2YTYrNmI2K/Yp9iqKSAg4oCYfGFwcGxvZ29ibD0gaHR0cHM6Ly9pLnBvc3RpbWcuY2MvaHZ3N0CMzhLL3dhY2VsLXR2LnBuZyAiLAogIAogIAogIAogIAogICJodHRwczovL2NkbmZlc3QuY29tL0cyLTQ4MHAtY2FzdC9wbGF5bGlzdC5tM3U4fG9yaWdpbj1odHRwczovL3d3dy55YXJpZ2EubGl2ZXx1c2VyLWFnZW50PU1vemlsbGEvNS4wIChpUGhvbmU7IENQVSBpUGhvbmUgT1MgMTZfNiBsaWtlIE1hYyBPUyBYKCBBcHBsZVdlYktpdC82MDUuMS4xNSAoS0hUTUwsIGxpa2UgR2Vja28pIFZlcnNpb24vMTYuNiBNb2JpbGUvMTVFMTQ4IFNhZmFyaS82MDQuMXxyZWZlcmVyPWh0dHBzOi8vd3d3LnlhcmlnYS5saXZlL3xjYXN0PWZhbHNlfG5hbWU9JyAgICAgV0FDRUwtVFYgICAgKNiI2YLYqiDYp9mE2YXZqNin2LHYp9ipKSAg4oCYfGFwcGxvZ29ibD1odHRwczovL2kucG9zdGltZy5jYy9odnc3QjM4Sy93YWNlbC10di5wbmcgIiwKICAKCgoKCiAgICAiIGh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9hbHlzamM3LWRvdC9pcHR2L3JlZnMvaGVhZHMvbWFpbi9ubS5tM3U4fHVzZXItYWdlbnQ9TW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzEyOS4wLjAuMCBTYWZhcmkvNTM3LjM2fHJlZmVyZXI9aHR0cHM6Ly9uZXdlbWJlZHBsYXkueHl6L3xuYW1lPSAnICAgNEsgICAoNzIwUCkgIOKAmHxhcHBsb2dvYmw9IGh0dHBzOi8vaS5wb3N0aW1nLmNjL2h2dzdCMzhLL3dhY2VsLXR2LnBuZyAiLAogIAogIAogIAoKCiJodHRwczovL2dpdGh1Yi5jb20vbzJ3cy94cG9sYS1wbGF5ZXIvcmF3L3JlZnMhaGVhZHMvbWFpbi8xLm0zdTh8dXNlci1hZ2VudD1Nb3ppbGxhLy81LjAgKGlQaG9uZTsgQ1BVIGlQaG9uZSBPUyAxNl82IGxpa2UgTWFjIE9TIFgpIEFwcGxlV2ViS2l0Ly82MDUuMS4xNSAoS0hUTUwsIGxpa2UgR2Vja28pIFZlcnNpb24vLzE2LjYgTW9iaWxlLy8xNUUxNDggU2FmYXJpLy82MDQuMXxyZWZlcmVyPWh0dHBzOi8vd3d3LnlhcmlnYS5saXZlL3xuYW1lPSAnICAgICB4cCAo2YXYqti52K/YrykgIOKAmHxhcHBsb2dvYmw9IGh0dHBzOi8vaS5wb3N0aW1nLmNjL2h2dzdCMzhLL3dhY2VsLXR2LnBuZyAiCl0=',
-                appUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
-                downloadUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
-                order: 2
             }
         ];
         this.renderChannels();
@@ -140,59 +131,87 @@ class BeinSportApp {
 
     showAdminLogin() {
         console.log('Showing admin login modal');
-        document.getElementById('loginModal').style.display = 'block';
+        const modal = document.getElementById('loginModal');
+        if (modal) {
+            modal.style.display = 'block';
+            console.log('Modal displayed successfully');
+        } else {
+            console.error('Login modal not found!');
+        }
     }
 
     hideAdminLogin() {
-        document.getElementById('loginModal').style.display = 'none';
-        document.getElementById('adminPassword').value = '';
-        document.getElementById('loginError').style.display = 'none';
+        const modal = document.getElementById('loginModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('loginError').style.display = 'none';
+        }
     }
 
     setupEventListeners() {
-        console.log('Setting up event listeners');
+        console.log('Setting up event listeners...');
         
-        // Admin toggle
-        document.getElementById('adminToggle').addEventListener('click', () => {
-            console.log('Admin toggle clicked');
-            if (authManager.isAuthenticated) {
-                console.log('User authenticated, redirecting to admin');
-                window.location.href = 'admin.html';
-            } else {
-                console.log('User not authenticated, showing login');
-                this.showAdminLogin();
-            }
-        });
+        // Login toggle button - FIXED
+        const loginToggle = document.getElementById('loginToggle');
+        if (loginToggle) {
+            loginToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Login button clicked');
+                
+                if (authManager.isAuthenticated) {
+                    console.log('User authenticated, redirecting to admin');
+                    window.location.href = 'admin.html';
+                } else {
+                    console.log('User not authenticated, showing login modal');
+                    this.showAdminLogin();
+                }
+            });
+        } else {
+            console.error('Login toggle button not found!');
+        }
 
-        // Login button
-        document.getElementById('loginButton').addEventListener('click', async () => {
-            const email = "admin@aseeltv.com"; // يمكن تغيير هذا ليكون حقل إدخال
-            const password = document.getElementById('adminPassword').value;
-            
-            console.log('Login attempt with email:', email);
-            
-            if (!password) {
-                document.getElementById('loginError').textContent = 'يرجى إدخال كلمة المرور';
-                document.getElementById('loginError').style.display = 'block';
-                return;
-            }
-            
-            const result = await authManager.login(email, password);
-            
-            if (result.success) {
-                console.log('Login successful, redirecting to admin');
-                this.hideAdminLogin();
-                window.location.href = 'admin.html';
-            } else {
-                document.getElementById('loginError').textContent = result.error;
-                document.getElementById('loginError').style.display = 'block';
-            }
-        });
+        // Login button in modal
+        const loginButton = document.getElementById('loginButton');
+        if (loginButton) {
+            loginButton.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const email = document.getElementById('adminEmail').value;
+                const password = document.getElementById('adminPassword').value;
+                
+                console.log('Login attempt with email:', email);
+                
+                if (!email || !password) {
+                    document.getElementById('loginError').textContent = 'يرجى إدخال البريد الإلكتروني وكلمة المرور';
+                    document.getElementById('loginError').style.display = 'block';
+                    return;
+                }
+                
+                const result = await authManager.login(email, password);
+                
+                if (result.success) {
+                    console.log('Login successful, redirecting to admin');
+                    this.hideAdminLogin();
+                    window.location.href = 'admin.html';
+                } else {
+                    document.getElementById('loginError').textContent = result.error;
+                    document.getElementById('loginError').style.display = 'block';
+                }
+            });
+        }
 
         // Cancel login
-        document.getElementById('cancelLogin').addEventListener('click', () => {
-            this.hideAdminLogin();
-        });
+        const cancelLogin = document.getElementById('cancelLogin');
+        if (cancelLogin) {
+            cancelLogin.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.hideAdminLogin();
+            });
+        }
 
         // Close modals when clicking outside
         window.addEventListener('click', (event) => {
@@ -208,11 +227,16 @@ class BeinSportApp {
         });
 
         // Enter key in password field
-        document.getElementById('adminPassword').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                document.getElementById('loginButton').click();
-            }
-        });
+        const adminPassword = document.getElementById('adminPassword');
+        if (adminPassword) {
+            adminPassword.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    document.getElementById('loginButton').click();
+                }
+            });
+        }
+
+        console.log('Event listeners setup completed');
     }
 }
 
