@@ -88,13 +88,15 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK - MUST BE LOADED FIRST -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
-    <!-- App Scripts -->
+    <!-- App Config - LOAD SECOND -->
     <script src="js/firebase-config.js"></script>
+    
+    <!-- App Logic - LOAD LAST -->
     <script src="js/app.js"></script>
 </body>
 </html>
