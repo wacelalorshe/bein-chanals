@@ -11,23 +11,33 @@ const firebaseConfig = {
 
 // Initialize Firebase
 try {
-    firebase.initializeApp(firebaseConfig);
-    console.log("Firebase initialized successfully");
+    console.log("Initializing Firebase...");
+    
+    // Check if Firebase is already initialized
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+        console.log("Firebase initialized successfully");
+    } else {
+        console.log("Firebase already initialized");
+    }
     
     // Initialize Firebase services
     const db = firebase.firestore();
     const auth = firebase.auth();
     
-    // إعدادات Firestore
+    // Firestore settings
     db.settings({
         timestampsInSnapshots: true
     });
     
-    // اختبار الاتصال
-    db.collection('channels').limit(1).get()
-        .then(() => console.log('Firestore connection successful'))
-        .catch(error => console.error('Firestore connection failed:', error));
-        
+    console.log("Firebase services initialized successfully");
+    console.log("Database:", db ? "✓ Available" : "✗ Not available");
+    console.log("Auth:", auth ? "✓ Available" : "✗ Not available");
+    
+    // Make services globally available
+    window.db = db;
+    window.auth = auth;
+    
 } catch (error) {
     console.error("Firebase initialization error:", error);
 }
