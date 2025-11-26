@@ -20,6 +20,11 @@
                 <span>قنوات BEIN SPORT</span>
             </a>
         </div>
+        
+        <!-- Login Button Top Left -->
+        <button id="loginToggle" class="login-toggle">
+            <i class="uil uil-signin"></i> Login
+        </button>
     </header>
     
     <!-- Ticker -->
@@ -42,11 +47,6 @@
             <!-- Channels will be loaded dynamically -->
         </div>
     </div>
-    
-    <!-- Admin Toggle Button -->
-    <button id="adminToggle" class="admin-toggle">
-        <i class="uil uil-cog"></i>
-    </button>
     
     <!-- Footer -->
     <div class="footer">
@@ -72,6 +72,9 @@
     <div id="loginModal" class="login-modal">
         <div class="login-content">
             <h3 class="login-title">تسجيل الدخول للإدارة</h3>
+            <div class="form-group">
+                <input type="email" id="adminEmail" class="form-control" placeholder="البريد الإلكتروني" value="admin@aseeltv.com" required>
+            </div>
             <div class="form-group">
                 <input type="password" id="adminPassword" class="form-control" placeholder="كلمة المرور" required>
             </div>
