@@ -101,6 +101,7 @@ const authManager = new AuthManager();
 class BeinSportApp {
     constructor() {
         this.channels = [];
+        this.unsubscribeChannels = null;
         this.init();
     }
 
@@ -108,8 +109,8 @@ class BeinSportApp {
         // Set current year
         document.getElementById('currentYear').textContent = new Date().getFullYear();
         
-        // Load channels
-        await this.loadChannels();
+        // Load channels with real-time listener
+        this.setupChannelsListener();
         
         // Setup event listeners
         this.setupEventListeners();
@@ -117,46 +118,60 @@ class BeinSportApp {
         console.log('App initialized successfully');
     }
 
-    async loadChannels() {
+    setupChannelsListener() {
         try {
             const channelsContainer = document.getElementById('channelsContainer');
             channelsContainer.innerHTML = '<div class="loading">جاري تحميل القنوات...</div>';
             
-            // Load from Firebase
-            const snapshot = await db.collection('channels').orderBy('order').get();
-            
-            if (!snapshot.empty) {
-                this.channels = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                this.renderChannels();
-            } else {
-                // Fallback to default channels
-                this.loadDefaultChannels();
-            }
+            // Set up real-time listener for channels
+            this.unsubscribeChannels = db.collection('channels')
+                .orderBy('order')
+                .onSnapshot((snapshot) => {
+                    console.log('Channels updated, total:', snapshot.size);
+                    
+                    if (!snapshot.empty) {
+                        this.channels = snapshot.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        this.renderChannels();
+                    } else {
+                        // Fallback to default channels only if no channels exist
+                        this.loadDefaultChannels();
+                    }
+                }, (error) => {
+                    console.error('Error in channels listener:', error);
+                    channelsContainer.innerHTML = '<div class="loading">خطأ في تحميل القنوات</div>';
+                    
+                    // Try to load default channels on error
+                    setTimeout(() => {
+                        this.loadDefaultChannels();
+                    }, 2000);
+                });
+                
         } catch (error) {
-            console.error('Error loading channels:', error);
+            console.error('Error setting up channels listener:', error);
             this.loadDefaultChannels();
         }
     }
 
     loadDefaultChannels() {
+        console.log('Loading default channels...');
         this.channels = [
             {
-                id: '1',
+                id: 'default-1',
                 name: 'bein sport 1',
-                image: 'https://via.placeholder.com/100',
-                url: 'xmtv://base64encodedurl1',
+                image: 'https://via.placeholder.com/200x100/2F2562/FFFFFF?text=BEIN+1',
+                url: 'xmtv://WwoKICAKICAKIAogIAogICJodHRwczovL2JkZDAwLjRyb3V3YW5kYS1zaG9wLnN0b3JlL2xpdmUvMzEwMDk5ODgwMDUvaW5kZXgubTN1OD90PWIydm9SNHZJREE5WGItcUJrenZrX3cmZT0xNzU4MTE2NTM2fGNhc3Q9ZmFsc2V8bmFtZT0nICAgICAgWUMgKDI0NFApICAgICAg4oCYfGFwcGxvZ29ibD1odHRwczovL3d3dzIuMHp6MC5jb20vMjAyNS8wMy8zMS8xNy83MDY1ODM2NDQucG5nIiwKICAKICAiaHR0cDovLzE3Ni4xMTkuMjkuNTQvMTMxZjI2ZDktYWZiMC00ODBlLTg2OTAtZTQ2MDA3ZGU5ZmM4Lm0zdTh8Y2FzdD1mYWxzZXxuYW1lPScgICAgICBudW1iZXIgKDM2MFApICAgICAg4oCYfGFwcGxvZ29ibD1odHRwczovL3d3dzIuMHp6MC5jb20vMjAyNS8wMy8zMS8xNy83MDY1ODM2NDQucG5nIiwKICAKICAKICAiaHR0cDovLzE3Ni4xMTkuMjkuNTQvYmIxYTQxMTktNjVmOS00MGRjLTk4NjctMTI3ZjJhNjk3M2QxLm0zdTh8ZGV2aWNlY2FuYXJ5PWZhbHNlfGNhc3Q9ZmFsc2V8bmFtZT0nICAgbnVtYmVyICAoNDgwUCkg4oCYfGFwcGxvZ29ibD1odHRwczovL3d3dzIuMHp6MC5jb20vMjAyNS8wMy8zMS8xNy83MDY1ODM2NDQucG5nIiwKICAKICAKICAKICAKICAiaHR0cHM6Ly9jZG5mZXN0LmNvbS9HMS03MjBwL3ZpZGVvLm0zdTg/dG9rZW49MlpSdnVtNVJ4SXdlRzNkZXZpY2VjYW5hcnk9ZmFsc2V8Y2FzdD1mYWxzZXxuYW1lPScgICAgRzEgKDcyMFApICDigJh8YXBwbG9nb2JsPWh0dHBzOi8vd3d3Mi4wenowLmNvbS8yMDI1LzAzLzMxLzE3LzcwNjU4MzY0NC5wbmciLAogIAogIAogIAogIAogIAoKCgoKICAgICJodHRwczovL2Rva2tvMW5ldy5uZXdrc28ucnUvZG9ra28xL3ByZW1pdW05MS9tb25vLm0zdTh8dXNlci1hZ2VudD1Nb3ppbGxhLzUuMCAoV2luZG93cyBOVCAxMC4wOyBXaW42NDsgeDY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvMTI5LjAuMC4wIFNhZmFyaS81MzcuMzZ8cmVmZXJlcj1odHRwczovL25ld2VtYmVkcGxheS54eXovfG5hbWU9ICcgICAgIERPSyAoNzIwUCkgIOKAmHxhcHBsb2dvYmw9aHR0cHM6Ly93d3cyLjB6ejAuY29tLzIwMjUvMDMvMzEvMTcvNzA2NTgzNjQ0LnBuZyIsCiAgCiAgImh0dHBzOi8vd28uY21hLmZvb3RiYWxsaWkuaXIvaGxzMi9iMi5tM3U4fGNhc3Q9ZmFsc2V8bmFtZT0nICAgICAgV0FDRUwtVFYgICAgICDigJh8YXBwbG9nb2JsPWh0dHBzOi8vd3d3Mi4wenowLmNvbS8yMDI1LzAzLzMxLzE3LzcwNjU4MzY0NC5wbmciLAogIAoKCiJodHRwczovL2dpdGh1Yi5jb20vbzJ3cy94cG9sYS1wbGF5ZXIvcmF3L3JlZnMvaGVhZHMvbWFpbi8xLm0zdTh8dXNlci1hZ2VudD1Nb3ppbGxhLy81LjAgKGlQaG9uZTsgQ1BVIGlQaG9uZSBPUyAxNl82IGxpa2UgTWFjIE9TIFgpIEFwcGxlV2ViS2l0Ly82MDUuMS4xNSAoS0hUTUwsIGxpa2UgR2Vja28pIFZlcnNpb24vLzE2LjYgTW9iaWxlLy8xNUUxNDggU2FmYXJpLy82MDQuMXxyZWZlcmVyPWh0dHBzOi8vd3d3LnlhcmlnYS5saXZlL3xuYW1lPSAnICAgICB4cCAo2YXYqti52K/YrykgIOKAmHxhcHBsb2dvYmw9aHR0cHM6Ly93d3cyLjB6ejAuY29tLzIwMjUvMDMvMzEvMTcvNzA2NTgzNjQ0LnBuZyIKXQ==',
                 appUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
                 downloadUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
                 order: 1
             },
             {
-                id: '2',
+                id: 'default-2',
                 name: 'bein sport 2',
-                image: 'https://via.placeholder.com/100',
-                url: 'xmtv://base64encodedurl2',
+                image: 'https://via.placeholder.com/200x100/2F2562/FFFFFF?text=BEIN+2',
+                url: 'xmtv://WwoKICAKICAKICJodHRwOi8vMTM1LjEyNS4xMDkuNzM6OTAwMC9iZWluc3BvcnQyXy5tM3U4fGNhc3Q9ZmFsc2V8bmFtZT0nICAgV0FDRUwtVFYgICgzNjBQKSAgICAgIOKAmHxhcHBsb2dvYmw9IGh0dHBzOi8vaS5wb3N0aW1nLmNjL2h2dzdCMzhLL3dhY2VsLXR2LnBuZyAiLAogIAogICJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vS0ROVFYvVFZUL3JlZnMvaGVhZHMvbWFpbi92cDIubTN1OHxjYXN0PWZhbHNlfG5hbWU9JyAgV0FDRUwtVFYgICjZhdiq2LnYr9iv2KfZhNis2YjYr9in2KopICAgICAg4oCYfGFwcGxvZ29ibD0gaHR0cHM6Ly9pLnBvc3RpbWcuY2MvaHZ3N0CMzhLL3dhY2VsLXR2LnBuZyAiLAogIAogIAogIAogIAogIAogIAogICJodHRwczovL2FmLmF5YXNzcG9ydC5pci9obHMyL2JlaW4yLm0zdTh8Y2FzdD1mYWxzZXxuYW1lPScgICAgICBXQUNFTC1UViAgICAgIOKAmHxhcHBsb2dvYmw9IGh0dHBzOi8vaS5wb3N0aW1nLmNjL2h2dzdCMzhLL3dhY2VsLXR2LnBuZyAiLAogIAogICJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vYWx5c2pjNy1kb3QvbWF0aC9yZWZzL2hlYWRzL21haW4vdG8yLm0zdTh8Y2FzdD1mYWxzZXxuYW1lPScgICAgICjZhdiq2LnYr9ivINin2YTYrNmI2K/Yp9iqKSAg4oCYfGFwcGxvZ29ibD0gaHR0cHM6Ly9pLnBvc3RpbWcuY2MvaHZ3N0CMzhLL3dhY2VsLXR2LnBuZyAiLAogIAogIAogIAogIAogICJodHRwczovL2NkbmZlc3QuY29tL0cyLTQ4MHAtY2FzdC9wbGF5bGlzdC5tM3U4fG9yaWdpbj1odHRwczovL3d3dy55YXJpZ2EubGl2ZXx1c2VyLWFnZW50PU1vemlsbGEvNS4wIChpUGhvbmU7IENQVSBpUGhvbmUgT1MgMTZfNiBsaWtlIE1hYyBPUyBYKCBBcHBsZVdlYktpdC82MDUuMS4xNSAoS0hUTUwsIGxpa2UgR2Vja28pIFZlcnNpb24vMTYuNiBNb2JpbGUvMTVFMTQ4IFNhZmFyaS82MDQuMXxyZWZlcmVyPWh0dHBzOi8vd3d3LnlhcmlnYS5saXZlL3xjYXN0PWZhbHNlfG5hbWU9JyAgICAgV0FDRUwtVFYgICAgKNiI2YLYqiDYp9mE2YXZqNin2LHYp9ipKSAg4oCYfGFwcGxvZ29ibD1odHRwczovL2kucG9zdGltZy5jYy9odnc3QjM4Sy93YWNlbC10di5wbmcgIiwKICAKCgoKCiAgICAiIGh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9hbHlzamM3LWRvdC9pcHR2L3JlZnMvaGVhZHMvbWFpbi9ubS5tM3U4fHVzZXItYWdlbnQ9TW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzEyOS4wLjAuMCBTYWZhcmkvNTM3LjM2fHJlZmVyZXI9aHR0cHM6Ly9uZXdlbWJlZHBsYXkueHl6L3xuYW1U9ICcgICA0SyAgIAo==',
                 appUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
                 downloadUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
                 order: 2
@@ -168,16 +183,18 @@ class BeinSportApp {
     renderChannels() {
         const container = document.getElementById('channelsContainer');
         
-        if (this.channels.length === 0) {
+        if (!this.channels || this.channels.length === 0) {
             container.innerHTML = '<div class="loading">لا توجد قنوات متاحة</div>';
             return;
         }
 
+        console.log('Rendering channels:', this.channels.length);
+        
         container.innerHTML = this.channels.map(channel => `
             <div class="channel-card" data-channel-id="${channel.id}">
                 <div class="channel-logo">
                     <img src="${channel.image}" alt="${channel.name}" 
-                         onerror="this.src='https://via.placeholder.com/100?text=No+Image'">
+                         onerror="this.src='https://via.placeholder.com/200x100/2F2562/FFFFFF?text=No+Image'">
                 </div>
                 <div class="channel-name">${channel.name}</div>
             </div>
@@ -196,6 +213,7 @@ class BeinSportApp {
     }
 
     openChannel(channel) {
+        console.log('Opening channel:', channel.name);
         // Try to open the app
         window.location.href = channel.url;
         
@@ -256,7 +274,7 @@ class BeinSportApp {
     setupEventListeners() {
         console.log('Setting up event listeners...');
         
-        // Login toggle button - FIXED
+        // Login toggle button
         const loginToggle = document.getElementById('loginToggle');
         if (loginToggle) {
             loginToggle.addEventListener('click', (e) => {
@@ -342,10 +360,24 @@ class BeinSportApp {
 
         console.log('Event listeners setup completed');
     }
+
+    // Cleanup when leaving page
+    destroy() {
+        if (this.unsubscribeChannels) {
+            this.unsubscribeChannels();
+        }
+    }
 }
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, initializing app...');
     window.app = new BeinSportApp();
+});
+
+// Cleanup when leaving page
+window.addEventListener('beforeunload', () => {
+    if (window.app) {
+        window.app.destroy();
+    }
 });
