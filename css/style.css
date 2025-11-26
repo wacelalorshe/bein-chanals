@@ -1,3 +1,55 @@
+
+/* إضافة تنسيقات زر Login في الأعلى */
+.login-toggle {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 8px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    z-index: 1001;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+.login-toggle:hover {
+    transform: translateY(-50%) scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+.login-toggle i {
+    font-size: 16px;
+}
+
+/* تحسين تنسيقات الهيدر لاستيعاب زر Login */
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-image: linear-gradient(to right, #322769, #654FD4, #372B74, #322769, #5A47BE, #654FD4, #372B74,#231086, #2F2562, #322769, #654FD4, #372B74, #322769, #5A47BE, #654FD4, #372B74,#322769, #654FD4, #372B74);
+    border-bottom: 11px double #42318F;
+    height: 70px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0px 0px 10px 10px;
+    box-shadow: 0 0px 10px  rgba(0, 0, 0, 100);
+    position: relative; /* لإضافة زر Login داخله */
+}
+
+/* بقية التنسيقات تبقى كما هي */
+/* ... */
+
 :root {
     --primary-color: #3545FF;
     --secondary-color: #FF5200;
