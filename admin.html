@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة الإدارة - Aseel TV</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
     <link rel="stylesheet" href="css/style.css">
     <style>
         .admin-panel {
@@ -12,6 +13,7 @@
             padding: 20px;
             border-radius: 10px;
             margin: 20px 0;
+            border: 2px solid #42318F;
         }
         .login-required {
             text-align: center;
@@ -19,11 +21,39 @@
             background: rgba(0, 0, 0, 0.8);
             border-radius: 10px;
             margin: 50px 0;
+            border: 2px solid #42318F;
         }
         body {
             background: linear-gradient(to right, #322769, #151825, #322769);
             color: white;
             min-height: 100vh;
+            padding-top: 20px;
+        }
+        .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #42318F;
+            color: white;
+        }
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #654FD4;
+            color: white;
+            box-shadow: 0 0 0 0.2rem rgba(101, 79, 212, 0.25);
+        }
+        .form-label {
+            color: #E1E1E1;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .channel-item {
+            background: linear-gradient(to right, #2F2562, #3A4266);
+            border: 1px solid #42318F;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .channel-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
@@ -31,64 +61,97 @@
     <div class="container mt-4">
         <div class="row">
             <div class="col-12">
-                <h1 class="text-center mb-4">لوحة إدارة القنوات</h1>
+                <h1 class="text-center mb-4" style="color: #E1E1E1; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">لوحة إدارة القنوات</h1>
                 
                 <!-- Admin Panel (shown when authenticated) -->
                 <div id="adminPanel" class="admin-panel" style="display: none;">
-                    <form id="channelForm" class="mb-4">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="text-white">اسم القناة</label>
-                                    <input type="text" id="channelName" class="form-control" required>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="text-white">رابط الصورة</label>
-                                    <input type="text" id="channelImage" class="form-control" placeholder="https://example.com/image.jpg">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="text-white">رابط البث (Base64)</label>
-                                    <textarea id="channelUrl" class="form-control" rows="3" required placeholder="أدخل رابط البث المشفر base64"></textarea>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="text-white">رابط التطبيق</label>
-                                    <input type="text" id="channelApp" class="form-control" 
-                                           value="https://play.google.com/store/apps/details?id=com.xpola.player">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="text-white">رابط التحميل</label>
-                                    <input type="text" id="channelDownload" class="form-control" 
-                                           value="https://play.google.com/store/apps/details?id=com.xpola.player">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="text-white">ترتيب العرض</label>
-                                    <input type="number" id="channelOrder" class="form-control" value="1" min="1">
-                                </div>
-                            </div>
+                    <!-- Add Channel Form -->
+                    <div class="card mb-4" style="background: rgba(0,0,0,0.7); border: 1px solid #42318F;">
+                        <div class="card-header" style="background: linear-gradient(to right, #322769, #654FD4); border-bottom: 1px solid #42318F;">
+                            <h4 class="mb-0" style="color: white;">إضافة قناة جديدة</h4>
                         </div>
-                        <button type="submit" class="btn btn-success w-100">إضافة قناة</button>
-                    </form>
-                    
-                    <div class="mt-4">
-                        <h3 class="text-white">القنوات المضافة</h3>
-                        <div id="channelsList" class="mt-3">
-                            <!-- Channels will be loaded here -->
+                        <div class="card-body">
+                            <form id="channelForm">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">اسم القناة *</label>
+                                            <input type="text" id="channelName" class="form-control" required placeholder="أدخل اسم القناة">
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">رابط الصورة</label>
+                                            <input type="text" id="channelImage" class="form-control" placeholder="https://example.com/image.jpg">
+                                            <small class="form-text text-muted">اتركه فارغاً لاستخدام صورة افتراضية</small>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">رابط البث (Base64) *</label>
+                                            <textarea id="channelUrl" class="form-control" rows="3" required placeholder="أدخل رابط البث المشفر base64"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">رابط التطبيق</label>
+                                            <input type="text" id="channelApp" class="form-control" 
+                                                   value="https://play.google.com/store/apps/details?id=com.xpola.player">
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">رابط التحميل</label>
+                                            <input type="text" id="channelDownload" class="form-control" 
+                                                   value="https://play.google.com/store/apps/details?id=com.xpola.player">
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">ترتيب العرض</label>
+                                            <input type="number" id="channelOrder" class="form-control" value="1" min="1">
+                                            <small class="form-text text-muted">رقم أقل يعني ظهوراً أبكر</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-success w-100 py-2" style="font-weight: bold;">
+                                    <i class="uil uil-plus-circle"></i> إضافة قناة
+                                </button>
+                            </form>
                         </div>
                     </div>
                     
+                    <!-- Channels List -->
+                    <div class="card" style="background: rgba(0,0,0,0.7); border: 1px solid #42318F;">
+                        <div class="card-header" style="background: linear-gradient(to right, #322769, #654FD4); border-bottom: 1px solid #42318F;">
+                            <h4 class="mb-0" style="color: white;">القنوات المضافة</h4>
+                        </div>
+                        <div class="card-body">
+                            <div id="channelsList" class="mt-3">
+                                <!-- Channels will be loaded here -->
+                                <div class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">جاري التحميل...</span>
+                                    </div>
+                                    <p class="mt-2">جاري تحميل القنوات...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
                     <div class="mt-4 text-center">
-                        <a href="index.html" class="btn btn-primary me-2">العودة للرئيسية</a>
-                        <button id="logoutAdmin" class="btn btn-danger">تسجيل الخروج</button>
+                        <a href="index.html" class="btn btn-primary me-2">
+                            <i class="uil uil-home"></i> العودة للرئيسية
+                        </a>
+                        <button id="logoutAdmin" class="btn btn-danger">
+                            <i class="uil uil-signout"></i> تسجيل الخروج
+                        </button>
                     </div>
                 </div>
 
                 <!-- Login Required Message (shown when not authenticated) -->
                 <div id="loginRequired" class="login-required" style="display: none;">
+                    <div class="mb-4">
+                        <i class="uil uil-lock-alt" style="font-size: 64px; color: #FF5200;"></i>
+                    </div>
                     <h3 class="text-white">يجب تسجيل الدخول أولاً</h3>
-                    <p class="text-white">يرجى تسجيل الدخول من الصفحة الرئيسية للوصول إلى لوحة الإدارة</p>
-                    <a href="index.html" class="btn btn-primary mt-3">العودة للرئيسية</a>
+                    <p class="text-white mb-4">يرجى تسجيل الدخول من الصفحة الرئيسية للوصول إلى لوحة الإدارة</p>
+                    <a href="index.html" class="btn btn-primary btn-lg">
+                        <i class="uil uil-signin"></i> العودة للرئيسية
+                    </a>
                 </div>
             </div>
         </div>
@@ -164,6 +227,8 @@
         class AdminPanel {
             constructor() {
                 this.authManager = new AdminAuthManager();
+                this.channels = [];
+                this.unsubscribeChannels = null;
                 this.init();
             }
 
@@ -172,84 +237,248 @@
                 
                 // Check authentication state
                 if (this.authManager.checkAuth()) {
-                    await this.loadChannels();
+                    await this.setupChannelsListener();
                     this.setupEventListeners();
                 }
             }
 
-            async loadChannels() {
+            setupChannelsListener() {
                 try {
-                    console.log('Loading channels...');
-                    const snapshot = await db.collection('channels').orderBy('order').get();
-                    const channels = snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
-                    this.renderChannelsList(channels);
+                    // Set up real-time listener for channels
+                    this.unsubscribeChannels = db.collection('channels')
+                        .orderBy('order')
+                        .onSnapshot((snapshot) => {
+                            console.log('Channels updated, total:', snapshot.size);
+                            
+                            if (!snapshot.empty) {
+                                this.channels = snapshot.docs.map(doc => ({
+                                    id: doc.id,
+                                    ...doc.data()
+                                }));
+                                this.renderChannelsList();
+                            } else {
+                                this.renderEmptyChannels();
+                            }
+                        }, (error) => {
+                            console.error('Error in channels listener:', error);
+                            this.renderChannelsError(error);
+                        });
+                        
                 } catch (error) {
-                    console.error('Error loading channels:', error);
-                    document.getElementById('channelsList').innerHTML = 
-                        '<p class="text-center text-white">خطأ في تحميل القنوات: ' + error.message + '</p>';
+                    console.error('Error setting up channels listener:', error);
+                    this.renderChannelsError(error);
                 }
             }
 
-            renderChannelsList(channels) {
+            renderChannelsList() {
                 const container = document.getElementById('channelsList');
                 
-                if (channels.length === 0) {
-                    container.innerHTML = '<p class="text-center text-white">لا توجد قنوات مضافة</p>';
+                if (this.channels.length === 0) {
+                    this.renderEmptyChannels();
                     return;
                 }
 
-                container.innerHTML = channels.map(channel => `
-                    <div class="card mb-2 bg-dark text-white">
-                        <div class="card-body d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5 class="card-title">${channel.name}</h5>
-                                <p class="card-text mb-0">الترتيب: ${channel.order || 1}</p>
+                container.innerHTML = this.channels.map(channel => `
+                    <div class="channel-item p-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <img src="${channel.image || 'https://via.placeholder.com/60x40/2F2562/FFFFFF?text=TV'}" 
+                                     alt="${channel.name}" 
+                                     class="rounded me-3"
+                                     style="width: 60px; height: 40px; object-fit: cover;"
+                                     onerror="this.src='https://via.placeholder.com/60x40/2F2562/FFFFFF?text=TV'">
+                                <div>
+                                    <h5 class="mb-1 text-white">${channel.name}</h5>
+                                    <p class="mb-0 text-muted">الترتيب: ${channel.order || 1}</p>
+                                </div>
                             </div>
-                            <button class="btn btn-danger btn-sm" onclick="adminPanel.deleteChannel('${channel.id}')">
-                                حذف
-                            </button>
+                            <div>
+                                <button class="btn btn-danger btn-sm" onclick="adminPanel.deleteChannel('${channel.id}')">
+                                    <i class="uil uil-trash-alt"></i> حذف
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `).join('');
             }
 
+            renderEmptyChannels() {
+                const container = document.getElementById('channelsList');
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="uil uil-tv-retro" style="font-size: 64px; color: #6c757d;"></i>
+                        <h5 class="mt-3 text-muted">لا توجد قنوات مضافة</h5>
+                        <p class="text-muted">استخدم النموذج أعلاه لإضافة قناة جديدة</p>
+                    </div>
+                `;
+            }
+
+            renderChannelsError(error) {
+                const container = document.getElementById('channelsList');
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h5><i class="uil uil-exclamation-triangle"></i> خطأ في تحميل القنوات</h5>
+                        <p class="mb-0">${error.message || 'حدث خطأ غير متوقع'}</p>
+                    </div>
+                `;
+            }
+
+            // دالة للتحقق من صحة البيانات قبل الإضافة
+            validateChannelData(channelData) {
+                const errors = [];
+                
+                if (!channelData.name || channelData.name.trim() === '') {
+                    errors.push('اسم القناة مطلوب');
+                }
+                
+                if (!channelData.url || channelData.url.trim() === '') {
+                    errors.push('رابط البث مطلوب');
+                }
+                
+                if (channelData.url && !channelData.url.includes('://')) {
+                    errors.push('رابط البث يجب أن يكون بصيغة صحيحة (يجب أن يحتوي على ://)');
+                }
+                
+                if (channelData.image && channelData.image.trim() !== '' && 
+                    !channelData.image.startsWith('http')) {
+                    errors.push('رابط الصورة يجب أن يبدأ بـ http أو https');
+                }
+                
+                return errors;
+            }
+
+            // معالجة الأخطاء
+            handleAddChannelError(error) {
+                let errorMessage = 'حدث خطأ أثناء إضافة القناة';
+                
+                switch (error.code) {
+                    case 'permission-denied':
+                        errorMessage = 'ليس لديك صلاحية لإضافة قنوات. تأكد من تسجيل الدخول.';
+                        break;
+                    case 'unavailable':
+                        errorMessage = 'لا يمكن الاتصال بقاعدة البيانات. تحقق من اتصال الإنترنت.';
+                        break;
+                    case 'invalid-argument':
+                        errorMessage = 'بيانات غير صالحة. تأكد من صحة تنسيق البيانات.';
+                        break;
+                    default:
+                        errorMessage += ': ' + error.message;
+                }
+                
+                return errorMessage;
+            }
+
             async addChannel(channelData) {
                 try {
-                    await db.collection('channels').add({
-                        name: channelData.name,
-                        image: channelData.image,
-                        url: channelData.url,
-                        appUrl: channelData.appUrl,
-                        downloadUrl: channelData.downloadUrl,
+                    // التحقق من صحة البيانات
+                    const errors = this.validateChannelData(channelData);
+                    if (errors.length > 0) {
+                        alert('يرجى تصحيح الأخطاء التالية:\n' + errors.join('\n'));
+                        return;
+                    }
+
+                    console.log('Adding new channel:', channelData);
+                    
+                    // استخدام صورة افتراضية إذا لم يتم توفير صورة
+                    const imageUrl = channelData.image && channelData.image.trim() !== '' ? 
+                           channelData.image.trim() : 
+                           'https://via.placeholder.com/200x100/2F2562/FFFFFF?text=' + encodeURIComponent(channelData.name);
+                    
+                    const docRef = await db.collection('channels').add({
+                        name: channelData.name.trim(),
+                        image: imageUrl,
+                        url: channelData.url.trim(),
+                        appUrl: channelData.appUrl.trim(),
+                        downloadUrl: channelData.downloadUrl.trim(),
                         order: parseInt(channelData.order) || 1,
-                        createdAt: new Date()
+                        createdAt: new Date(),
+                        updatedAt: new Date()
                     });
                     
-                    alert('تم إضافة القناة بنجاح');
+                    console.log('Channel added with ID:', docRef.id);
+                    
+                    // إظهار رسالة نجاح
+                    this.showSuccessMessage('✅ تم إضافة القناة بنجاح! سيتم عرضها في القائمة الرئيسية خلال ثوانٍ.');
+                    
+                    // إعادة تعيين النموذج
                     document.getElementById('channelForm').reset();
-                    await this.loadChannels();
+                    document.getElementById('channelOrder').value = 1;
+                    
                 } catch (error) {
                     console.error('Error adding channel:', error);
-                    alert('حدث خطأ أثناء إضافة القناة: ' + error.message);
+                    const errorMessage = this.handleAddChannelError(error);
+                    this.showErrorMessage('❌ ' + errorMessage);
                 }
             }
 
-            async deleteChannel(channelId) {
-                if (confirm('هل أنت متأكد من حذف هذه القناة؟')) {
-                    try {
-                        await db.collection('channels').doc(channelId).delete();
-                        await this.loadChannels();
-                    } catch (error) {
-                        console.error('Error deleting channel:', error);
-                        alert('حدث خطأ أثناء حذف القناة: ' + error.message);
+            showSuccessMessage(message) {
+                // إنشاء عنصر التنبيه
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                alertDiv.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                // إضافة التنبيه قبل النموذج
+                const form = document.getElementById('channelForm');
+                form.parentNode.insertBefore(alertDiv, form);
+                
+                // إزالة التنبيه تلقائياً بعد 5 ثوانٍ
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.remove();
                     }
+                }, 5000);
+            }
+
+            showErrorMessage(message) {
+                // إنشاء عنصر التنبيه
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                alertDiv.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                // إضافة التنبيف قبل النموذج
+                const form = document.getElementById('channelForm');
+                form.parentNode.insertBefore(alertDiv, form);
+                
+                // إزالة التنبيه تلقائياً بعد 5 ثوانٍ
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.remove();
+                    }
+                }, 5000);
+            }
+
+            async deleteChannel(channelId) {
+                if (!confirm('هل أنت متأكد من حذف هذه القناة؟')) {
+                    return;
+                }
+
+                try {
+                    await db.collection('channels').doc(channelId).delete();
+                    console.log('Channel deleted:', channelId);
+                    
+                    // إظهار رسالة نجاح
+                    this.showSuccessMessage('✅ تم حذف القناة بنجاح!');
+                    
+                } catch (error) {
+                    console.error('Error deleting channel:', error);
+                    let errorMessage = 'حدث خطأ أثناء حذف القناة';
+                    
+                    if (error.code === 'permission-denied') {
+                        errorMessage = 'ليس لديك صلاحية لحذف القنوات.';
+                    }
+                    
+                    this.showErrorMessage('❌ ' + errorMessage);
                 }
             }
 
             setupEventListeners() {
+                // Form submission
                 document.getElementById('channelForm').addEventListener('submit', (e) => {
                     e.preventDefault();
                     
@@ -265,21 +494,51 @@
                     this.addChannel(channel);
                 });
 
+                // Logout button
                 document.getElementById('logoutAdmin').addEventListener('click', async () => {
                     const result = await this.authManager.logout();
                     if (result.success) {
                         window.location.href = 'index.html';
                     } else {
-                        alert('حدث خطأ أثناء تسجيل الخروج: ' + result.error);
+                        this.showErrorMessage('❌ حدث خطأ أثناء تسجيل الخروج: ' + result.error);
                     }
                 });
+
+                // Enter key in form fields
+                const formFields = document.querySelectorAll('#channelForm input, #channelForm textarea');
+                formFields.forEach(field => {
+                    field.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            document.getElementById('channelForm').dispatchEvent(new Event('submit'));
+                        }
+                    });
+                });
+            }
+
+            // Cleanup when leaving page
+            destroy() {
+                if (this.unsubscribeChannels) {
+                    this.unsubscribeChannels();
+                }
             }
         }
 
         // Initialize admin panel when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('Admin page loaded, initializing...');
             window.adminPanel = new AdminPanel();
         });
+
+        // Cleanup when leaving page
+        window.addEventListener('beforeunload', () => {
+            if (window.adminPanel) {
+                window.adminPanel.destroy();
+            }
+        });
     </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
