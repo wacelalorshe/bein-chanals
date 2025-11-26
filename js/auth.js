@@ -12,16 +12,19 @@ class AuthManager {
     // Setup authentication state listener
     setupAuthListener() {
         onAuthStateChanged(auth, (user) => {
+            console.log('Auth state changed:', user ? 'User signed in' : 'User signed out');
             if (user) {
                 this.isAuthenticated = true;
                 this.currentUser = user;
                 localStorage.setItem('adminAuth', 'true');
-                console.log('User is signed in:', user.email);
+                localStorage.setItem('adminEmail', user.email);
+                console.log('User authenticated:', user.email);
             } else {
                 this.isAuthenticated = false;
                 this.currentUser = null;
                 localStorage.removeItem('adminAuth');
-                console.log('User is signed out');
+                localStorage.removeItem('adminEmail');
+                console.log('User signed out');
             }
         });
     }
@@ -29,10 +32,13 @@ class AuthManager {
     // Firebase authentication
     async login(email, password) {
         try {
+            console.log('Attempting login for:', email);
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             this.isAuthenticated = true;
             this.currentUser = userCredential.user;
             localStorage.setItem('adminAuth', 'true');
+            localStorage.setItem('adminEmail', email);
+            console.log('Login successful for:', email);
             return { success: true, user: userCredential.user };
         } catch (error) {
             console.error('Login error:', error);
@@ -42,6 +48,9 @@ class AuthManager {
                 case 'auth/invalid-email':
                     errorMessage = 'البريد الإلكتروني غير صحيح';
                     break;
+                case 'auth/user-disabled':
+                    errorMessage = 'هذا الحساب معطل';
+                    break;
                 case 'auth/user-not-found':
                     errorMessage = 'المستخدم غير موجود';
                     break;
@@ -50,6 +59,9 @@ class AuthManager {
                     break;
                 case 'auth/too-many-requests':
                     errorMessage = 'محاولات تسجيل دخول كثيرة، حاول لاحقاً';
+                    break;
+                case 'auth/network-request-failed':
+                    errorMessage = 'خطأ في الشبكة، تحقق من اتصال الإنترنت';
                     break;
             }
             
@@ -63,6 +75,8 @@ class AuthManager {
             this.isAuthenticated = false;
             this.currentUser = null;
             localStorage.removeItem('adminAuth');
+            localStorage.removeItem('adminEmail');
+            console.log('Logout successful');
             return { success: true };
         } catch (error) {
             console.error('Logout error:', error);
@@ -73,6 +87,7 @@ class AuthManager {
     checkAuth() {
         const storedAuth = localStorage.getItem('adminAuth');
         this.isAuthenticated = storedAuth === 'true' && auth.currentUser !== null;
+        console.log('Auth check:', this.isAuthenticated ? 'Authenticated' : 'Not authenticated');
         return this.isAuthenticated;
     }
 
