@@ -1,75 +1,140 @@
-// Authentication system
+// Wait for Firebase to be fully loaded
+function waitForFirebase() {
+    return new Promise((resolve, reject) => {
+        let attempts = 0;
+        const maxAttempts = 50; // 5 seconds max
+        
+        const checkFirebase = () => {
+            attempts++;
+            
+            if (typeof firebase !== 'undefined' && 
+                typeof db !== 'undefined' && 
+                typeof auth !== 'undefined') {
+                console.log("Firebase is ready after", attempts, "attempts");
+                resolve(true);
+                return;
+            }
+            
+            if (attempts >= maxAttempts) {
+                console.error("Firebase failed to load after", maxAttempts, "attempts");
+                reject(new Error("Firebase failed to load"));
+                return;
+            }
+            
+            setTimeout(checkFirebase, 100);
+        };
+        
+        checkFirebase();
+    });
+}
+
+// Enhanced Authentication system
 class AuthManager {
     constructor() {
         this.isAuthenticated = false;
         this.currentUser = null;
-        this.setupAuthListener();
+        this.authReady = false;
+        this.init();
     }
 
-    // Setup authentication state listener
-    setupAuthListener() {
-        if (typeof auth !== 'undefined') {
-            auth.onAuthStateChanged((user) => {
-                console.log('Auth state changed:', user ? 'User signed in' : 'User signed out');
-                if (user) {
-                    this.isAuthenticated = true;
-                    this.currentUser = user;
-                    localStorage.setItem('adminAuth', 'true');
-                    localStorage.setItem('adminEmail', user.email);
-                    console.log('User authenticated:', user.email);
-                } else {
-                    this.isAuthenticated = false;
-                    this.currentUser = null;
-                    localStorage.removeItem('adminAuth');
-                    localStorage.removeItem('adminEmail');
-                    console.log('User signed out');
-                }
-            });
-        } else {
-            console.error('Firebase auth is not defined');
+    async init() {
+        try {
+            await waitForFirebase();
+            
+            if (typeof auth === 'undefined') {
+                console.error('Firebase auth is not available');
+                this.setupFallbackAuth();
+                return;
+            }
+            
+            this.setupAuthListener();
+            this.authReady = true;
+            console.log('AuthManager initialized successfully');
+            
+        } catch (error) {
+            console.error('AuthManager initialization failed:', error);
+            this.setupFallbackAuth();
         }
     }
 
-    // Firebase authentication
-    async login(email, password) {
-        try {
-            console.log('Attempting login for:', email);
-            if (typeof auth === 'undefined') {
-                throw new Error('Firebase auth is not available');
+    setupAuthListener() {
+        auth.onAuthStateChanged((user) => {
+            console.log('Auth state changed:', user ? 'User signed in' : 'User signed out');
+            if (user) {
+                this.isAuthenticated = true;
+                this.currentUser = user;
+                localStorage.setItem('adminAuth', 'true');
+                localStorage.setItem('adminEmail', user.email);
+                console.log('User authenticated:', user.email);
+            } else {
+                this.isAuthenticated = false;
+                this.currentUser = null;
+                localStorage.removeItem('adminAuth');
+                localStorage.removeItem('adminEmail');
+                console.log('User signed out');
             }
+        }, (error) => {
+            console.error('Auth state change error:', error);
+            this.setupFallbackAuth();
+        });
+    }
+
+    // Fallback authentication for when Firebase fails
+    setupFallbackAuth() {
+        console.log('Setting up fallback authentication');
+        const storedAuth = localStorage.getItem('adminAuth');
+        this.isAuthenticated = storedAuth === 'true';
+        this.authReady = true;
+    }
+
+    async login(email, password) {
+        // If Firebase auth is not available, use fallback
+        if (typeof auth === 'undefined') {
+            console.log('Using fallback authentication');
+            return this.fallbackLogin(email, password);
+        }
+
+        try {
+            console.log('Attempting Firebase login for:', email);
             
             const userCredential = await auth.signInWithEmailAndPassword(email, password);
             this.isAuthenticated = true;
             this.currentUser = userCredential.user;
+            
             localStorage.setItem('adminAuth', 'true');
             localStorage.setItem('adminEmail', email);
-            console.log('Login successful for:', email);
-            return { success: true, user: userCredential.user };
-        } catch (error) {
-            console.error('Login error:', error);
-            let errorMessage = 'حدث خطأ أثناء تسجيل الدخول';
             
-            switch (error.code) {
-                case 'auth/invalid-email':
-                    errorMessage = 'البريد الإلكتروني غير صحيح';
-                    break;
-                case 'auth/user-disabled':
-                    errorMessage = 'هذا الحساب معطل';
-                    break;
-                case 'auth/user-not-found':
-                    errorMessage = 'المستخدم غير موجود';
-                    break;
-                case 'auth/wrong-password':
-                    errorMessage = 'كلمة المرور غير صحيحة';
-                    break;
-                case 'auth/too-many-requests':
-                    errorMessage = 'محاولات تسجيل دخول كثيرة، حاول لاحقاً';
-                    break;
-                case 'auth/network-request-failed':
-                    errorMessage = 'خطأ في الشبكة، تحقق من اتصال الإنترنت';
-                    break;
-                default:
-                    errorMessage = error.message;
+            console.log('Firebase login successful for:', email);
+            return { success: true, user: userCredential.user };
+            
+        } catch (error) {
+            console.error('Firebase login error:', error);
+            
+            // Fallback to simple authentication if Firebase fails
+            return this.fallbackLogin(email, password);
+        }
+    }
+
+    // Simple password-based authentication as fallback
+    fallbackLogin(email, password) {
+        console.log('Using fallback login for:', email);
+        
+        // Simple password check - you can change this password
+        const validPassword = "Ww735981122"; // Change this to your desired password
+        
+        if (password === validPassword && email === "admin@aseeltv.com") {
+            this.isAuthenticated = true;
+            this.currentUser = { email: email };
+            localStorage.setItem('adminAuth', 'true');
+            localStorage.setItem('adminEmail', email);
+            
+            console.log('Fallback login successful');
+            return { success: true, user: { email: email } };
+        } else {
+            let errorMessage = 'كلمة المرور غير صحيحة';
+            
+            if (email !== "admin@aseeltv.com") {
+                errorMessage = 'البريد الإلكتروني غير صحيح';
             }
             
             return { success: false, error: errorMessage };
@@ -81,33 +146,45 @@ class AuthManager {
             if (typeof auth !== 'undefined') {
                 await auth.signOut();
             }
+            
             this.isAuthenticated = false;
             this.currentUser = null;
             localStorage.removeItem('adminAuth');
             localStorage.removeItem('adminEmail');
+            
             console.log('Logout successful');
             return { success: true };
+            
         } catch (error) {
             console.error('Logout error:', error);
-            return { success: false, error: error.message };
+            
+            // Fallback logout
+            this.isAuthenticated = false;
+            this.currentUser = null;
+            localStorage.removeItem('adminAuth');
+            localStorage.removeItem('adminEmail');
+            
+            return { success: true };
         }
     }
 
     checkAuth() {
+        if (!this.authReady) {
+            console.log('Auth not ready yet');
+            return false;
+        }
+        
         const storedAuth = localStorage.getItem('adminAuth');
-        this.isAuthenticated = storedAuth === 'true' && (typeof auth !== 'undefined' ? auth.currentUser !== null : false);
+        this.isAuthenticated = storedAuth === 'true';
+        
         console.log('Auth check:', this.isAuthenticated ? 'Authenticated' : 'Not authenticated');
         return this.isAuthenticated;
     }
 
-    // Get current user
     getCurrentUser() {
         return this.currentUser;
     }
 }
-
-// Create global auth instance
-const authManager = new AuthManager();
 
 // Main application
 class BeinSportApp {
@@ -123,13 +200,43 @@ class BeinSportApp {
         // Set current year
         document.getElementById('currentYear').textContent = new Date().getFullYear();
         
-        // Setup event listeners first
+        // Wait for auth to be ready
+        await this.waitForAuth();
+        
+        // Setup event listeners
         this.setupEventListeners();
         
-        // Then load channels
+        // Load channels
         await this.loadChannels();
         
         console.log('App initialized successfully');
+    }
+
+    async waitForAuth() {
+        let attempts = 0;
+        const maxAttempts = 100; // 10 seconds max
+        
+        return new Promise((resolve) => {
+            const checkAuth = () => {
+                attempts++;
+                
+                if (authManager.authReady) {
+                    console.log("Auth ready after", attempts, "attempts");
+                    resolve(true);
+                    return;
+                }
+                
+                if (attempts >= maxAttempts) {
+                    console.warn("Auth not ready, continuing anyway");
+                    resolve(false);
+                    return;
+                }
+                
+                setTimeout(checkAuth, 100);
+            };
+            
+            checkAuth();
+        });
     }
 
     async loadChannels() {
@@ -137,23 +244,25 @@ class BeinSportApp {
             const channelsContainer = document.getElementById('channelsContainer');
             channelsContainer.innerHTML = '<div class="loading">جاري تحميل القنوات...</div>';
             
-            if (typeof db === 'undefined') {
-                throw new Error('Firebase is not available');
+            // Try Firebase first
+            if (typeof db !== 'undefined') {
+                console.log('Loading channels from Firebase...');
+                const snapshot = await db.collection('channels').orderBy('order').get();
+                
+                if (!snapshot.empty) {
+                    this.channels = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    this.renderChannels();
+                    return;
+                }
             }
             
-            // Load from Firebase
-            const snapshot = await db.collection('channels').orderBy('order').get();
+            // Fallback to default channels
+            console.log('Using default channels (Firebase not available or no channels)');
+            this.loadDefaultChannels();
             
-            if (!snapshot.empty) {
-                this.channels = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                this.renderChannels();
-            } else {
-                // Fallback to default channels
-                this.loadDefaultChannels();
-            }
         } catch (error) {
             console.error('Error loading channels:', error);
             this.loadDefaultChannels();
@@ -167,7 +276,7 @@ class BeinSportApp {
                 id: 'default-1',
                 name: 'bein sport 1',
                 image: 'https://via.placeholder.com/200x100/2F2562/FFFFFF?text=BEIN+1',
-                url: 'xmtv://base64encodedurl1',
+                url: '#',
                 appUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
                 downloadUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
                 order: 1
@@ -176,7 +285,7 @@ class BeinSportApp {
                 id: 'default-2',
                 name: 'bein sport 2',
                 image: 'https://via.placeholder.com/200x100/2F2562/FFFFFF?text=BEIN+2',
-                url: 'xmtv://base64encodedurl2',
+                url: '#',
                 appUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
                 downloadUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
                 order: 2
@@ -219,17 +328,13 @@ class BeinSportApp {
 
     openChannel(channel) {
         console.log('Opening channel:', channel.name);
-        // Try to open the app
+        
         if (channel.url && channel.url !== '#') {
             window.location.href = channel.url;
+        } else {
+            // Show install modal if no URL or demo URL
+            this.showInstallModal(channel);
         }
-        
-        // Show install modal if needed
-        setTimeout(() => {
-            if (localStorage.getItem('appInstallPrompt') !== 'disabled') {
-                this.showInstallModal(channel);
-            }
-        }, 2000);
     }
 
     showInstallModal(channel) {
@@ -237,7 +342,6 @@ class BeinSportApp {
         if (modal) {
             modal.style.display = "block";
             
-            // Reset event listeners
             document.getElementById('confirmInstall').onclick = () => {
                 if (channel.downloadUrl) {
                     window.open(channel.downloadUrl, '_blank');
@@ -271,7 +375,7 @@ class BeinSportApp {
         const modal = document.getElementById('loginModal');
         if (modal) {
             modal.style.display = 'block';
-            console.log('Modal displayed successfully');
+            console.log('Login modal displayed successfully');
         } else {
             console.error('Login modal not found!');
         }
@@ -282,38 +386,32 @@ class BeinSportApp {
         if (modal) {
             modal.style.display = 'none';
             const adminPassword = document.getElementById('adminPassword');
-            if (adminPassword) {
-                adminPassword.value = '';
-            }
+            if (adminPassword) adminPassword.value = '';
+            
             const loginError = document.getElementById('loginError');
-            if (loginError) {
-                loginError.style.display = 'none';
-            }
+            if (loginError) loginError.style.display = 'none';
         }
     }
 
     setupEventListeners() {
         console.log('Setting up event listeners...');
         
-        // Login toggle button - FIXED
+        // Login toggle button
         const loginToggle = document.getElementById('loginToggle');
         if (loginToggle) {
             loginToggle.addEventListener('click', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
-                console.log('Login button clicked');
+                console.log('Login button clicked - Auth state:', authManager.isAuthenticated);
                 
                 if (authManager.isAuthenticated) {
-                    console.log('User authenticated, redirecting to admin');
+                    console.log('Redirecting to admin panel');
                     window.location.href = 'admin.html';
                 } else {
-                    console.log('User not authenticated, showing login modal');
+                    console.log('Showing login modal');
                     this.showAdminLogin();
                 }
             });
             console.log('Login toggle event listener added');
-        } else {
-            console.error('Login toggle button not found!');
         }
 
         // Login button in modal
@@ -321,27 +419,14 @@ class BeinSportApp {
         if (loginButton) {
             loginButton.addEventListener('click', async (e) => {
                 e.preventDefault();
-                e.stopPropagation();
                 
-                const emailInput = document.getElementById('adminEmail');
-                const passwordInput = document.getElementById('adminPassword');
-                
-                if (!emailInput || !passwordInput) {
-                    console.error('Login inputs not found');
-                    return;
-                }
-                
-                const email = emailInput.value;
-                const password = passwordInput.value;
+                const email = document.getElementById('adminEmail').value;
+                const password = document.getElementById('adminPassword').value;
                 
                 console.log('Login attempt with email:', email);
                 
                 if (!email || !password) {
-                    const loginError = document.getElementById('loginError');
-                    if (loginError) {
-                        loginError.textContent = 'يرجى إدخال البريد الإلكتروني وكلمة المرور';
-                        loginError.style.display = 'block';
-                    }
+                    this.showLoginError('يرجى إدخال البريد الإلكتروني وكلمة المرور');
                     return;
                 }
                 
@@ -352,14 +437,9 @@ class BeinSportApp {
                     this.hideAdminLogin();
                     window.location.href = 'admin.html';
                 } else {
-                    const loginError = document.getElementById('loginError');
-                    if (loginError) {
-                        loginError.textContent = result.error;
-                        loginError.style.display = 'block';
-                    }
+                    this.showLoginError(result.error);
                 }
             });
-            console.log('Login button event listener added');
         }
 
         // Cancel login
@@ -367,10 +447,8 @@ class BeinSportApp {
         if (cancelLogin) {
             cancelLogin.addEventListener('click', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
                 this.hideAdminLogin();
             });
-            console.log('Cancel login event listener added');
         }
 
         // Close modals when clicking outside
@@ -378,12 +456,8 @@ class BeinSportApp {
             const installModal = document.getElementById('installModal');
             const loginModal = document.getElementById('loginModal');
             
-            if (event.target === installModal) {
-                this.closeModal();
-            }
-            if (event.target === loginModal) {
-                this.hideAdminLogin();
-            }
+            if (event.target === installModal) this.closeModal();
+            if (event.target === loginModal) this.hideAdminLogin();
         });
 
         // Enter key in password field
@@ -391,10 +465,7 @@ class BeinSportApp {
         if (adminPassword) {
             adminPassword.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
-                    const loginButton = document.getElementById('loginButton');
-                    if (loginButton) {
-                        loginButton.click();
-                    }
+                    document.getElementById('loginButton').click();
                 }
             });
         }
@@ -402,7 +473,14 @@ class BeinSportApp {
         console.log('All event listeners setup completed');
     }
 
-    // Cleanup when leaving page
+    showLoginError(message) {
+        const loginError = document.getElementById('loginError');
+        if (loginError) {
+            loginError.textContent = message;
+            loginError.style.display = 'block';
+        }
+    }
+
     destroy() {
         if (this.unsubscribeChannels) {
             this.unsubscribeChannels();
@@ -410,13 +488,20 @@ class BeinSportApp {
     }
 }
 
-// Initialize the app when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing app...');
-    window.app = new BeinSportApp();
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('DOM loaded, starting initialization...');
+    
+    // Create auth manager first
+    window.authManager = new AuthManager();
+    
+    // Wait a bit for auth to initialize, then create app
+    setTimeout(() => {
+        window.app = new BeinSportApp();
+    }, 100);
 });
 
-// Cleanup when leaving page
+// Cleanup
 window.addEventListener('beforeunload', () => {
     if (window.app) {
         window.app.destroy();
