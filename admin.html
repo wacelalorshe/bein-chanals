@@ -13,7 +13,7 @@
             <div class="col-12">
                 <h1 class="text-center mb-4">لوحة إدارة القنوات</h1>
                 
-                <div class="admin-panel">
+                <div id="adminPanel" class="admin-panel">
                     <form id="channelForm" class="mb-4">
                         <div class="row">
                             <div class="col-md-6">
@@ -62,26 +62,42 @@
                         <button id="logoutAdmin" class="btn btn-danger">تسجيل الخروج</button>
                     </div>
                 </div>
+
+                <div id="loginRequired" class="text-center" style="display: none;">
+                    <h3>يجب تسجيل الدخول أولاً</h3>
+                    <a href="index.html" class="btn btn-primary">العودة للرئيسية</a>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    
-    <script src="js/firebase-config.js"></script>
-    <script src="js/auth.js"></script>
-    <script>
+    <script type="module">
+        import { db, authManager } from './js/firebase-config.js';
+        import { collection, getDocs, addDoc, deleteDoc, doc, orderBy, query } from "firebase/firestore";
+
         class AdminPanel {
             constructor() {
                 this.init();
             }
 
             async init() {
-                // Check authentication
+                // Setup auth listener
+                authManager.setupAuthListener((isAuthenticated, user) => {
+                    if (isAuthenticated) {
+                        document.getElementById('adminPanel').style.display = 'block';
+                        document.getElementById('loginRequired').style.display = 'none';
+                        this.loadChannels();
+                    } else {
+                        document.getElementById('adminPanel').style.display = 'none';
+                        document.getElementById('loginRequired').style.display = 'block';
+                    }
+                });
+
+                // Check initial auth state
                 if (!authManager.checkAuth()) {
-                    window.location.href = 'index.html';
+                    document.getElementById('adminPanel').style.display = 'none';
+                    document.getElementById('loginRequired').style.display = 'block';
                     return;
                 }
 
@@ -91,7 +107,8 @@
 
             async loadChannels() {
                 try {
-                    const snapshot = await db.collection('channels').orderBy('order').get();
+                    const channelsQuery = query(collection(db, 'channels'), orderBy('order'));
+                    const snapshot = await getDocs(channelsQuery);
                     const channels = snapshot.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data()
@@ -99,6 +116,7 @@
                     this.renderChannelsList(channels);
                 } catch (error) {
                     console.error('Error loading channels:', error);
+                    document.getElementById('channelsList').innerHTML = '<p class="text-center">خطأ في تحميل القنوات</p>';
                 }
             }
 
@@ -127,14 +145,14 @@
 
             async addChannel(channelData) {
                 try {
-                    await db.collection('channels').add({
+                    await addDoc(collection(db, 'channels'), {
                         name: channelData.name,
                         image: channelData.image,
                         url: channelData.url,
                         appUrl: channelData.appUrl,
                         downloadUrl: channelData.downloadUrl,
                         order: parseInt(channelData.order) || 1,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        createdAt: new Date()
                     });
                     
                     alert('تم إضافة القناة بنجاح');
@@ -149,7 +167,7 @@
             async deleteChannel(channelId) {
                 if (confirm('هل أنت متأكد من حذف هذه القناة؟')) {
                     try {
-                        await db.collection('channels').doc(channelId).delete();
+                        await deleteDoc(doc(db, 'channels', channelId));
                         await this.loadChannels();
                     } catch (error) {
                         console.error('Error deleting channel:', error);
