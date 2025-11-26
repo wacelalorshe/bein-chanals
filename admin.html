@@ -20,13 +20,18 @@
             border-radius: 10px;
             margin: 50px 0;
         }
+        body {
+            background: linear-gradient(to right, #322769, #151825, #322769);
+            color: white;
+            min-height: 100vh;
+        }
     </style>
 </head>
 <body>
     <div class="container mt-4">
         <div class="row">
             <div class="col-12">
-                <h1 class="text-center mb-4" style="color: white;">لوحة إدارة القنوات</h1>
+                <h1 class="text-center mb-4">لوحة إدارة القنوات</h1>
                 
                 <!-- Admin Panel (shown when authenticated) -->
                 <div id="adminPanel" class="admin-panel" style="display: none;">
@@ -89,12 +94,76 @@
         </div>
     </div>
 
-    <script type="module">
-        import { db, authManager } from './js/firebase-config.js';
-        import { collection, getDocs, addDoc, deleteDoc, doc, orderBy, query } from "firebase/firestore";
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
+    <script src="js/firebase-config.js"></script>
+    
+    <script>
+        // Authentication system for admin
+        class AdminAuthManager {
+            constructor() {
+                this.isAuthenticated = false;
+                this.currentUser = null;
+                this.setupAuthListener();
+            }
+
+            setupAuthListener() {
+                auth.onAuthStateChanged((user) => {
+                    console.log('Admin Auth state changed:', user ? 'User signed in' : 'User signed out');
+                    if (user) {
+                        this.isAuthenticated = true;
+                        this.currentUser = user;
+                        localStorage.setItem('adminAuth', 'true');
+                        localStorage.setItem('adminEmail', user.email);
+                        this.showAdminPanel();
+                    } else {
+                        this.isAuthenticated = false;
+                        this.currentUser = null;
+                        localStorage.removeItem('adminAuth');
+                        localStorage.removeItem('adminEmail');
+                        this.showLoginRequired();
+                    }
+                });
+            }
+
+            checkAuth() {
+                const storedAuth = localStorage.getItem('adminAuth');
+                this.isAuthenticated = storedAuth === 'true' && auth.currentUser !== null;
+                return this.isAuthenticated;
+            }
+
+            async logout() {
+                try {
+                    await auth.signOut();
+                    this.isAuthenticated = false;
+                    this.currentUser = null;
+                    localStorage.removeItem('adminAuth');
+                    localStorage.removeItem('adminEmail');
+                    return { success: true };
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    return { success: false, error: error.message };
+                }
+            }
+
+            showAdminPanel() {
+                document.getElementById('adminPanel').style.display = 'block';
+                document.getElementById('loginRequired').style.display = 'none';
+            }
+
+            showLoginRequired() {
+                document.getElementById('adminPanel').style.display = 'none';
+                document.getElementById('loginRequired').style.display = 'block';
+            }
+        }
+
+        // Admin Panel
         class AdminPanel {
             constructor() {
+                this.authManager = new AdminAuthManager();
                 this.init();
             }
 
@@ -102,35 +171,16 @@
                 console.log('Admin panel initializing...');
                 
                 // Check authentication state
-                this.checkAuthentication();
-                
-                // Setup auth listener for future changes
-                authManager.setupAuthListener();
-                
-                // Load channels if authenticated
-                if (authManager.isAuthenticated) {
+                if (this.authManager.checkAuth()) {
                     await this.loadChannels();
                     this.setupEventListeners();
-                }
-            }
-
-            checkAuthentication() {
-                if (authManager.isAuthenticated) {
-                    console.log('User is authenticated, showing admin panel');
-                    document.getElementById('adminPanel').style.display = 'block';
-                    document.getElementById('loginRequired').style.display = 'none';
-                } else {
-                    console.log('User is not authenticated, showing login required');
-                    document.getElementById('adminPanel').style.display = 'none';
-                    document.getElementById('loginRequired').style.display = 'block';
                 }
             }
 
             async loadChannels() {
                 try {
                     console.log('Loading channels...');
-                    const channelsQuery = query(collection(db, 'channels'), orderBy('order'));
-                    const snapshot = await getDocs(channelsQuery);
+                    const snapshot = await db.collection('channels').orderBy('order').get();
                     const channels = snapshot.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data()
@@ -168,7 +218,7 @@
 
             async addChannel(channelData) {
                 try {
-                    await addDoc(collection(db, 'channels'), {
+                    await db.collection('channels').add({
                         name: channelData.name,
                         image: channelData.image,
                         url: channelData.url,
@@ -190,7 +240,7 @@
             async deleteChannel(channelId) {
                 if (confirm('هل أنت متأكد من حذف هذه القناة؟')) {
                     try {
-                        await deleteDoc(doc(db, 'channels', channelId));
+                        await db.collection('channels').doc(channelId).delete();
                         await this.loadChannels();
                     } catch (error) {
                         console.error('Error deleting channel:', error);
@@ -216,7 +266,7 @@
                 });
 
                 document.getElementById('logoutAdmin').addEventListener('click', async () => {
-                    const result = await authManager.logout();
+                    const result = await this.authManager.logout();
                     if (result.success) {
                         window.location.href = 'index.html';
                     } else {
@@ -226,8 +276,10 @@
             }
         }
 
-        // Initialize admin panel
-        const adminPanel = new AdminPanel();
+        // Initialize admin panel when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.adminPanel = new AdminPanel();
+        });
     </script>
 </body>
 </html>
