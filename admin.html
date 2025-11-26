@@ -8,67 +8,108 @@
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .admin-panel {
-            background: rgba(0, 0, 0, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            border: 2px solid #42318F;
-        }
-        .login-required {
-            text-align: center;
-            padding: 50px;
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 10px;
-            margin: 50px 0;
-            border: 2px solid #42318F;
-        }
         body {
             background: linear-gradient(to right, #322769, #151825, #322769);
             color: white;
             min-height: 100vh;
-            padding-top: 20px;
+            padding: 20px;
+            font-family: Arial, sans-serif;
         }
+        
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .admin-panel {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #42318F;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        
+        .login-required {
+            text-align: center;
+            padding: 60px 30px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            margin: 50px 0;
+            border: 2px solid #42318F;
+        }
+        
         .form-control {
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid #42318F;
             color: white;
+            border-radius: 8px;
         }
+        
         .form-control:focus {
             background: rgba(255, 255, 255, 0.15);
             border-color: #654FD4;
             color: white;
             box-shadow: 0 0 0 0.2rem rgba(101, 79, 212, 0.25);
         }
+        
         .form-label {
             color: #E1E1E1;
             font-weight: bold;
             margin-bottom: 8px;
+            font-size: 14px;
         }
+        
         .channel-item {
-            background: linear-gradient(to right, #2F2562, #3A4266);
+            background: linear-gradient(135deg, #2F2562, #3A4266);
             border: 1px solid #42318F;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+        
+        .channel-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        .card-header-custom {
+            background: linear-gradient(135deg, #322769, #654FD4) !important;
+            border-bottom: 2px solid #42318F !important;
+            padding: 15px 20px;
+        }
+        
+        .btn-custom {
             border-radius: 8px;
+            font-weight: bold;
+            padding: 10px 20px;
             transition: all 0.3s ease;
         }
-        .channel-item:hover {
+        
+        .btn-custom:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
 <body>
-    <div class="container mt-4">
+    <div class="admin-container">
         <div class="row">
             <div class="col-12">
-                <h1 class="text-center mb-4" style="color: #E1E1E1; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">لوحة إدارة القنوات</h1>
+                <!-- Header -->
+                <div class="text-center mb-5">
+                    <h1 style="color: #E1E1E1; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-size: 2.5rem;">
+                        <i class="uil uil-setting"></i> لوحة إدارة القنوات
+                    </h1>
+                    <p class="text-muted">إدارة قنوات BEIN SPORT</p>
+                </div>
                 
                 <!-- Admin Panel (shown when authenticated) -->
                 <div id="adminPanel" class="admin-panel" style="display: none;">
                     <!-- Add Channel Form -->
-                    <div class="card mb-4" style="background: rgba(0,0,0,0.7); border: 1px solid #42318F;">
-                        <div class="card-header" style="background: linear-gradient(to right, #322769, #654FD4); border-bottom: 1px solid #42318F;">
-                            <h4 class="mb-0" style="color: white;">إضافة قناة جديدة</h4>
+                    <div class="card mb-5" style="background: rgba(0,0,0,0.7); border: 1px solid #42318F;">
+                        <div class="card-header card-header-custom">
+                            <h4 class="mb-0 text-white">
+                                <i class="uil uil-plus-circle"></i> إضافة قناة جديدة
+                            </h4>
                         </div>
                         <div class="card-body">
                             <form id="channelForm">
@@ -85,7 +126,7 @@
                                         </div>
                                         <div class="form-group mb-3">
                                             <label class="form-label">رابط البث (Base64) *</label>
-                                            <textarea id="channelUrl" class="form-control" rows="3" required placeholder="أدخل رابط البث المشفر base64"></textarea>
+                                            <textarea id="channelUrl" class="form-control" rows="4" required placeholder="أدخل رابط البث المشفر base64"></textarea>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -106,8 +147,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-success w-100 py-2" style="font-weight: bold;">
-                                    <i class="uil uil-plus-circle"></i> إضافة قناة
+                                <button type="submit" class="btn btn-success w-100 py-3 btn-custom" style="font-size: 16px;">
+                                    <i class="uil uil-plus-circle"></i> إضافة قناة جديدة
                                 </button>
                             </form>
                         </div>
@@ -115,28 +156,31 @@
                     
                     <!-- Channels List -->
                     <div class="card" style="background: rgba(0,0,0,0.7); border: 1px solid #42318F;">
-                        <div class="card-header" style="background: linear-gradient(to right, #322769, #654FD4); border-bottom: 1px solid #42318F;">
-                            <h4 class="mb-0" style="color: white;">القنوات المضافة</h4>
+                        <div class="card-header card-header-custom">
+                            <h4 class="mb-0 text-white">
+                                <i class="uil uil-list-ui-alt"></i> القنوات المضافة
+                                <span id="channelsCount" class="badge bg-primary ms-2">0</span>
+                            </h4>
                         </div>
                         <div class="card-body">
-                            <div id="channelsList" class="mt-3">
+                            <div id="channelsList">
                                 <!-- Channels will be loaded here -->
-                                <div class="text-center py-4">
-                                    <div class="spinner-border text-primary" role="status">
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
                                         <span class="visually-hidden">جاري التحميل...</span>
                                     </div>
-                                    <p class="mt-2">جاري تحميل القنوات...</p>
+                                    <p class="mt-3 text-muted">جاري تحميل القنوات...</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Action Buttons -->
-                    <div class="mt-4 text-center">
-                        <a href="index.html" class="btn btn-primary me-2">
+                    <div class="mt-5 text-center">
+                        <a href="index.html" class="btn btn-primary me-3 btn-custom">
                             <i class="uil uil-home"></i> العودة للرئيسية
                         </a>
-                        <button id="logoutAdmin" class="btn btn-danger">
+                        <button id="logoutAdmin" class="btn btn-danger btn-custom">
                             <i class="uil uil-signout"></i> تسجيل الخروج
                         </button>
                     </div>
@@ -145,12 +189,12 @@
                 <!-- Login Required Message (shown when not authenticated) -->
                 <div id="loginRequired" class="login-required" style="display: none;">
                     <div class="mb-4">
-                        <i class="uil uil-lock-alt" style="font-size: 64px; color: #FF5200;"></i>
+                        <i class="uil uil-lock-alt" style="font-size: 80px; color: #FF5200;"></i>
                     </div>
-                    <h3 class="text-white">يجب تسجيل الدخول أولاً</h3>
-                    <p class="text-white mb-4">يرجى تسجيل الدخول من الصفحة الرئيسية للوصول إلى لوحة الإدارة</p>
-                    <a href="index.html" class="btn btn-primary btn-lg">
-                        <i class="uil uil-signin"></i> العودة للرئيسية
+                    <h3 class="text-white mb-3">يجب تسجيل الدخول أولاً</h3>
+                    <p class="text-white mb-4" style="font-size: 18px;">يرجى تسجيل الدخول من الصفحة الرئيسية للوصول إلى لوحة الإدارة</p>
+                    <a href="index.html" class="btn btn-primary btn-lg btn-custom">
+                        <i class="uil uil-signin"></i> العودة للرئيسية لتسجيل الدخول
                     </a>
                 </div>
             </div>
@@ -174,33 +218,50 @@
             }
 
             setupAuthListener() {
-                auth.onAuthStateChanged((user) => {
-                    console.log('Admin Auth state changed:', user ? 'User signed in' : 'User signed out');
-                    if (user) {
+                if (typeof auth !== 'undefined') {
+                    auth.onAuthStateChanged((user) => {
+                        console.log('Admin Auth state changed:', user ? 'User signed in' : 'User signed out');
+                        if (user) {
+                            this.isAuthenticated = true;
+                            this.currentUser = user;
+                            localStorage.setItem('adminAuth', 'true');
+                            localStorage.setItem('adminEmail', user.email);
+                            this.showAdminPanel();
+                        } else {
+                            this.isAuthenticated = false;
+                            this.currentUser = null;
+                            localStorage.removeItem('adminAuth');
+                            localStorage.removeItem('adminEmail');
+                            this.showLoginRequired();
+                        }
+                    }, (error) => {
+                        console.error('Auth state change error:', error);
+                        this.showLoginRequired();
+                    });
+                } else {
+                    console.error('Firebase auth not available in admin');
+                    // Check local storage for fallback auth
+                    const storedAuth = localStorage.getItem('adminAuth');
+                    if (storedAuth === 'true') {
                         this.isAuthenticated = true;
-                        this.currentUser = user;
-                        localStorage.setItem('adminAuth', 'true');
-                        localStorage.setItem('adminEmail', user.email);
                         this.showAdminPanel();
                     } else {
-                        this.isAuthenticated = false;
-                        this.currentUser = null;
-                        localStorage.removeItem('adminAuth');
-                        localStorage.removeItem('adminEmail');
                         this.showLoginRequired();
                     }
-                });
+                }
             }
 
             checkAuth() {
                 const storedAuth = localStorage.getItem('adminAuth');
-                this.isAuthenticated = storedAuth === 'true' && auth.currentUser !== null;
+                this.isAuthenticated = storedAuth === 'true';
                 return this.isAuthenticated;
             }
 
             async logout() {
                 try {
-                    await auth.signOut();
+                    if (typeof auth !== 'undefined') {
+                        await auth.signOut();
+                    }
                     this.isAuthenticated = false;
                     this.currentUser = null;
                     localStorage.removeItem('adminAuth');
@@ -213,11 +274,13 @@
             }
 
             showAdminPanel() {
+                console.log('Showing admin panel');
                 document.getElementById('adminPanel').style.display = 'block';
                 document.getElementById('loginRequired').style.display = 'none';
             }
 
             showLoginRequired() {
+                console.log('Showing login required');
                 document.getElementById('adminPanel').style.display = 'none';
                 document.getElementById('loginRequired').style.display = 'block';
             }
@@ -239,24 +302,34 @@
                 if (this.authManager.checkAuth()) {
                     await this.setupChannelsListener();
                     this.setupEventListeners();
+                } else {
+                    console.log('User not authenticated, waiting for auth state...');
                 }
             }
 
             setupChannelsListener() {
                 try {
+                    console.log('Setting up channels listener...');
+                    
+                    if (typeof db === 'undefined') {
+                        throw new Error('Firestore is not available');
+                    }
+                    
                     // Set up real-time listener for channels
                     this.unsubscribeChannels = db.collection('channels')
                         .orderBy('order')
                         .onSnapshot((snapshot) => {
-                            console.log('Channels updated, total:', snapshot.size);
+                            console.log('Channels snapshot received, total:', snapshot.size);
                             
                             if (!snapshot.empty) {
                                 this.channels = snapshot.docs.map(doc => ({
                                     id: doc.id,
                                     ...doc.data()
                                 }));
+                                console.log('Channels loaded:', this.channels.length);
                                 this.renderChannelsList();
                             } else {
+                                console.log('No channels found in database');
                                 this.renderEmptyChannels();
                             }
                         }, (error) => {
@@ -272,24 +345,35 @@
 
             renderChannelsList() {
                 const container = document.getElementById('channelsList');
+                const countElement = document.getElementById('channelsCount');
                 
-                if (this.channels.length === 0) {
+                if (!this.channels || this.channels.length === 0) {
                     this.renderEmptyChannels();
                     return;
                 }
 
+                console.log('Rendering channels list with', this.channels.length, 'channels');
+                
+                // Update count
+                if (countElement) {
+                    countElement.textContent = this.channels.length;
+                }
+                
                 container.innerHTML = this.channels.map(channel => `
-                    <div class="channel-item p-3 mb-3">
+                    <div class="channel-item p-3">
                         <div class="d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center">
-                                <img src="${channel.image || 'https://via.placeholder.com/60x40/2F2562/FFFFFF?text=TV'}" 
+                            <div class="d-flex align-items-center flex-grow-1">
+                                <img src="${channel.image || 'https://via.placeholder.com/80x50/2F2562/FFFFFF?text=TV'}" 
                                      alt="${channel.name}" 
                                      class="rounded me-3"
-                                     style="width: 60px; height: 40px; object-fit: cover;"
-                                     onerror="this.src='https://via.placeholder.com/60x40/2F2562/FFFFFF?text=TV'">
-                                <div>
+                                     style="width: 80px; height: 50px; object-fit: cover;"
+                                     onerror="this.src='https://via.placeholder.com/80x50/2F2562/FFFFFF?text=TV'">
+                                <div class="flex-grow-1">
                                     <h5 class="mb-1 text-white">${channel.name}</h5>
-                                    <p class="mb-0 text-muted">الترتيب: ${channel.order || 1}</p>
+                                    <div class="d-flex text-muted">
+                                        <small class="me-3"><i class="uil uil-sort"></i> الترتيب: ${channel.order || 1}</small>
+                                        <small><i class="uil uil-calendar-alt"></i> ${this.formatDate(channel.createdAt)}</small>
+                                    </div>
                                 </div>
                             </div>
                             <div>
@@ -302,11 +386,33 @@
                 `).join('');
             }
 
+            formatDate(date) {
+                if (!date) return 'غير محدد';
+                
+                try {
+                    if (date.toDate) {
+                        return date.toDate().toLocaleDateString('ar-EG');
+                    } else if (date instanceof Date) {
+                        return date.toLocaleDateString('ar-EG');
+                    } else {
+                        return new Date(date).toLocaleDateString('ar-EG');
+                    }
+                } catch (e) {
+                    return 'غير محدد';
+                }
+            }
+
             renderEmptyChannels() {
                 const container = document.getElementById('channelsList');
+                const countElement = document.getElementById('channelsCount');
+                
+                if (countElement) {
+                    countElement.textContent = '0';
+                }
+                
                 container.innerHTML = `
                     <div class="text-center py-5">
-                        <i class="uil uil-tv-retro" style="font-size: 64px; color: #6c757d;"></i>
+                        <i class="uil uil-tv-retro" style="font-size: 80px; color: #6c757d;"></i>
                         <h5 class="mt-3 text-muted">لا توجد قنوات مضافة</h5>
                         <p class="text-muted">استخدم النموذج أعلاه لإضافة قناة جديدة</p>
                     </div>
@@ -315,12 +421,36 @@
 
             renderChannelsError(error) {
                 const container = document.getElementById('channelsList');
+                const countElement = document.getElementById('channelsCount');
+                
+                if (countElement) {
+                    countElement.textContent = '0';
+                }
+                
+                let errorMessage = 'حدث خطأ غير متوقع';
+                
+                if (error.code === 'permission-denied') {
+                    errorMessage = 'ليس لديك صلاحية لعرض القنوات. تأكد من تسجيل الدخول.';
+                } else if (error.code === 'unavailable') {
+                    errorMessage = 'لا يمكن الاتصال بقاعدة البيانات. تحقق من اتصال الإنترنت.';
+                } else {
+                    errorMessage = error.message || 'حدث خطأ في تحميل القنوات';
+                }
+                
                 container.innerHTML = `
                     <div class="alert alert-danger">
                         <h5><i class="uil uil-exclamation-triangle"></i> خطأ في تحميل القنوات</h5>
-                        <p class="mb-0">${error.message || 'حدث خطأ غير متوقع'}</p>
+                        <p class="mb-0">${errorMessage}</p>
+                        <button class="btn btn-warning btn-sm mt-2" onclick="adminPanel.retryLoadChannels()">
+                            <i class="uil uil-redo"></i> إعادة المحاولة
+                        </button>
                     </div>
                 `;
+            }
+
+            retryLoadChannels() {
+                console.log('Retrying to load channels...');
+                this.setupChannelsListener();
             }
 
             // دالة للتحقق من صحة البيانات قبل الإضافة
@@ -335,10 +465,6 @@
                     errors.push('رابط البث مطلوب');
                 }
                 
-                if (channelData.url && !channelData.url.includes('://')) {
-                    errors.push('رابط البث يجب أن يكون بصيغة صحيحة (يجب أن يحتوي على ://)');
-                }
-                
                 if (channelData.image && channelData.image.trim() !== '' && 
                     !channelData.image.startsWith('http')) {
                     errors.push('رابط الصورة يجب أن يبدأ بـ http أو https');
@@ -347,37 +473,20 @@
                 return errors;
             }
 
-            // معالجة الأخطاء
-            handleAddChannelError(error) {
-                let errorMessage = 'حدث خطأ أثناء إضافة القناة';
-                
-                switch (error.code) {
-                    case 'permission-denied':
-                        errorMessage = 'ليس لديك صلاحية لإضافة قنوات. تأكد من تسجيل الدخول.';
-                        break;
-                    case 'unavailable':
-                        errorMessage = 'لا يمكن الاتصال بقاعدة البيانات. تحقق من اتصال الإنترنت.';
-                        break;
-                    case 'invalid-argument':
-                        errorMessage = 'بيانات غير صالحة. تأكد من صحة تنسيق البيانات.';
-                        break;
-                    default:
-                        errorMessage += ': ' + error.message;
-                }
-                
-                return errorMessage;
-            }
-
             async addChannel(channelData) {
                 try {
                     // التحقق من صحة البيانات
                     const errors = this.validateChannelData(channelData);
                     if (errors.length > 0) {
-                        alert('يرجى تصحيح الأخطاء التالية:\n' + errors.join('\n'));
+                        this.showAlert('يرجى تصحيح الأخطاء التالية:<br>' + errors.join('<br>'), 'danger');
                         return;
                     }
 
                     console.log('Adding new channel:', channelData);
+                    
+                    if (typeof db === 'undefined') {
+                        throw new Error('Firestore is not available');
+                    }
                     
                     // استخدام صورة افتراضية إذا لم يتم توفير صورة
                     const imageUrl = channelData.image && channelData.image.trim() !== '' ? 
@@ -398,7 +507,7 @@
                     console.log('Channel added with ID:', docRef.id);
                     
                     // إظهار رسالة نجاح
-                    this.showSuccessMessage('✅ تم إضافة القناة بنجاح! سيتم عرضها في القائمة الرئيسية خلال ثوانٍ.');
+                    this.showAlert('✅ تم إضافة القناة بنجاح! سيتم عرضها في القائمة الرئيسية خلال ثوانٍ.', 'success');
                     
                     // إعادة تعيين النموذج
                     document.getElementById('channelForm').reset();
@@ -406,51 +515,18 @@
                     
                 } catch (error) {
                     console.error('Error adding channel:', error);
-                    const errorMessage = this.handleAddChannelError(error);
-                    this.showErrorMessage('❌ ' + errorMessage);
+                    let errorMessage = 'حدث خطأ أثناء إضافة القناة';
+                    
+                    if (error.code === 'permission-denied') {
+                        errorMessage = 'ليس لديك صلاحية لإضافة قنوات. تأكد من تسجيل الدخول.';
+                    } else if (error.code === 'unavailable') {
+                        errorMessage = 'لا يمكن الاتصال بقاعدة البيانات. تحقق من اتصال الإنترنت.';
+                    } else {
+                        errorMessage += ': ' + error.message;
+                    }
+                    
+                    this.showAlert('❌ ' + errorMessage, 'danger');
                 }
-            }
-
-            showSuccessMessage(message) {
-                // إنشاء عنصر التنبيه
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-success alert-dismissible fade show';
-                alertDiv.innerHTML = `
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                `;
-                
-                // إضافة التنبيه قبل النموذج
-                const form = document.getElementById('channelForm');
-                form.parentNode.insertBefore(alertDiv, form);
-                
-                // إزالة التنبيه تلقائياً بعد 5 ثوانٍ
-                setTimeout(() => {
-                    if (alertDiv.parentNode) {
-                        alertDiv.remove();
-                    }
-                }, 5000);
-            }
-
-            showErrorMessage(message) {
-                // إنشاء عنصر التنبيه
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-danger alert-dismissible fade show';
-                alertDiv.innerHTML = `
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                `;
-                
-                // إضافة التنبيف قبل النموذج
-                const form = document.getElementById('channelForm');
-                form.parentNode.insertBefore(alertDiv, form);
-                
-                // إزالة التنبيه تلقائياً بعد 5 ثوانٍ
-                setTimeout(() => {
-                    if (alertDiv.parentNode) {
-                        alertDiv.remove();
-                    }
-                }, 5000);
             }
 
             async deleteChannel(channelId) {
@@ -459,11 +535,15 @@
                 }
 
                 try {
+                    if (typeof db === 'undefined') {
+                        throw new Error('Firestore is not available');
+                    }
+                    
                     await db.collection('channels').doc(channelId).delete();
                     console.log('Channel deleted:', channelId);
                     
                     // إظهار رسالة نجاح
-                    this.showSuccessMessage('✅ تم حذف القناة بنجاح!');
+                    this.showAlert('✅ تم حذف القناة بنجاح!', 'success');
                     
                 } catch (error) {
                     console.error('Error deleting channel:', error);
@@ -473,47 +553,75 @@
                         errorMessage = 'ليس لديك صلاحية لحذف القنوات.';
                     }
                     
-                    this.showErrorMessage('❌ ' + errorMessage);
+                    this.showAlert('❌ ' + errorMessage, 'danger');
                 }
+            }
+
+            showAlert(message, type) {
+                // إنشاء عنصر التنبيه
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+                alertDiv.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                // إضافة التنبيه قبل النموذج
+                const form = document.getElementById('channelForm');
+                if (form && form.parentNode) {
+                    form.parentNode.insertBefore(alertDiv, form);
+                } else {
+                    // إذا لم يوجد النموذج، أضفه في الأعلى
+                    const adminPanel = document.getElementById('adminPanel');
+                    if (adminPanel) {
+                        adminPanel.insertBefore(alertDiv, adminPanel.firstChild);
+                    }
+                }
+                
+                // إزالة التنبيه تلقائياً بعد 5 ثوانٍ
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.remove();
+                    }
+                }, 5000);
             }
 
             setupEventListeners() {
                 // Form submission
-                document.getElementById('channelForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    
-                    const channel = {
-                        name: document.getElementById('channelName').value,
-                        image: document.getElementById('channelImage').value,
-                        url: document.getElementById('channelUrl').value,
-                        appUrl: document.getElementById('channelApp').value,
-                        downloadUrl: document.getElementById('channelDownload').value,
-                        order: document.getElementById('channelOrder').value
-                    };
-                    
-                    this.addChannel(channel);
-                });
+                const channelForm = document.getElementById('channelForm');
+                if (channelForm) {
+                    channelForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        
+                        const channel = {
+                            name: document.getElementById('channelName').value,
+                            image: document.getElementById('channelImage').value,
+                            url: document.getElementById('channelUrl').value,
+                            appUrl: document.getElementById('channelApp').value,
+                            downloadUrl: document.getElementById('channelDownload').value,
+                            order: document.getElementById('channelOrder').value
+                        };
+                        
+                        this.addChannel(channel);
+                    });
+                    console.log('Channel form event listener added');
+                }
 
                 // Logout button
-                document.getElementById('logoutAdmin').addEventListener('click', async () => {
-                    const result = await this.authManager.logout();
-                    if (result.success) {
-                        window.location.href = 'index.html';
-                    } else {
-                        this.showErrorMessage('❌ حدث خطأ أثناء تسجيل الخروج: ' + result.error);
-                    }
-                });
-
-                // Enter key in form fields
-                const formFields = document.querySelectorAll('#channelForm input, #channelForm textarea');
-                formFields.forEach(field => {
-                    field.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            document.getElementById('channelForm').dispatchEvent(new Event('submit'));
+                const logoutButton = document.getElementById('logoutAdmin');
+                if (logoutButton) {
+                    logoutButton.addEventListener('click', async () => {
+                        const result = await this.authManager.logout();
+                        if (result.success) {
+                            window.location.href = 'index.html';
+                        } else {
+                            this.showAlert('❌ حدث خطأ أثناء تسجيل الخروج: ' + result.error, 'danger');
                         }
                     });
-                });
+                    console.log('Logout button event listener added');
+                }
+
+                console.log('All event listeners setup completed');
             }
 
             // Cleanup when leaving page
@@ -526,7 +634,7 @@
 
         // Initialize admin panel when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('Admin page loaded, initializing...');
+            console.log('Admin page DOM loaded, initializing...');
             window.adminPanel = new AdminPanel();
         });
 
