@@ -152,52 +152,52 @@ try {
     firebaseDb = firebase.database();
 } catch (e) {
     console.error("Firebase Error:", e);
-    document.getElementById( matches-container ).innerHTML =  <div class="error">❌ خطأ في تحميل البيانات.</div> ;
+    document.getElementById('matches-container').innerHTML = '<div class="error">❌ خطأ في تحميل البيانات.</div>';
 }
 
-document.addEventListener( DOMContentLoaded , () => {
+document.addEventListener('DOMContentLoaded', () => {
     const today = new Date();
-    document.getElementById( greg-date ).textContent = today.toLocaleDateString( ar-AR , { weekday:  long , year:  numeric , month:  long , day:  numeric  });
+    document.getElementById('greg-date').textContent = today.toLocaleDateString('ar-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     loadMatches();
 });
 
 function loadMatches() {
-    const container = document.getElementById( matches-container );
+    const container = document.getElementById('matches-container');
     if (!firebaseDb) return;
 
-    firebaseDb.ref( matches ).on( value , snapshot => {
+    firebaseDb.ref('matches').on('value', snapshot => {
         displayMatches(snapshot);
     }, error => {
         console.error(error);
-        container.innerHTML =  <div class="error">❌ حدث خطأ في تحميل المباريات</div> ;
+        container.innerHTML = '<div class="error">❌ حدث خطأ في تحميل المباريات</div>';
     });
 }
 
 function openXpolaApp(link) { if (link) window.location.href = link; }
 
 function displayMatches(snapshot) {
-    const container = document.getElementById( matches-container );
-    container.innerHTML =   ;
-    if (!snapshot.exists()) { container.innerHTML =  <div class="loading">لا توجد مباريات اليوم</div> ; return; }
+    const container = document.getElementById('matches-container');
+    container.innerHTML = '';
+    if (!snapshot.exists()) { container.innerHTML = '<div class="loading">لا توجد مباريات اليوم</div>'; return; }
 
     const matches = snapshot.val();
     for (const key in matches) {
         const match = matches[key];
-        const matchDiv = document.createElement( div );
-        matchDiv.className =  match-box fade-in ;
+        const matchDiv = document.createElement('div');
+        matchDiv.className = 'match-box fade-in';
         matchDiv.innerHTML = `
             <div class="match-info">
-                <div><img src="${match.team1Logo|| # }"><p>${match.team1|| فريق 1 }</p></div>
-                <div><span class="match-time">${match.time|| 00:00 }</span></div>
-                <div><img src="${match.team2Logo|| # }"><p>${match.team2|| فريق 2 }</p></div>
+                <div><img src="${match.team1Logo||'#'}"><p>${match.team1||'فريق 1'}</p></div>
+                <div><span class="match-time">${match.time||'00:00'}</span></div>
+                <div><img src="${match.team2Logo||'#'}"><p>${match.team2||'فريق 2'}</p></div>
             </div>
             <div class="match-details">
-                <div>${match.channel|| قناة غير محددة }</div>
-                <div>${match.commentator|| معلق غير محدد }</div>
+                <div>${match.channel||'قناة غير محددة'}</div>
+                <div>${match.commentator||'معلق غير محدد'}</div>
             </div>
             <div class="match-actions">
-                <button class="btn btn-success" onclick="openXpolaApp( ${match.xmtvLink|| # } )">📱 مشاهدة المباراة</button>
-                <button class="btn btn-info" onclick="window.open( https://play.google.com/store/apps/details?id=com.xpola.player , _blank )">⬇️ تحميل مشغل القناة</button>
+                <button class="btn btn-success" onclick="openXpolaApp('${match.xmtvLink||'#'}')">📱 مشاهدة المباراة</button>
+                <button class="btn btn-info" onclick="window.open('https://play.google.com/store/apps/details?id=com.xpola.player','_blank')">⬇️ تحميل مشغل القناة</button>
             </div>
         `;
         container.appendChild(matchDiv);
@@ -206,4 +206,4 @@ function displayMatches(snapshot) {
 </script>
 
 </body>
-  </html>
+</html>
