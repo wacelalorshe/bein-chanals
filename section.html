@@ -8,21 +8,15 @@
     
     <!-- CSS Libraries -->
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Amita">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     
     <style>
-        /* نفس الأنماط الموجودة في index.html */
         :root {
             --primary-color: #3545FF;
             --secondary-color: #FF5200;
             --dark-bg: #151825;
-            --darker-bg: #0d111c;
-            --card-bg: #2F2562;
             --text-light: #F0F0F0;
-            --success-color: #80FF00;
-            --danger-color: #FF0005;
         }
 
         * {
@@ -34,9 +28,8 @@
         body, html {
             margin: 0;
             padding: 0;
-            overflow-x: hidden;
             font-family: Arial, sans-serif;
-            background-image: linear-gradient(to right, #000, #151825, #151825, #151825, #151825, #151825, #151825, #151825, #151825,#151825, #151825, #151825, #151825, #151825, #151825, #151825, #151825, #000);
+            background: linear-gradient(to right, #000, #151825, #000);
             color: var(--text-light);
             direction: rtl;
             height: 100%;
@@ -47,15 +40,13 @@
             position: fixed;
             top: 0;
             width: 100%;
-            background-image: linear-gradient(to right, #000, #151825, #151825, #151825, #151825, #151825, #151825, #151825, #151825,#151825, #151825, #151825, #151825, #151825, #151825, #151825, #151825, #000);
-            border-bottom: 6px groove #3A4266;
-            height: 79px;
+            background: linear-gradient(to right, #000, #151825, #000);
+            border-bottom: 2px solid #42318F;
+            height: 70px;
             z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 0px 0px 10px 10px;
-            box-shadow: 0 0px 10px  #0050D0;
         }
 
         .header-title {
@@ -63,22 +54,20 @@
         }
 
         .header-title .text-box {
-            background-image: linear-gradient(to right, #000, #3A4266, #151825, #000, #3A4266, #151825);
+            background: linear-gradient(to right, #2F2562, #42318F);
             display: inline-block;
-            padding: 5px 15px;
-            border-radius: 10px 100px 10px 100px;
-            border: 2px outset #fff;
-            border-bottom: 1px groove  #fff; 
-            border-top: 1px ridge  #fff; 
-            border-left: 0px ridge #2F2562;
-            border-right: 0px groove #2F2562;
-            color: var(--text-light);
+            padding: 8px 20px;
+            border-radius: 25px;
+            border: 1px solid #fff;
+            color: white;
             font-weight: bold;
             text-decoration: none;
             transition: all 0.3s ease;
-            font-size: 13px;
-            color: #fff;
-            box-shadow: 0 0px 10px  rgba(255, 255, 255, 100);
+        }
+
+        .header-title .text-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
         /* Back Button */
@@ -95,7 +84,6 @@
             font-size: 14px;
             cursor: pointer;
             z-index: 1001;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
             display: flex;
             align-items: center;
             gap: 5px;
@@ -106,97 +94,61 @@
 
         .back-button:hover {
             transform: translateY(-50%) scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-            color: white;
-            text-decoration: none;
         }
 
         /* Main Content */
         .content {
-            margin-top: 100px;
+            margin-top: 90px;
             padding: 20px;
-            min-height: calc(100vh - 180px);
-            padding-bottom: 80px;
+            min-height: calc(100vh - 160px);
+            padding-bottom: 70px;
         }
 
         .section-title {
             text-align: center;
-            position: fixed;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            display: inline-block;
-            position: fixed;
-            top: 80px;
-            width: 100%;
-            background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-            padding: 5px 1px;
-            border-radius: 0px;
+            background: linear-gradient(to right, #2F2562, #42318F);
+            padding: 15px;
+            border-radius: 10px;
             margin: 0 auto 20px;
             color: white;
-            font-size: 1.0rem;
-            border-bottom: 3px groove #151825;
+            font-size: 1.4rem;
             max-width: 90%;
         }
 
         .section-description {
-            
-            position: fixed;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            display: inline-block;
-            background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-            padding-bottom: 5px;
-            border-radius: 0px;
-            top: 111px;
-            left: 0;
-            right: 0;
-            width: 90%;
-            padding: 5px;
-            z-index: 999;
-            margin: 0 auto 100px;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: linear-gradient(to right, #2F2562, #42318F);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 0 auto 30px;
             text-align: center;
-            
-            border-bottom: 0px groove #fff;
-            font-size: 13px;
+            font-size: 16px;
             color: #b8d4f5;
+            max-width: 90%;
         }
 
         /* Channels Grid */
         .channels-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 20px;
             padding: 20px 0;
             justify-items: center;
         }
 
         .channel-card {
-            background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
+            background: linear-gradient(to right, #2F2562, #42318F);
             padding: 15px;
-            background-size: cover;
-            background-position: top center;
-            background-repeat: no-repeat;
-            margin: 20px 10px;
-            height: 80%;
-            width: 80%;
-            border-bottom: 4px groove #fff;
-            border-top: 4px groove #fff;
-            border-left: 0px ridge rgb(255 0 0 / 100%);
-            border-right: 0px ridge #f1f8e9;
             border-radius: 15px;
+            border: 1px solid #42318F;
             cursor: pointer;
             transition: all 0.3s ease;
+            text-align: center;
+            width: 100%;
         }
 
         .channel-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
 
         .channel-logo {
@@ -205,36 +157,25 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-bottom: 10px;
         }
 
         .channel-logo img {
-            width: 90px;
-            height: 90px;
-            border-radius: 10px 20px 10px 20px;
-            border-bottom: 5px double rgba(255, 255, 255, 0.7); 
-            border-top: 5px double rgba(255, 255, 255, 0.7); 
-            border-left: 0px ridge #2F2562;
-            border-right: 0px groove #2F2562;
-            padding: 3px;
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
             object-fit: cover;
+            border: 2px solid white;
         }
 
         .channel-name {
-            background-image: linear-gradient(to right, #000, #151825, #151825, #151825, #151825, #151825, #151825, #151825, #151825,#151825, #151825, #151825, #151825, #151825, #151825, #151825, #151825, #000);
+            background: rgba(0,0,0,0.5);
             padding: 8px 0;
-            box-shadow: 0 0px 100px rgba(255, 255, 255, 100);
-            border-top: 3px groove rgba(0, 0, 0, 100);
-            border-left: 0px ridge #6D42B8;
-            border-right: 0px groove #6D42B8;
-            border-bottom: 3px groove rgba(0, 0, 0, 5);
             color: #fff;
-            border-radius: 40px;
-            margin-top: 10px;
-            font-weight: bold; 
-            font-family: Arial, sans-serif; 
-            box-shadow: 0 0px 5px rgba(255, 255, 255, 100);
-            text-align: center;
+            border-radius: 20px;
+            font-weight: bold;
             font-size: 14px;
+            text-align: center;
         }
 
         /* Footer */
@@ -244,10 +185,9 @@
             left: 0;
             width: 100%;
             text-align: center;
-            padding: 0.5rem;
-            background: linear-gradient(to right, #503FA6, var(--dark-bg), #2F2562);
+            padding: 10px;
+            background: linear-gradient(to right, #2F2562, #42318F);
             border-top: 1px solid #fff;
-            font-family: Amita, cursive;
             color: white;
             z-index: 100;
         }
@@ -255,14 +195,14 @@
         /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
-            bottom: 0;
+            bottom: 50px;
             left: 0;
             width: 100%;
-            background: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
+            background: linear-gradient(to right, #2F2562, #42318F);
             display: flex;
             justify-content: space-around;
             padding: 10px 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            border-top: 1px solid rgba(255,255,255,0.2);
             z-index: 999;
         }
 
@@ -282,14 +222,26 @@
         }
 
         .nav-item:hover {
-            color: var(--secondary-color);
+            color: #FF5200;
             transform: translateY(-3px);
         }
 
         .loading {
             text-align: center;
-            padding: 20px;
+            padding: 40px;
             font-size: 18px;
+        }
+
+        .loading small {
+            display: block;
+            margin-top: 10px;
+            color: #b8d4f5;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 40px;
+            color: #ff6b6b;
         }
 
         /* Modal Styles */
@@ -301,92 +253,77 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: rgba(0,0,0,0.7);
             padding-top: 100px;
-            animation: fadeIn 0.3s;
         }
 
         .modal-content {
-            background: linear-gradient(to right, var(--dark-bg), #3A4266);
+            background: linear-gradient(to right, #2F2562, #42318F);
             margin: auto;
             padding: 20px;
-            border: 3px groove #fff;
+            border-radius: 15px;
             width: 90%;
             max-width: 500px;
-            border-radius: 15px;
             text-align: center;
-            color: var(--text-light);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            animation: slideIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            color: white;
         }
 
         .modal-buttons {
             display: flex;
-            justify-content: space-between;
+            gap: 10px;
             margin-top: 20px;
         }
 
         .modal-button {
-            background-color: var(--success-color);
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
             flex: 1;
-            margin: 0 5px;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
         }
 
-        .cancel-button {
-            background-color: var(--danger-color);
+        .btn-primary {
+            background: #3545FF;
             color: white;
         }
 
-        /* تحسينات للعرض على الجوال */
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
             .channels-container {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
                 gap: 15px;
-            }
-            
-            .channel-card {
-                max-width: 130px;
-            }
-            
-            .channel-logo {
-                height: 80px;
             }
             
             .channel-logo img {
                 width: 70px;
                 height: 70px;
             }
+            
+            .back-button {
+                padding: 6px 15px;
+                font-size: 12px;
+                left: 10px;
+            }
         }
 
         @media (max-width: 480px) {
             .channels-container {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
                 gap: 10px;
             }
             
             .channel-card {
-                max-width: 110px;
-                padding: 8px;
+                padding: 10px;
             }
             
             .channel-logo {
-                height: 60px;
+                height: 80px;
             }
             
             .channel-logo img {
@@ -396,6 +333,12 @@
             
             .channel-name {
                 font-size: 12px;
+            }
+            
+            .back-button {
+                padding: 5px 10px;
+                font-size: 11px;
+                left: 5px;
             }
         }
     </style>
@@ -411,15 +354,15 @@
         
         <!-- Back Button -->
         <a href="index.html" class="back-button">
-            <i class="uil uil-arrow-left"></i> العودة للأقسام
+            <i class="uil uil-arrow-left"></i> العودة
         </a>
     </header>
     
     <!-- Main Content -->
     <div class="content">
-        <h1 class="section-title" id="sectionName">قنوات القسم</h1>
+        <h1 class="section-title" id="sectionName">جاري تحميل القسم...</h1>
         <div class="section-description" id="sectionDescription">
-            جاري تحميل القنوات...
+            جاري تحميل البيانات، يرجى الانتظار...
         </div>
         
         <!-- Channels Grid -->
@@ -464,8 +407,8 @@
         <div class="modal-content">
             <p>لمشاهدة القنوات يجب عليك أولاً تثبيت تطبيق مشغل القنوات الخاص بالتطبيق</p>
             <div class="modal-buttons">
-                <button id="confirmInstall" class="modal-button">تحميل مشغل القنوات</button>
-                <button id="cancelInstall" class="modal-button cancel-button">الغاء التحميل</button>
+                <button id="confirmInstall" class="modal-button btn-primary">تحميل المشغل</button>
+                <button id="cancelInstall" class="modal-button btn-secondary">إلغاء</button>
             </div>
         </div>
     </div>
@@ -475,7 +418,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // Firebase configuration
+        // Firebase configuration - نفس إعدادات الصفحة الرئيسية
         const firebaseConfig = {
             apiKey: "AIzaSyAkgEiYYlmpMe0NLewulheovlTQMz5C980",
             authDomain: "bein-42f9e.firebaseapp.com",
@@ -486,9 +429,38 @@
             measurementId: "G-JH198SKCFS"
         };
 
-        // Initialize Firebase
-        let app;
-        let db;
+        // متغيرات عالمية
+        let db = null;
+        let isFirebaseInitialized = false;
+
+        // دالة لتهيئة Firebase
+        async function initializeFirebase() {
+            return new Promise((resolve, reject) => {
+                try {
+                    console.log('🚀 محاولة تهيئة Firebase...');
+                    
+                    if (typeof firebase === 'undefined') {
+                        throw new Error('Firebase SDK لم يتم تحميله');
+                    }
+
+                    // التحقق إذا كان Firebase مهيأ بالفعل
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp(firebaseConfig);
+                    }
+                    
+                    // الحصول على كائن Firestore
+                    db = firebase.firestore();
+                    isFirebaseInitialized = true;
+                    
+                    console.log('✅ Firebase مهيأ بنجاح');
+                    resolve(db);
+                    
+                } catch (error) {
+                    console.error('❌ فشل في تهيئة Firebase:', error);
+                    reject(error);
+                }
+            });
+        }
 
         // تطبيق عرض القسم
         class SectionApp {
@@ -502,55 +474,71 @@
             async init() {
                 console.log('🚀 بدء تشغيل صفحة القسم...');
                 
+                // تعيين السنة الحالية
                 document.getElementById('currentYear').textContent = new Date().getFullYear();
-                this.setupEventListeners();
                 
                 // الحصول على معرف القسم من رابط الصفحة
                 const urlParams = new URLSearchParams(window.location.search);
                 this.sectionId = urlParams.get('id');
                 
+                console.log('📋 معرّف القسم:', this.sectionId);
+                
                 if (!this.sectionId) {
-                    this.showError('لم يتم تحديد قسم');
+                    this.showError('لم يتم تحديد قسم. الرجاء العودة للصفحة الرئيسية واختيار قسم.');
                     return;
                 }
                 
-                try {
-                    await this.initializeFirebase();
-                    await this.loadSectionData();
-                } catch (error) {
-                    console.error('❌ فشل تحميل البيانات:', error);
-                    this.showError('فشل في تحميل البيانات');
-                }
+                // إعداد مستمعي الأحداث
+                this.setupEventListeners();
+                
+                // محاولة تحميل البيانات
+                await this.loadData();
             }
 
-            async initializeFirebase() {
+            async loadData() {
                 try {
-                    console.log('🔥 جاري تهيئة Firebase...');
+                    // أولاً: محاولة التحميل من Firebase
+                    const firebaseLoaded = await this.tryLoadFromFirebase();
                     
-                    if (typeof firebase === 'undefined') {
-                        throw new Error('Firebase SDK لم يتم تحميله');
+                    if (firebaseLoaded) {
+                        console.log('✅ تم تحميل البيانات من Firebase');
+                        return;
                     }
-
-                    // تهيئة Firebase
-                    app = firebase.initializeApp(firebaseConfig);
-                    db = firebase.firestore();
                     
-                    console.log('✅ تم تهيئة Firebase بنجاح');
-                    return true;
+                    // ثانياً: محاولة التحميل من التخزين المحلي
+                    const localStorageLoaded = await this.tryLoadFromLocalStorage();
+                    
+                    if (localStorageLoaded) {
+                        console.log('✅ تم تحميل البيانات من التخزين المحلي');
+                        return;
+                    }
+                    
+                    // إذا فشل كل شيء
+                    this.showError('فشل في تحميل البيانات. تأكد من اتصالك بالإنترنت.');
+                    
                 } catch (error) {
-                    console.error('❌ فشل تهيئة Firebase:', error);
-                    throw error;
+                    console.error('❌ خطأ غير متوقع:', error);
+                    this.showError('حدث خطأ غير متوقع: ' + error.message);
                 }
             }
 
-            async loadSectionData() {
+            async tryLoadFromFirebase() {
                 try {
-                    // تحميل بيانات القسم من Firebase
+                    if (!isFirebaseInitialized) {
+                        await initializeFirebase();
+                    }
+                    
+                    if (!db) {
+                        throw new Error('Firestore غير متاح');
+                    }
+                    
+                    console.log('📡 جاري جلب البيانات من Firebase...');
+                    
+                    // 1. جلب بيانات القسم
                     const sectionDoc = await db.collection('sections').doc(this.sectionId).get();
                     
                     if (!sectionDoc.exists) {
-                        this.showError('القسم غير موجود');
-                        return;
+                        throw new Error('القسم غير موجود في قاعدة البيانات');
                     }
                     
                     this.section = {
@@ -558,50 +546,113 @@
                         ...sectionDoc.data()
                     };
                     
-                    // تحديث العنوان والوصف
-                    document.getElementById('sectionHeader').textContent = this.section.name;
-                    document.getElementById('sectionName').textContent = this.section.name;
-                    document.getElementById('sectionDescription').textContent = 
-                        this.section.description || 'استمتع بمشاهدة القنوات المتاحة في هذا القسم';
+                    console.log('✅ تم تحميل القسم:', this.section.name);
                     
-                    // تحميل قنوات القسم من Firebase
-                    const channelsSnapshot = await db.collection('channels')
+                    // 2. جلب القنوات الخاصة بهذا القسم
+                    const channelsQuery = await db.collection('channels')
                         .where('sectionId', '==', this.sectionId)
-                        .orderBy('order')
+                        .orderBy('order', 'asc')
                         .get();
                     
-                    this.channels = channelsSnapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
+                    if (!channelsQuery.empty) {
+                        this.channels = channelsQuery.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        console.log(`✅ تم تحميل ${this.channels.length} قناة`);
+                    } else {
+                        console.log('⚠️ لا توجد قنوات في هذا القسم');
+                        this.channels = [];
+                    }
                     
-                    this.renderChannels();
+                    // 3. عرض البيانات
+                    this.displayData();
+                    return true;
                     
                 } catch (error) {
-                    console.error('❌ خطأ في تحميل بيانات القسم:', error);
-                    throw error;
+                    console.warn('⚠️ فشل تحميل Firebase:', error.message);
+                    return false;
                 }
+            }
+
+            async tryLoadFromLocalStorage() {
+                try {
+                    console.log('💾 جاري تحميل البيانات من التخزين المحلي...');
+                    
+                    // 1. جلب الأقسام من localStorage
+                    const savedSections = localStorage.getItem('bein_sections');
+                    if (!savedSections) {
+                        throw new Error('لا توجد بيانات محلية للأقسام');
+                    }
+                    
+                    const sections = JSON.parse(savedSections);
+                    
+                    // 2. البحث عن القسم المطلوب
+                    this.section = sections.find(s => s.id === this.sectionId);
+                    
+                    if (!this.section) {
+                        throw new Error('القسم غير موجود في البيانات المحلية');
+                    }
+                    
+                    console.log('✅ تم العثور على القسم في البيانات المحلية:', this.section.name);
+                    
+                    // 3. جلب القنوات من localStorage
+                    const savedChannels = localStorage.getItem('bein_channels');
+                    if (savedChannels) {
+                        const allChannels = JSON.parse(savedChannels);
+                        this.channels = allChannels.filter(channel => channel.sectionId === this.sectionId);
+                        console.log(`✅ تم تحميل ${this.channels.length} قناة من البيانات المحلية`);
+                    } else {
+                        this.channels = [];
+                    }
+                    
+                    // 4. عرض البيانات
+                    this.displayData();
+                    return true;
+                    
+                } catch (error) {
+                    console.warn('⚠️ فشل تحميل البيانات المحلية:', error.message);
+                    return false;
+                }
+            }
+
+            displayData() {
+                // تحديث عنوان ووصف القسم
+                document.getElementById('sectionHeader').textContent = this.section.name;
+                document.getElementById('sectionName').textContent = this.section.name;
+                document.getElementById('sectionDescription').textContent = 
+                    this.section.description || 'استمتع بمشاهدة القنوات المتاحة في هذا القسم';
+                
+                // عرض القنوات
+                this.renderChannels();
             }
 
             renderChannels() {
                 const container = document.getElementById('channelsContainer');
                 
-                if (this.channels.length === 0) {
-                    container.innerHTML = '<div class="loading">لا توجد قنوات في هذا القسم</div>';
+                if (!this.channels || this.channels.length === 0) {
+                    container.innerHTML = `
+                        <div class="loading">
+                            <i class="uil uil-tv-retro" style="font-size: 3rem; color: #6c757d;"></i>
+                            <p class="mt-3">لا توجد قنوات في هذا القسم</p>
+                            <small>سيتم إضافة قنوات قريباً</small>
+                        </div>
+                    `;
                     return;
                 }
                 
                 container.innerHTML = this.channels.map(channel => `
                     <div class="channel-card" data-channel-id="${channel.id}">
                         <div class="channel-logo">
-                            <img src="${channel.image || 'https://via.placeholder.com/200x100/2F2562/FFFFFF?text=No+Image'}" 
+                            <img src="${channel.image || 'https://via.placeholder.com/100x100/2F2562/FFFFFF?text=TV'}" 
                                  alt="${channel.name}"
-                                 onerror="this.src='https://via.placeholder.com/200x100/2F2562/FFFFFF?text=No+Image'">
+                                 onerror="this.src='https://via.placeholder.com/100x100/2F2562/FFFFFF?text=TV'">
                         </div>
                         <div class="channel-name">${channel.name}</div>
                     </div>
                 `).join('');
                 
+                // إضافة مستمعي الأحداث للقنوات
                 this.setupChannelEventListeners();
             }
 
@@ -618,27 +669,43 @@
             }
 
             openChannel(channel) {
+                console.log('🔗 فتح القناة:', channel.name);
+                
+                // إذا كان هناك رابط مباشر، افتحه
                 if (channel.url && channel.url !== '#' && channel.url.trim() !== '') {
                     try {
                         window.open(channel.url, '_blank');
+                        return;
                     } catch (error) {
                         console.error('❌ خطأ في فتح الرابط:', error);
-                        this.showInstallModal(channel);
                     }
-                } else {
-                    this.showInstallModal(channel);
                 }
+                
+                // وإلا اعرض نافذة التثبيت
+                this.showInstallModal(channel);
             }
 
             showInstallModal(channel) {
                 const modal = document.getElementById('installModal');
                 if (modal) {
                     modal.style.display = "block";
+                    
+                    // زر التحميل
                     const confirmBtn = document.getElementById('confirmInstall');
                     if (confirmBtn) {
                         confirmBtn.onclick = () => {
-                            const downloadUrl = channel.downloadUrl || channel.appUrl || 'https://play.google.com/store/apps/details?id=com.xpola.player';
+                            const downloadUrl = channel.downloadUrl || 
+                                                channel.appUrl || 
+                                                'https://play.google.com/store/apps/details?id=com.xpola.player';
                             window.open(downloadUrl, '_blank');
+                            this.closeModal();
+                        };
+                    }
+                    
+                    // زر الإلغاء
+                    const cancelBtn = document.getElementById('cancelInstall');
+                    if (cancelBtn) {
+                        cancelBtn.onclick = () => {
                             this.closeModal();
                         };
                     }
@@ -647,50 +714,54 @@
 
             closeModal() {
                 const modal = document.getElementById('installModal');
-                if (modal) modal.style.display = "none";
+                if (modal) {
+                    modal.style.display = "none";
+                }
             }
 
             showError(message) {
                 const container = document.getElementById('channelsContainer');
                 if (container) {
                     container.innerHTML = `
-                        <div class="loading">
-                            <i class="uil uil-exclamation-triangle text-warning mb-3" style="font-size: 3rem;"></i>
+                        <div class="error-message">
+                            <i class="uil uil-exclamation-triangle" style="font-size: 3rem;"></i>
+                            <h4 class="mt-3">حدث خطأ</h4>
                             <p>${message}</p>
-                            <a href="index.html" class="btn btn-primary mt-2">
-                                <i class="uil uil-home"></i> العودة للرئيسية
-                            </a>
+                            <div class="mt-4">
+                                <a href="index.html" class="btn btn-primary me-2">
+                                    <i class="uil uil-home"></i> العودة للرئيسية
+                                </a>
+                                <button onclick="window.location.reload()" class="btn btn-secondary">
+                                    <i class="uil uil-redo"></i> إعادة تحميل
+                                </button>
+                            </div>
                         </div>
                     `;
                 }
             }
 
             setupEventListeners() {
-                const confirmInstall = document.getElementById('confirmInstall');
-                if (confirmInstall) {
-                    confirmInstall.addEventListener('click', () => {
-                        window.open('https://play.google.com/store/apps/details?id=com.xpola.player', '_blank');
-                        this.closeModal();
-                    });
-                }
-
-                const cancelInstall = document.getElementById('cancelInstall');
-                if (cancelInstall) {
-                    cancelInstall.addEventListener('click', () => {
-                        this.closeModal();
-                    });
-                }
-
+                // إغلاق النافذة المنبثقة عند النقر خارجها
                 window.addEventListener('click', (event) => {
-                    if (event.target === document.getElementById('installModal')) {
+                    const modal = document.getElementById('installModal');
+                    if (event.target === modal) {
                         this.closeModal();
                     }
                 });
+                
+                // زر الإلغاء في النافذة المنبثقة
+                const cancelBtn = document.getElementById('cancelInstall');
+                if (cancelBtn) {
+                    cancelBtn.addEventListener('click', () => {
+                        this.closeModal();
+                    });
+                }
             }
         }
 
-        // بدء التطبيق
+        // بدء التطبيق عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('🏠 صفحة القسم جاهزة للتشغيل');
             window.sectionApp = new SectionApp();
         });
     </script>
