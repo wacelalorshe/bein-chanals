@@ -12,7 +12,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     
     <style>
-        ::root {
+        :root {
+            ::root {
             --primary-color: #3545FF;
             --secondary-color: #FF5200;
             --dark-bg: #151825;
@@ -361,7 +362,42 @@
             color: white;
         }
 
-        
+        /* أنماط للرسائل المتعلقة بالاتصال */
+        .connection-error {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .connection-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .btn-retry {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-retry:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
             
             .channel-card {
                 max-width: 1300px;
@@ -444,19 +480,19 @@
     
     <!-- Bottom Navigation -->
     <div class="bottom-nav">
-        <a href="index.html" class="nav-item">
+        <a href="javascript:void(0)" class="nav-item" onclick="goToIndexWithCheck()">
             <i class="uil uil-home"></i>
             <span>الرئيسية</span>
         </a>
-        <a href="matches.html" class="nav-item">
+        <a href="javascript:void(0)" class="nav-item" onclick="goToMatchesWithCheck()">
             <i class="uil uil-calendar-alt"></i>
             <span>جدول المباريات</span>
         </a>
-        <a href="https://t.me/wacelalorshepro" class="nav-item">
+        <a href="https://t.me/wacelalorshepro" class="nav-item" target="_blank">
             <i class="uil uil-telegram-alt"></i>
             <span>تليجرام</span>
         </a>
-        <a href="https://play.google.com/store/apps/details?id=com.xpola.player" class="nav-item">
+        <a href="https://play.google.com/store/apps/details?id=com.xpola.player" class="nav-item" target="_blank">
             <i class="uil uil-download-alt"></i>
             <span>تحميل المشغل</span>
         </a>
@@ -492,6 +528,90 @@
         // متغيرات عالمية
         let db = null;
         let isFirebaseInitialized = false;
+
+        // دالة للتحقق من الاتصال بالإنترنت
+        async function checkInternetConnection() {
+            return new Promise((resolve, reject) => {
+                if (!navigator.onLine) {
+                    reject(new Error("لا يوجد اتصال بالإنترنت"));
+                    return;
+                }
+
+                const img = new Image();
+                img.src = "https://www.google.com/images/phd/px.gif?t=" + new Date().getTime();
+                let timer = setTimeout(() => {
+                    reject(new Error("انتهت مهلة الاتصال بالإنترنت"));
+                }, 5000);
+
+                img.onload = () => {
+                    clearTimeout(timer);
+                    resolve(true);
+                };
+
+                img.onerror = () => {
+                    clearTimeout(timer);
+                    reject(new Error("فشل الاتصال بالإنترنت"));
+                };
+            });
+        }
+
+        // دالة للتحقق قبل الانتقال إلى صفحة
+        async function navigateWithConnectionCheck(url) {
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.backgroundColor = 'rgba(0,0,0,0.8)';
+            overlay.style.zIndex = '9999';
+            overlay.style.display = 'flex';
+            overlay.style.flexDirection = 'column';
+            overlay.style.justifyContent = 'center';
+            overlay.style.alignItems = 'center';
+            overlay.style.color = 'white';
+            overlay.style.fontSize = '18px';
+            overlay.style.textAlign = 'center';
+            overlay.style.backdropFilter = 'blur(5px)';
+            overlay.innerHTML = `
+                <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">جاري التحقق...</span>
+                </div>
+                <p>جاري التحقق من الاتصال بالإنترنت...</p>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            try {
+                await checkInternetConnection();
+                overlay.remove();
+                window.location.href = url;
+            } catch (error) {
+                overlay.innerHTML = `
+                    <i class="uil uil-wifi-slash mb-3" style="font-size: 3rem; color: #ff6b6b;"></i>
+                    <h4>⚠️ لا يوجد اتصال بالإنترنت</h4>
+                    <p>${error.message || "يرجى التحقق من اتصالك بالإنترنت"}</p>
+                    <div class="mt-4">
+                        <button onclick="window.location.reload()" class="btn btn-primary me-2">
+                            <i class="uil uil-redo"></i> إعادة المحاولة
+                        </button>
+                        <button onclick="this.parentElement.parentElement.remove()" class="btn btn-secondary">
+                            <i class="uil uil-times"></i> إغلاق
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // دالة للذهاب إلى الرئيسية مع التحقق
+        function goToIndexWithCheck() {
+            navigateWithConnectionCheck('index.html');
+        }
+
+        // دالة للذهاب إلى المباريات مع التحقق
+        function goToMatchesWithCheck() {
+            navigateWithConnectionCheck('matches.html');
+        }
 
         // دالة لتهيئة Firebase
         async function initializeFirebase() {
@@ -556,29 +676,94 @@
             }
 
             async loadData() {
+                const container = document.getElementById('channelsContainer');
+                
+                // إضافة مؤشر تحميل للتحقق من الاتصال
+                container.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">جاري التحقق...</span>
+                        </div>
+                        <p>جاري التحقق من الاتصال بالإنترنت...</p>
+                    </div>
+                `;
+                
                 try {
-                    // أولاً: محاولة التحميل من Firebase
-                    const firebaseLoaded = await this.tryLoadFromFirebase();
+                    // التحقق من الاتصال أولاً
+                    await checkInternetConnection();
                     
-                    if (firebaseLoaded) {
-                        console.log('✅ تم تحميل البيانات من Firebase');
-                        return;
+                    // إذا كان هناك اتصال، تابع تحميل البيانات
+                    try {
+                        // أولاً: محاولة التحميل من Firebase
+                        const firebaseLoaded = await this.tryLoadFromFirebase();
+                        
+                        if (firebaseLoaded) {
+                            console.log('✅ تم تحميل البيانات من Firebase');
+                            return;
+                        }
+                        
+                        // ثانياً: محاولة التحميل من التخزين المحلي
+                        const localStorageLoaded = await this.tryLoadFromLocalStorage();
+                        
+                        if (localStorageLoaded) {
+                            console.log('✅ تم تحميل البيانات من التخزين المحلي');
+                            return;
+                        }
+                        
+                        // إذا فشل كل شيء
+                        this.showError('فشل في تحميل البيانات. تأكد من اتصالك بالإنترنت.');
+                        
+                    } catch (error) {
+                        console.error('❌ خطأ غير متوقع:', error);
+                        this.showError('حدث خطأ غير متوقع: ' + error.message);
                     }
                     
-                    // ثانياً: محاولة التحميل من التخزين المحلي
-                    const localStorageLoaded = await this.tryLoadFromLocalStorage();
+                } catch (connectionError) {
+                    console.error('Connection error:', connectionError);
                     
-                    if (localStorageLoaded) {
-                        console.log('✅ تم تحميل البيانات من التخزين المحلي');
-                        return;
+                    // محاولة استخدام البيانات المحلية المخزنة كبديل
+                    try {
+                        const localStorageLoaded = await this.tryLoadFromLocalStorage();
+                        
+                        if (localStorageLoaded) {
+                            console.log('✅ تم تحميل البيانات من التخزين المحلي بدون إنترنت');
+                            
+                            // إضافة تنبيه بأن البيانات قديمة
+                            const container = document.getElementById('channelsContainer');
+                            const warning = document.createElement('div');
+                            warning.className = 'connection-warning';
+                            warning.innerHTML = `
+                                <i class="uil uil-wifi-slash"></i>
+                                <strong>تنبيه:</strong> أنت حالياً بدون اتصال بالإنترنت. يتم عرض البيانات المخزنة مسبقاً.
+                                <button onclick="window.location.reload()" class="btn-retry">
+                                    <i class="uil uil-redo"></i> تحديث
+                                </button>
+                            `;
+                            container.parentNode.insertBefore(warning, container);
+                            
+                            return;
+                        }
+                    } catch (localError) {
+                        console.error('Failed to load from localStorage:', localError);
                     }
                     
-                    // إذا فشل كل شيء
-                    this.showError('فشل في تحميل البيانات. تأكد من اتصالك بالإنترنت.');
-                    
-                } catch (error) {
-                    console.error('❌ خطأ غير متوقع:', error);
-                    this.showError('حدث خطأ غير متوقع: ' + error.message);
+                    // إذا فشل تحميل البيانات المحلية
+                    this.showError(`
+                        <div class="text-center">
+                            <i class="uil uil-wifi-slash mb-3" style="font-size: 3rem; color: #ff6b6b;"></i>
+                            <h4>⚠️ لا يوجد اتصال بالإنترنت</h4>
+                            <p>${connectionError.message || "يرجى التحقق من اتصالك بالإنترنت"}</p>
+                            <p>لا يمكن تحميل القنوات بدون اتصال بالإنترنت</p>
+                            <div class="mt-4">
+                                <button onclick="window.location.reload()" class="btn btn-primary me-2">
+                                    <i class="uil uil-redo"></i> إعادة المحاولة
+                                </button>
+                                <button onclick="navigateWithConnectionCheck('index.html')" class="btn btn-secondary">
+                                    <i class="uil uil-home"></i> العودة للرئيسية
+                                </button>
+                            </div>
+                        </div>
+                    `);
                 }
             }
 
@@ -608,7 +793,7 @@
                     
                     console.log('✅ تم تحميل القسم:', this.section.name);
                     
-                    // 2. جلب القنوات الخاصة بهذا القسم
+                    // 2. جلب القنوات الخاصة بهذا القسم مرتبة حسب الترتيب
                     const channelsQuery = await db.collection('channels')
                         .where('sectionId', '==', this.sectionId)
                         .orderBy('order', 'asc')
@@ -619,7 +804,7 @@
                             id: doc.id,
                             ...doc.data()
                         }));
-                        console.log(`✅ تم تحميل ${this.channels.length} قناة`);
+                        console.log(`✅ تم تحميل ${this.channels.length} قناة مرتبة حسب الترتيب`);
                     } else {
                         console.log('⚠️ لا توجد قنوات في هذا القسم');
                         this.channels = [];
@@ -656,12 +841,14 @@
                     
                     console.log('✅ تم العثور على القسم في البيانات المحلية:', this.section.name);
                     
-                    // 3. جلب القنوات من localStorage
+                    // 3. جلب القنوات من localStorage وفرزها حسب الترتيب
                     const savedChannels = localStorage.getItem('bein_channels');
                     if (savedChannels) {
                         const allChannels = JSON.parse(savedChannels);
-                        this.channels = allChannels.filter(channel => channel.sectionId === this.sectionId);
-                        console.log(`✅ تم تحميل ${this.channels.length} قناة من البيانات المحلية`);
+                        this.channels = allChannels
+                            .filter(channel => channel.sectionId === this.sectionId)
+                            .sort((a, b) => (a.order || 999) - (b.order || 999));
+                        console.log(`✅ تم تحميل ${this.channels.length} قناة من البيانات المحلية مرتبة حسب الترتيب`);
                     } else {
                         this.channels = [];
                     }
@@ -701,8 +888,10 @@
                     return;
                 }
                 
-                container.innerHTML = this.channels.map(channel => `
+                // عرض القنوات مرتبة حسب الترتيب مع عرض الأرقام
+                container.innerHTML = this.channels.map((channel, index) => `
                     <div class="channel-card" data-channel-id="${channel.id}">
+                        <div class="order-badge">${index + 1}</div>
                         <div class="channel-logo">
                             <img src="${channel.image || 'https://via.placeholder.com/100x100/2F2562/FFFFFF?text=TV'}" 
                                  alt="${channel.name}"
@@ -783,18 +972,8 @@
                 const container = document.getElementById('channelsContainer');
                 if (container) {
                     container.innerHTML = `
-                        <div class="error-message">
-                            <i class="uil uil-exclamation-triangle" style="font-size: 3rem;"></i>
-                            <h4 class="mt-3">حدث خطأ</h4>
-                            <p>${message}</p>
-                            <div class="mt-4">
-                                <a href="index.html" class="btn btn-primary me-2">
-                                    <i class="uil uil-home"></i> العودة للرئيسية
-                                </a>
-                                <button onclick="window.location.reload()" class="btn btn-secondary">
-                                    <i class="uil uil-redo"></i> إعادة تحميل
-                                </button>
-                            </div>
+                        <div class="connection-error">
+                            ${message}
                         </div>
                     `;
                 }
