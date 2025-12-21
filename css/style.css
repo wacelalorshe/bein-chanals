@@ -758,4 +758,31 @@ header {
 
 
 
+/* أضف هذا في نهاية ملف style.css */
+.colors-editor-link {
+    position: fixed;
+    top: 120px;
+    right: 20px;
+    z-index: 1000;
+}
 
+.colors-editor-link a {
+    background: linear-gradient(135deg, #42318F, #654FD4);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(101, 79, 212, 0.4);
+    transition: all 0.3s ease;
+}
+
+.colors-editor-link a:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(101, 79, 212, 0.6);
+    text-decoration: none;
+    color: white;
+}
