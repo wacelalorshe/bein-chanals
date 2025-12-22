@@ -1,5 +1,5 @@
 // js/player.js
-// مشغل الفيديو الاحترافي مع معالجة الأخطاء المتقدمة
+// مشغل الفيديو الاحترافي مع إصلاح مشكلة تحميل البيانات
 
 class VideoPlayerApp {
     constructor() {
@@ -20,16 +20,6 @@ class VideoPlayerApp {
         // معلومات البث
         this.streamUrl = null;
         this.qualityLevels = {};
-        this.stats = {
-            bitrate: 0,
-            bufferLength: 0,
-            droppedFrames: 0,
-            connectionTime: 0
-        };
-        
-        // تحسينات CORS
-        this.corsProxyEnabled = false;
-        this.corsProxyUrl = 'https://cors-anywhere.herokuapp.com/'; // CORS proxy بديل
         
         this.init();
     }
@@ -52,9 +42,6 @@ class VideoPlayerApp {
         // إعداد الأحداث
         this.setupEventListeners();
         
-        // تحميل وتشغيل الفيديو
-        await this.loadStream();
-        
         console.log('✅ تم تهيئة مشغل الفيديو بنجاح');
     }
     
@@ -62,32 +49,53 @@ class VideoPlayerApp {
         try {
             const urlParams = new URLSearchParams(window.location.search);
             const channelId = urlParams.get('channel');
-            const channelName = urlParams.get('name');
+            const channelName = urlParams.get('name') || 'بث مباشر';
             const channelLogo = urlParams.get('logo');
             const streamUrl = urlParams.get('stream');
-            const sectionName = urlParams.get('section');
             
-            if (!channelId && !streamUrl) {
-                throw new Error('لم يتم تحديد قناة أو رابط بث');
+            console.log('📊 معلمات URL:', {
+                channelId,
+                channelName,
+                streamUrl
+            });
+            
+            // التحقق من وجود رابط البث
+            if (!streamUrl && !channelId) {
+                throw new Error('لم يتم تحديد رابط بث أو معرف قناة');
             }
             
-            // إذا كان هناك رابط مباشر
+            // استخدام البيانات من المعلمات مباشرة
+            this.channelData = {
+                id: channelId || 'direct-' + Date.now(),
+                name: channelName,
+                logo: channelLogo || 'https://via.placeholder.com/100/2F2562/FFFFFF?text=TV',
+                url: streamUrl || '#',
+                type: streamUrl ? this.detectStreamType(streamUrl) : 'unknown'
+            };
+            
+            // إذا كان هناك streamUrl، نقوم بتحديثه
             if (streamUrl) {
-                this.channelData = {
-                    id: 'direct-stream',
-                    name: channelName || 'بث مباشر',
-                    logo: channelLogo || 'https://via.placeholder.com/100/2F2562/FFFFFF?text=TV',
-                    url: streamUrl,
-                    type: this.detectStreamType(streamUrl),
-                    section: sectionName || 'غير معروف'
-                };
-            } else {
-                // محاولة جلب بيانات القناة من Firebase
-                await this.loadChannelFromFirebase(channelId);
+                this.streamUrl = streamUrl;
+            } else if (channelId) {
+                // محاولة جلب رابط البث من Firebase
+                try {
+                    await this.loadChannelFromFirebase(channelId);
+                } catch (firebaseError) {
+                    console.warn('⚠️ فشل تحميل من Firebase:', firebaseError.message);
+                    // نستخدم القناة بدون رابط
+                    this.channelData.url = '#';
+                }
             }
             
             // تحديث واجهة المستخدم
             this.updateUI();
+            
+            // إذا كان هناك رابط بث، نقوم بتحميله
+            if (this.streamUrl && this.streamUrl !== '#') {
+                this.loadStream();
+            } else {
+                this.showError('رابط البث غير متوفر حالياً');
+            }
             
         } catch (error) {
             console.error('❌ خطأ في تحميل بيانات القناة:', error);
@@ -96,120 +104,103 @@ class VideoPlayerApp {
     }
     
     detectStreamType(url) {
+        if (!url) return 'unknown';
         if (url.includes('.m3u8')) return 'hls';
         if (url.includes('.mpd')) return 'dash';
         if (url.includes('.mp4')) return 'mp4';
         if (url.includes('.m3u')) return 'm3u';
         if (url.includes('.ts')) return 'ts';
-        return 'unknown';
+        if (url.includes('.flv')) return 'flv';
+        return 'direct';
+    }
+    
+    async loadChannelFromFirebase(channelId) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                console.log('🔥 محاولة تحميل القناة من Firebase:', channelId);
+                
+                if (typeof firebase === 'undefined') {
+                    throw new Error('Firebase غير متوفر');
+                }
+                
+                // تهيئة Firebase
+                let app;
+                if (!firebase.apps.length) {
+                    app = firebase.initializeApp({
+                        apiKey: "AIzaSyAkgEiYYlmpMe0NLewulheovlTQMz5C980",
+                        authDomain: "bein-42f9e.firebaseapp.com",
+                        projectId: "bein-42f9e",
+                        storageBucket: "bein-42f9e.firebasestorage.app",
+                        messagingSenderId: "143741167050",
+                        appId: "1:143741167050:web:922d3a0cddb40f67b21b33",
+                        measurementId: "G-JH198SKCFS"
+                    }, 'PlayerFirebaseApp');
+                } else {
+                    app = firebase.apps[0];
+                }
+                
+                const db = firebase.firestore(app);
+                
+                // جلب بيانات القناة
+                const channelDoc = await db.collection('channels').doc(channelId).get();
+                
+                if (!channelDoc.exists) {
+                    throw new Error('القناة غير موجودة في قاعدة البيانات');
+                }
+                
+                const channelData = channelDoc.data();
+                console.log('✅ بيانات القناة من Firebase:', channelData);
+                
+                // تحديث بيانات القناة
+                this.channelData = {
+                    ...this.channelData,
+                    ...channelData,
+                    id: channelId
+                };
+                
+                // تحديث رابط البث إذا كان متوفراً
+                if (channelData.url && channelData.url !== '#') {
+                    this.streamUrl = channelData.url;
+                }
+                
+                // تحديث الواجهة
+                this.updateUI();
+                
+                resolve(this.channelData);
+                
+            } catch (error) {
+                console.error('❌ فشل تحميل من Firebase:', error);
+                reject(error);
+            }
+        });
     }
     
     async loadStream() {
         try {
             this.showLoading();
             
-            // تحديد رابط البث
-            let streamUrl = this.channelData?.url;
-            
-            if (!streamUrl || streamUrl === '#') {
+            if (!this.streamUrl || this.streamUrl === '#') {
                 throw new Error('رابط البث غير متوفر');
             }
             
-            console.log('📡 جاري تحميل البث:', streamUrl);
+            console.log('📡 جاري تحميل البث:', this.streamUrl);
             console.log('📊 نوع البث:', this.channelData?.type);
             
-            // التحقق من صحة الرابط
-            const isValid = await this.validateStreamUrl(streamUrl);
-            if (!isValid) {
-                console.log('⚠️ الرابط غير صالح، محاولة استخدام CORS proxy...');
-                streamUrl = await this.fixStreamUrl(streamUrl);
-            }
+            // التحقق من نوع البث وتشغيله
+            const streamType = this.channelData?.type || this.detectStreamType(this.streamUrl);
             
-            this.streamUrl = streamUrl;
-            
-            // التحقق من نوع الرابط واختيار طريقة التشغيل المناسبة
-            const streamType = this.channelData?.type || this.detectStreamType(streamUrl);
-            
-            switch(streamType) {
-                case 'hls':
-                case 'm3u':
-                case 'm3u8':
-                    await this.loadHLSStream(streamUrl);
-                    break;
-                case 'mp4':
-                    await this.loadMP4Stream(streamUrl);
-                    break;
-                case 'dash':
-                    await this.loadDASHStream(streamUrl);
-                    break;
-                default:
-                    // محاولة تشغيل كـ HLS بشكل افتراضي
-                    await this.loadHLSStream(streamUrl);
+            if (streamType === 'hls' || streamType === 'm3u8') {
+                await this.loadHLSStream(this.streamUrl);
+            } else if (streamType === 'mp4') {
+                await this.loadMP4Stream(this.streamUrl);
+            } else {
+                // محاولة تشغيل مباشر
+                await this.loadDirectStream(this.streamUrl);
             }
             
         } catch (error) {
             console.error('❌ فشل تحميل البث:', error);
             this.handleStreamError(error);
-        }
-    }
-    
-    async validateStreamUrl(url) {
-        try {
-            console.log('🔍 التحقق من صحة الرابط:', url);
-            
-            // إذا كان الرابط نسبي (لا يحتوي على http/https)
-            if (!url.startsWith('http')) {
-                console.log('⚠️ الرابط نسبي، تحويل إلى رابط كامل');
-                return false;
-            }
-            
-            // اختبار بسيط للرابط
-            const testRequest = await fetch(url, {
-                method: 'HEAD',
-                mode: 'no-cors',
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                }
-            }).catch(() => null);
-            
-            return true;
-            
-        } catch (error) {
-            console.log('❌ فشل التحقق من الرابط:', error);
-            return false;
-        }
-    }
-    
-    async fixStreamUrl(originalUrl) {
-        try {
-            // 1. محاولة إصلاح الروابط النسبية
-            if (originalUrl.startsWith('//')) {
-                return `https:${originalUrl}`;
-            }
-            
-            if (!originalUrl.startsWith('http')) {
-                // إذا كان الرابط بدون بروتوكول
-                return `https://${originalUrl}`;
-            }
-            
-            // 2. التحقق من CORS issues
-            try {
-                // اختبار CORS
-                const test = await fetch(originalUrl, { mode: 'no-cors' });
-                return originalUrl;
-            } catch (corsError) {
-                console.log('⚠️ مشكلة CORS، محاولة استخدام CORS proxy');
-                this.corsProxyEnabled = true;
-                
-                // استخدام CORS proxy
-                const proxyUrl = this.corsProxyUrl + originalUrl;
-                console.log('🔄 استخدام CORS proxy:', proxyUrl);
-                return proxyUrl;
-            }
-            
-        } catch (error) {
-            console.error('❌ فشل إصلاح الرابط:', error);
-            return originalUrl; // العودة للرابط الأصلي
         }
     }
     
@@ -226,39 +217,17 @@ class VideoPlayerApp {
                     maxMaxBufferLength: 60,
                     maxBufferSize: 60 * 1000 * 1000,
                     maxBufferHole: 0.5,
-                    maxFragLookUpTolerance: 0.2,
                     liveSyncDurationCount: 3,
                     liveMaxLatencyDurationCount: 10,
-                    manifestLoadingTimeOut: 15000, // زيادة المهلة
+                    manifestLoadingTimeOut: 10000,
                     manifestLoadingMaxRetry: 3,
                     manifestLoadingRetryDelay: 1000,
-                    manifestLoadingMaxRetryTimeout: 30000,
-                    levelLoadingTimeOut: 15000,
+                    levelLoadingTimeOut: 10000,
                     levelLoadingMaxRetry: 3,
                     levelLoadingRetryDelay: 1000,
-                    levelLoadingMaxRetryTimeout: 30000,
-                    fragLoadingTimeOut: 30000, // زيادة المهلة
+                    fragLoadingTimeOut: 20000,
                     fragLoadingMaxRetry: 3,
-                    fragLoadingRetryDelay: 1000,
-                    fragLoadingMaxRetryTimeout: 30000,
-                    xhrSetup: (xhr, url) => {
-                        // إضافة headers للتعامل مع CORS
-                        xhr.withCredentials = false;
-                        xhr.setRequestHeader('Accept', '*/*');
-                        xhr.setRequestHeader('Accept-Language', 'ar,en;q=0.9');
-                        xhr.setRequestHeader('Cache-Control', 'no-cache');
-                        xhr.setRequestHeader('Pragma', 'no-cache');
-                        
-                        // إضافة User-Agent
-                        xhr.setRequestHeader('User-Agent', 
-                            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-                        
-                        // إذا كان هناك مشكلة CORS، أضف المزيد من headers
-                        if (this.corsProxyEnabled) {
-                            xhr.setRequestHeader('Origin', window.location.origin);
-                            xhr.setRequestHeader('Referer', window.location.origin + '/');
-                        }
-                    }
+                    fragLoadingRetryDelay: 1000
                 });
                 
                 // أحداث HLS
@@ -266,23 +235,7 @@ class VideoPlayerApp {
                     console.log('✅ تم تحليل قائمة التشغيل بنجاح');
                     this.hideLoading();
                     this.play();
-                    this.setupQualitySelector();
-                    this.retryCount = 0; // إعادة تعيين عداد المحاولات
-                });
-                
-                this.hls.on(Hls.Events.LEVEL_LOADED, (event, data) => {
-                    console.log(`📊 تم تحميل مستوى الجودة: ${data.level}`);
-                    this.updateStats();
-                });
-                
-                this.hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
-                    console.log(`🔄 تغيير الجودة إلى: ${data.level}`);
-                    this.updateQualityBadge();
-                });
-                
-                this.hls.on(Hls.Events.FRAG_BUFFERED, (event, data) => {
-                    console.log('📦 تم تخزين الجزء:', data.stats);
-                    this.updateStats();
+                    resolve(true);
                 });
                 
                 this.hls.on(Hls.Events.ERROR, (event, data) => {
@@ -293,7 +246,6 @@ class VideoPlayerApp {
                             case Hls.ErrorTypes.NETWORK_ERROR:
                                 console.log('🔄 إعادة المحاولة بعد خطأ في الشبكة');
                                 
-                                // محاولة إعادة الاتصال
                                 if (this.retryCount < this.maxRetries) {
                                     this.retryCount++;
                                     console.log(`🔄 المحاولة ${this.retryCount} من ${this.maxRetries}`);
@@ -302,10 +254,8 @@ class VideoPlayerApp {
                                         if (this.hls) {
                                             this.hls.startLoad();
                                         }
-                                    }, 2000 * this.retryCount); // زيادة التأخير مع كل محاولة
+                                    }, 2000 * this.retryCount);
                                 } else {
-                                    // إرسال تقرير الخطأ إلى صفحة القسم
-                                    this.reportErrorToSectionPage();
                                     this.showError('فشل الاتصال بالبث بعد عدة محاولات');
                                 }
                                 break;
@@ -318,37 +268,15 @@ class VideoPlayerApp {
                             default:
                                 console.log('❌ خطأ غير قابل للاسترداد');
                                 this.hls.destroy();
-                                
-                                // محاولة تشغيل كـ MP4 مباشر إذا أمكن
-                                if (this.streamUrl.includes('.mp4')) {
-                                    this.loadMP4Stream(this.streamUrl);
-                                } else {
-                                    // إرسال تقرير الخطأ إلى صفحة القسم
-                                    this.reportErrorToSectionPage();
-                                    this.showError('خطأ غير قابل للاسترداد في البث');
-                                }
+                                this.showError('خطأ غير قابل للاسترداد في البث');
                                 break;
                         }
                     }
                 });
                 
-                // تحميل الملف الرئيسي
-                try {
-                    this.hls.loadSource(url);
-                    this.hls.attachMedia(this.videoPlayer.el().querySelector('video'));
-                    console.log('✅ تم تحميل مصدر HLS');
-                } catch (loadError) {
-                    console.error('❌ فشل تحميل مصدر HLS:', loadError);
-                    
-                    // إرسال تقرير الخطأ إلى صفحة القسم
-                    this.reportErrorToSectionPage();
-                    reject(loadError);
-                }
-                
-                // تحديث الإحصائيات
-                this.setupStatsUpdater();
-                
-                resolve(true);
+                // تحميل المصدر
+                this.hls.loadSource(url);
+                this.hls.attachMedia(this.videoPlayer.el().querySelector('video'));
                 
             } else if (this.videoPlayer.el().querySelector('video').canPlayType('application/vnd.apple.mpegurl')) {
                 // دعم HLS الأصلي (Safari)
@@ -365,134 +293,39 @@ class VideoPlayerApp {
                 
             } else {
                 console.log('❌ المتصفح لا يدعم HLS');
-                
-                // إرسال تقرير الخطأ إلى صفحة القسم
-                this.reportErrorToSectionPage('المتصفح لا يدعم تشغيل هذا النوع من البث');
-                
+                this.showError('المتصفح لا يدعم هذا النوع من البث');
                 reject(new Error('المتصفح لا يدعم HLS'));
             }
         });
     }
     
-    // ====== إضافة جديدة: دالة إرسال تقرير الخطأ إلى صفحة القسم ======
-    reportErrorToSectionPage(errorMessage = 'فشل الاتصال بالبث') {
-        try {
-            // الحصول على معرف القناة من URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const channelId = urlParams.get('channel');
-            
-            if (channelId && window.opener && typeof window.opener.reportPlayerError === 'function') {
-                // إرسال الخطأ إلى النافذة الأصلية (صفحة القسم)
-                window.opener.reportPlayerError(channelId, errorMessage);
-            } else if (channelId && window.parent && typeof window.parent.reportPlayerError === 'function') {
-                // إذا كانت النافذة مدمجة في iframe
-                window.parent.reportPlayerError(channelId, errorMessage);
-            } else if (channelId) {
-                // محاولة استخدام localStorage لنقل رسالة الخطأ
-                const errorData = {
-                    channelId: channelId,
-                    errorMessage: errorMessage,
-                    timestamp: new Date().toISOString()
-                };
-                localStorage.setItem('last_player_error', JSON.stringify(errorData));
-                
-                // عرض رسالة للمستخدم
-                this.showErrorWithXpolaOption(errorMessage);
-            }
-        } catch (error) {
-            console.error('❌ فشل إرسال تقرير الخطأ:', error);
-        }
-    }
-    
-    // ====== إضافة جديدة: عرض رسالة خطأ مع خيار XPola ======
-    showErrorWithXpolaOption(errorMessage) {
-        const errorOverlay = document.getElementById('errorOverlay');
-        if (!errorOverlay) return;
-        
-        // تحديث رسالة الخطأ
-        const errorMessageElement = document.getElementById('errorMessage');
-        if (errorMessageElement) {
-            errorMessageElement.textContent = errorMessage;
-        }
-        
-        // إضافة زر XPola Player
-        const xpolaButton = document.createElement('button');
-        xpolaButton.className = 'btn btn-warning mt-3';
-        xpolaButton.innerHTML = '<i class="uil uil-external-link-alt"></i> جرب XPola Player';
-        xpolaButton.onclick = () => {
-            this.tryXpolaPlayer();
-        };
-        
-        // إضافة الزر إلى عناصر الخطأ
-        const errorActions = errorOverlay.querySelector('.error-actions');
-        if (errorActions) {
-            errorActions.appendChild(xpolaButton);
-        }
-    }
-    
     async loadMP4Stream(url) {
         console.log('🎬 تحميل MP4 مباشر:', url);
         
-        try {
-            // اختبار الرابط أولاً
-            const test = await fetch(url, { method: 'HEAD' }).catch(() => null);
-            
-            if (!test || test.status !== 200) {
-                console.log('⚠️ رابط MP4 غير متاح، محاولة فتح في نافذة جديدة');
-                this.openInExternalPlayer(url);
-                return;
-            }
-            
-            this.videoPlayer.src({
-                src: url,
-                type: 'video/mp4'
-            });
-            
-            this.hideLoading();
-            this.play();
-            
-        } catch (error) {
-            console.error('❌ فشل تحميل MP4:', error);
-            
-            // إرسال تقرير الخطأ
-            this.reportErrorToSectionPage('فشل تحميل الفيديو');
-            this.openInExternalPlayer(url);
-        }
+        this.videoPlayer.src({
+            src: url,
+            type: 'video/mp4'
+        });
+        
+        this.hideLoading();
+        this.play();
     }
     
-    openInExternalPlayer(url) {
-        console.log('🔗 فتح الرابط في مشغل خارجي');
+    async loadDirectStream(url) {
+        console.log('🎬 تحميل بث مباشر:', url);
         
-        // إنشاء رابط مؤقت لفتح في نافذة جديدة
-        const tempPage = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>مشغل الفيديو</title>
-                <style>
-                    body { margin: 0; padding: 0; background: #000; }
-                    video { width: 100vw; height: 100vh; }
-                </style>
-            </head>
-            <body>
-                <video controls autoplay>
-                    <source src="${url}" type="video/mp4">
-                    متصفحك لا يدعم تشغيل الفيديو.
-                </video>
-                <script>
-                    document.querySelector('video').play().catch(e => console.log(e));
-                </script>
-            </body>
-            </html>
-        `;
+        // محاولة تحديد نوع الملف
+        let type = 'video/mp4';
+        if (url.includes('.webm')) type = 'video/webm';
+        if (url.includes('.ogg')) type = 'video/ogg';
         
-        const blob = new Blob([tempPage], { type: 'text/html' });
-        const blobUrl = URL.createObjectURL(blob);
+        this.videoPlayer.src({
+            src: url,
+            type: type
+        });
         
-        window.open(blobUrl, '_blank', 'width=800,height=600');
-        
-        // تنظيف الذاكرة
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+        this.hideLoading();
+        this.play();
     }
     
     handleStreamError(error) {
@@ -506,115 +339,17 @@ class VideoPlayerApp {
             errorMessage = 'مشكلة في صلاحيات الوصول للبث.';
         } else if (error.message.includes('404')) {
             errorMessage = 'رابط البث غير موجود أو منتهي الصلاحية.';
-        } else if (error.message.includes('network')) {
-            errorMessage = 'مشكلة في الشبكة. تحقق من اتصال الإنترنت.';
         }
-        
-        // إرسال تقرير الخطأ
-        this.reportErrorToSectionPage(errorMessage);
         
         this.showError(errorMessage);
-        
-        // عرض خيارات بديلة
-        this.showAlternativeOptions();
     }
     
-    showAlternativeOptions() {
-        const errorOverlay = document.getElementById('errorOverlay');
-        if (!errorOverlay) return;
-        
-        // إضافة خيارات بديلة
-        const alternativeOptions = document.createElement('div');
-        alternativeOptions.className = 'alternative-options';
-        alternativeOptions.innerHTML = `
-            <h4>خيارات بديلة:</h4>
-            <div class="alt-options-grid">
-                <button class="alt-option" onclick="window.videoPlayer.tryWithProxy()">
-                    <i class="uil uil-sync"></i>
-                    <span>محاولة باستخدام CORS Proxy</span>
-                </button>
-                <button class="alt-option" onclick="window.videoPlayer.openInNewTab()">
-                    <i class="uil uil-external-link-alt"></i>
-                    <span>فتح في نافذة جديدة</span>
-                </button>
-                <button class="alt-option" onclick="window.videoPlayer.tryXpolaPlayer()">
-                    <i class="uil uil-play-circle"></i>
-                    <span>فتح في XPola Player</span>
-                </button>
-            </div>
-        `;
-        
-        errorOverlay.appendChild(alternativeOptions);
-    }
-    
-    tryWithProxy() {
-        console.log('🔄 محاولة باستخدام CORS Proxy');
-        
-        if (this.streamUrl) {
-            this.corsProxyEnabled = true;
-            const proxyUrl = this.corsProxyUrl + this.streamUrl;
-            this.retryStream(proxyUrl);
-        }
-    }
-    
-    openInNewTab() {
-        console.log('🔗 فتح في نافذة جديدة');
-        
-        if (this.streamUrl) {
-            window.open(this.streamUrl, '_blank');
-        }
-    }
-    
-    tryXpolaPlayer() {
-        console.log('🎮 فتح في XPola Player');
-        
-        if (this.channelData?.url) {
-            // فتح في XPola عبر intent
-            const xpolaUrl = `intent://play?url=${encodeURIComponent(this.channelData.url)}#Intent;package=com.xpola.player;scheme=xpola;end`;
-            
-            window.location.href = xpolaUrl;
-            
-            // إذا فشل intent، افتح الرابط مباشرة
-            setTimeout(() => {
-                window.open(this.channelData.url, '_blank');
-            }, 500);
-        }
-    }
-    
-    retryStream(newUrl = null) {
-        console.log('🔄 إعادة محاولة تشغيل البث...');
-        
-        this.hideError();
-        this.showLoading();
-        
-        if (newUrl) {
-            this.streamUrl = newUrl;
-        }
-        
-        // إعادة تعيين HLS إذا كان موجوداً
-        if (this.hls) {
-            this.hls.destroy();
-            this.hls = null;
-        }
-        
-        // إعادة المحاولة بعد تأخير قصير
-        setTimeout(() => {
-            if (this.streamUrl) {
-                this.loadHLSStream(this.streamUrl).catch(error => {
-                    console.error('❌ فشل إعادة المحاولة:', error);
-                    this.showError('فشل الاتصال بعد عدة محاولات');
-                });
-            }
-        }, 1000);
-    }
-    
-    // باقي الدوال الأساسية
     initializePlayer() {
         try {
             // تهيئة مشغل Video.js
             this.videoPlayer = videojs('videoPlayer', {
                 controls: true,
-                autoplay: true,
+                autoplay: false, // نعطيه false ونشغل يدوياً
                 preload: 'auto',
                 fluid: true,
                 liveui: true,
@@ -629,38 +364,146 @@ class VideoPlayerApp {
                 }
             });
             
-            console.log('✅ تم تهيئة مشغل الفيديو');
+            // إضافة حدث عند جاهزية المشغل
+            this.videoPlayer.ready(() => {
+                console.log('✅ مشغل الفيديو جاهز');
+            });
             
         } catch (error) {
             console.error('❌ فشل تهيئة مشغل الفيديو:', error);
+            
+            // محاولة بديلة باستخدام HTML5 video مباشرة
+            this.fallbackToHTML5Player();
+        }
+    }
+    
+    fallbackToHTML5Player() {
+        console.log('🔄 استخدام مشغل HTML5 بديل');
+        
+        const videoElement = document.getElementById('videoPlayer');
+        if (videoElement && videoElement.tagName === 'VIDEO') {
+            // إضافة controls يدوياً
+            videoElement.controls = true;
+            this.videoPlayer = {
+                el: () => ({ querySelector: () => videoElement }),
+                src: (source) => {
+                    videoElement.src = source.src;
+                    videoElement.type = source.type;
+                },
+                play: () => videoElement.play(),
+                pause: () => videoElement.pause(),
+                on: (event, callback) => videoElement.addEventListener(event, callback),
+                ready: (callback) => {
+                    if (videoElement.readyState >= 2) {
+                        callback();
+                    } else {
+                        videoElement.addEventListener('loadedmetadata', callback);
+                    }
+                }
+            };
+            
+            console.log('✅ تم تهيئة مشغل HTML5 بديل');
+        } else {
             this.showError('تعذر تهيئة مشغل الفيديو');
         }
     }
     
-    setupControls() {
-        // ربط عناصر التحكم
-        this.playPauseBtn = document.getElementById('playPauseBtn');
-        this.muteBtn = document.getElementById('muteBtn');
-        this.volumeSlider = document.getElementById('volumeSlider');
-        this.progressSlider = document.getElementById('progressSlider');
-        this.fullscreenBtn = document.getElementById('fullscreenBtn');
-        this.qualityBtn = document.getElementById('qualityBtn');
-        this.shareBtn = document.getElementById('shareBtn');
-        this.settingsBtn = document.getElementById('settingsBtn');
-        this.retryBtn = document.getElementById('retryBtn');
-        this.reportBtn = document.getElementById('reportBtn');
+    updateUI() {
+        if (!this.channelData) return;
         
-        // تحديث حالة التشغيل
-        this.updatePlayButton();
+        // تحديث اسم القناة
+        const updateElementText = (id, text) => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = text;
+        };
+        
+        updateElementText('channelName', this.channelData.name);
+        updateElementText('channelNameFull', this.channelData.name);
+        
+        // تحديث لوجو القناة
+        const updateLogo = (id, size = 100) => {
+            const element = document.getElementById(id);
+            if (element) {
+                const defaultLogo = `https://via.placeholder.com/${size}/2F2562/FFFFFF?text=${encodeURIComponent(this.channelData.name.substring(0, 2))}`;
+                const logoUrl = this.channelData.logo || defaultLogo;
+                
+                element.innerHTML = `
+                    <img src="${logoUrl}" 
+                         alt="${this.channelData.name}"
+                         onerror="this.src='${defaultLogo}'"
+                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                `;
+            }
+        };
+        
+        updateLogo('channelLogo', 50);
+        updateLogo('channelLogoFull', 100);
+        
+        // تحديث الوصف إذا كان متوفراً
+        const descriptionElement = document.getElementById('channelDescription');
+        if (descriptionElement && this.channelData.description) {
+            descriptionElement.textContent = this.channelData.description;
+        }
+        
+        // تحديث رابط المشاركة
+        const shareUrl = document.getElementById('shareUrl');
+        if (shareUrl) {
+            shareUrl.value = window.location.href;
+            this.generateQRCode();
+        }
+    }
+    
+    generateQRCode() {
+        const qrcodeElement = document.getElementById('qrcode');
+        if (qrcodeElement && window.QRCode) {
+            qrcodeElement.innerHTML = '';
+            new QRCode(qrcodeElement, {
+                text: window.location.href,
+                width: 128,
+                height: 128,
+                colorDark: "#42318F",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+    }
+    
+    setupControls() {
+        // ربط عناصر التحكم الأساسية
+        this.setupControl('playPauseBtn', () => this.togglePlay());
+        this.setupControl('muteBtn', () => this.toggleMute());
+        this.setupControl('fullscreenBtn', () => this.toggleFullscreen());
+        this.setupControl('qualityBtn', () => this.showQualityModal());
+        this.setupControl('shareBtn', () => this.showShareModal());
+        this.setupControl('settingsBtn', () => this.showSettingsModal());
+        this.setupControl('retryBtn', () => this.retryStream());
+        this.setupControl('reportBtn', () => this.reportProblem());
+        
+        // ربط السلايدرات
+        this.setupSlider('volumeSlider', (value) => this.setVolume(value));
+        this.setupSlider('progressSlider', (value) => this.seek(value));
+    }
+    
+    setupControl(elementId, handler) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.addEventListener('click', handler);
+        }
+    }
+    
+    setupSlider(elementId, handler) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.addEventListener('input', (e) => handler(e.target.value));
+        }
     }
     
     setupEventListeners() {
-        // أحداث الفيديو
-        if (this.videoPlayer) {
+        // أحداث الفيديو إذا كان المشغل موجوداً
+        if (this.videoPlayer && this.videoPlayer.on) {
             this.videoPlayer.on('play', () => {
                 this.isPlaying = true;
                 this.updatePlayButton();
-                this.updateLiveStatus();
             });
             
             this.videoPlayer.on('pause', () => {
@@ -669,9 +512,11 @@ class VideoPlayerApp {
             });
             
             this.videoPlayer.on('volumechange', () => {
-                this.volume = this.videoPlayer.volume() * 100;
-                this.isMuted = this.videoPlayer.muted();
-                this.updateVolumeControls();
+                if (this.videoPlayer.volume) {
+                    this.volume = this.videoPlayer.volume() * 100;
+                    this.isMuted = this.videoPlayer.muted();
+                    this.updateVolumeControls();
+                }
             });
             
             this.videoPlayer.on('timeupdate', () => {
@@ -679,167 +524,224 @@ class VideoPlayerApp {
             });
         }
         
-        // أحداث عناصر التحكم
-        if (this.playPauseBtn) {
-            this.playPauseBtn.addEventListener('click', () => this.togglePlay());
-        }
+        // أحداث المودالات
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', () => this.closeAllModals());
+        });
         
-        if (this.muteBtn) {
-            this.muteBtn.addEventListener('click', () => this.toggleMute());
-        }
-        
-        if (this.volumeSlider) {
-            this.volumeSlider.addEventListener('input', (e) => this.setVolume(e.target.value));
-        }
-        
-        if (this.progressSlider) {
-            this.progressSlider.addEventListener('input', (e) => this.seek(e.target.value));
-        }
-        
-        if (this.fullscreenBtn) {
-            this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
-        }
-        
-        if (this.qualityBtn) {
-            this.qualityBtn.addEventListener('click', () => this.showQualityModal());
-        }
-        
-        if (this.shareBtn) {
-            this.shareBtn.addEventListener('click', () => this.showShareModal());
-        }
-        
-        if (this.settingsBtn) {
-            this.settingsBtn.addEventListener('click', () => this.showSettingsModal());
-        }
-        
-        if (this.retryBtn) {
-            this.retryBtn.addEventListener('click', () => this.retryStream());
-        }
-        
-        if (this.reportBtn) {
-            this.reportBtn.addEventListener('click', () => this.reportProblem());
-        }
-    }
-    
-    updateUI() {
-        if (this.channelData) {
-            // تحديث العنوان
-            const channelNameElement = document.getElementById('channelName');
-            const channelNameFullElement = document.getElementById('channelNameFull');
-            
-            if (channelNameElement) channelNameElement.textContent = this.channelData.name;
-            if (channelNameFullElement) channelNameFullElement.textContent = this.channelData.name;
-            
-            // تحديث اللوجو
-            this.updateChannelLogo();
-            
-            // تحديث رابط المشاركة
-            const shareUrl = document.getElementById('shareUrl');
-            if (shareUrl) {
-                shareUrl.value = window.location.href;
-                this.generateQRCode();
+        // النقر خارج المودال
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                this.closeAllModals();
             }
+        });
+    }
+    
+    togglePlay() {
+        if (!this.videoPlayer) return;
+        
+        if (this.isPlaying) {
+            this.videoPlayer.pause();
+        } else {
+            this.videoPlayer.play().catch(error => {
+                console.error('❌ فشل التشغيل:', error);
+                this.showError('فشل تشغيل الفيديو');
+            });
         }
     }
     
-    updateChannelLogo() {
-        const logoSmall = document.getElementById('channelLogo');
-        const logoFull = document.getElementById('channelLogoFull');
-        const defaultLogo = 'https://via.placeholder.com/100/2F2562/FFFFFF?text=TV';
-        const channelLogo = this.channelData?.image || this.channelData?.logo || defaultLogo;
+    updatePlayButton() {
+        const btn = document.getElementById('playPauseBtn');
+        if (btn) {
+            const icon = this.isPlaying ? 'uil uil-pause' : 'uil uil-play';
+            btn.innerHTML = `<i class="${icon}"></i>`;
+        }
+    }
+    
+    toggleMute() {
+        if (!this.videoPlayer || !this.videoPlayer.muted) return;
         
-        if (logoSmall) {
-            logoSmall.innerHTML = `
-                <img src="${channelLogo}" 
-                     alt="${this.channelData?.name || 'قناة'}"
-                     onerror="this.src='${defaultLogo}'">
-            `;
+        this.videoPlayer.muted(!this.videoPlayer.muted());
+        this.updateVolumeControls();
+    }
+    
+    updateVolumeControls() {
+        const muteBtn = document.getElementById('muteBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
+        
+        if (muteBtn) {
+            const icon = this.isMuted ? 'uil uil-volume-mute' : 
+                         this.volume < 50 ? 'uil uil-volume-down' : 'uil uil-volume-up';
+            muteBtn.innerHTML = `<i class="${icon}"></i>`;
         }
         
-        if (logoFull) {
-            logoFull.innerHTML = `
-                <img src="${channelLogo}" 
-                     alt="${this.channelData?.name || 'قناة'}"
-                     onerror="this.src='${defaultLogo}'">
-            `;
+        if (volumeSlider) {
+            volumeSlider.value = this.volume;
         }
+    }
+    
+    setVolume(value) {
+        if (!this.videoPlayer || !this.videoPlayer.volume) return;
+        
+        this.volume = value;
+        this.videoPlayer.volume(value / 100);
+    }
+    
+    seek(percentage) {
+        if (!this.videoPlayer || !this.videoPlayer.duration) return;
+        
+        const duration = this.videoPlayer.duration();
+        if (duration) {
+            this.videoPlayer.currentTime((percentage / 100) * duration);
+        }
+    }
+    
+    updateProgress() {
+        if (!this.videoPlayer || !this.videoPlayer.currentTime) return;
+        
+        const progressSlider = document.getElementById('progressSlider');
+        const currentTimeElement = document.getElementById('currentTime');
+        const durationElement = document.getElementById('duration');
+        
+        const currentTime = this.videoPlayer.currentTime();
+        const duration = this.videoPlayer.duration();
+        
+        if (progressSlider && duration) {
+            const percentage = (currentTime / duration) * 100;
+            progressSlider.value = percentage;
+        }
+        
+        if (currentTimeElement) {
+            currentTimeElement.textContent = this.formatTime(currentTime);
+        }
+        
+        if (durationElement && duration) {
+            durationElement.textContent = this.formatTime(duration);
+        }
+    }
+    
+    formatTime(seconds) {
+        if (isNaN(seconds)) return '00:00';
+        
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = Math.floor(seconds % 60);
+        
+        if (hours > 0) {
+            return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        } else {
+            return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+    }
+    
+    toggleFullscreen() {
+        if (!this.videoPlayer || !this.videoPlayer.isFullscreen) return;
+        
+        if (this.videoPlayer.isFullscreen()) {
+            this.videoPlayer.exitFullscreen();
+        } else {
+            this.videoPlayer.requestFullscreen();
+        }
+    }
+    
+    showQualityModal() {
+        const modal = document.getElementById('qualityModal');
+        if (modal) modal.style.display = 'block';
+    }
+    
+    showShareModal() {
+        const modal = document.getElementById('shareModal');
+        if (modal) modal.style.display = 'block';
+    }
+    
+    showSettingsModal() {
+        const modal = document.getElementById('settingsModal');
+        if (modal) modal.style.display = 'block';
+    }
+    
+    closeAllModals() {
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.style.display = 'none';
+        });
+    }
+    
+    retryStream() {
+        console.log('🔄 إعادة محاولة تشغيل البث...');
+        this.hideError();
+        
+        if (this.streamUrl) {
+            this.loadStream();
+        } else {
+            this.showError('لا يوجد رابط بث للمحاولة');
+        }
+    }
+    
+    reportProblem() {
+        const reportUrl = `https://t.me/wacelalorshepro?text=${encodeURIComponent(
+            `الإبلاغ عن مشكلة في البث:\n` +
+            `القناة: ${this.channelData?.name || 'غير معروف'}\n` +
+            `الوقت: ${new Date().toLocaleString()}\n` +
+            `المتصفح: ${navigator.userAgent}\n` +
+            `وصف المشكلة: `
+        )}`;
+        
+        window.open(reportUrl, '_blank');
+    }
+    
+    showLoading() {
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) overlay.style.display = 'flex';
+    }
+    
+    hideLoading() {
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) overlay.style.display = 'none';
     }
     
     showError(message) {
         const overlay = document.getElementById('errorOverlay');
         const errorMessage = document.getElementById('errorMessage');
         
-        if (overlay) {
-            overlay.style.display = 'flex';
-        }
+        if (overlay) overlay.style.display = 'flex';
+        if (errorMessage) errorMessage.textContent = message;
         
-        if (errorMessage && message) {
-            errorMessage.textContent = message;
-        }
-        
-        // إعادة تعيين عداد المحاولات
-        this.retryCount = 0;
+        this.hideLoading();
     }
     
     hideError() {
         const overlay = document.getElementById('errorOverlay');
-        if (overlay) {
-            overlay.style.display = 'none';
-            // إزالة الخيارات البديلة إذا كانت موجودة
-            const altOptions = overlay.querySelector('.alternative-options');
-            if (altOptions) {
-                altOptions.remove();
-            }
-        }
-    }
-    
-    showLoading() {
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) {
-            overlay.style.display = 'flex';
-        }
-    }
-    
-    hideLoading() {
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) {
-            overlay.style.display = 'none';
-        }
+        if (overlay) overlay.style.display = 'none';
     }
     
     play() {
-        if (this.videoPlayer) {
-            this.videoPlayer.play().catch(error => {
-                console.error('❌ فشل التشغيل:', error);
-                this.showError('فشل تشغيل الفيديو');
+        if (this.videoPlayer && this.videoPlayer.play) {
+            this.videoPlayer.play().then(() => {
+                this.isPlaying = true;
+                this.updatePlayButton();
+            }).catch(error => {
+                console.error('❌ فشل التشغيل التلقائي:', error);
+                // لا نعرض خطأ هنا، نترك للمستخدم الضغط على play
             });
-            this.isPlaying = true;
-            this.updatePlayButton();
         }
     }
-    
-    // ... (بقية الدوال الأساسية)
-    
-    togglePlay() {
-        if (this.isPlaying) {
-            this.pause();
-        } else {
-            this.play();
-        }
-    }
-    
-    updatePlayButton() {
-        if (this.playPauseBtn) {
-            const icon = this.isPlaying ? 'uil uil-pause' : 'uil uil-play';
-            this.playPauseBtn.innerHTML = `<i class="${icon}"></i>`;
-        }
-    }
-    
-    // ... (بقية الدوال)
 }
 
 // بدء تشغيل المشغل
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🎬 تهيئة مشغل الفيديو...');
-    window.videoPlayer = new VideoPlayerApp();
+    
+    // التحقق من توفر المكتبات المطلوبة
+    if (typeof videojs === 'undefined') {
+        console.error('❌ مكتبة Video.js غير محملة');
+        // يمكنك هنا تحميل المكتبة ديناميكياً
+        const script = document.createElement('script');
+        script.src = 'https://vjs.zencdn.net/8.6.1/video.min.js';
+        script.onload = () => {
+            console.log('✅ تم تحميل Video.js');
+            window.videoPlayer = new VideoPlayerApp();
+        };
+        document.head.appendChild(script);
+    } else {
+        window.videoPlayer = new VideoPlayerApp();
+    }
 });
