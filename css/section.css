@@ -239,3 +239,314 @@
     transform: translateY(-5px);
     box-shadow: 0 10px 25px rgba(101, 79, 212, 0.3);
 }
+/* خيارات التشغيل Modal */
+.player-options-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.player-options-modal.show {
+    opacity: 1;
+}
+
+.player-options-content {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow: hidden;
+    border: 2px solid #42318F;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.player-options-header {
+    background: linear-gradient(135deg, #2F2562, #42318F);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid #654FD4;
+}
+
+.channel-info-modal {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.channel-logo-modal {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #654FD4;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.channel-logo-modal img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.channel-details-modal h3 {
+    margin: 0;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.channel-status {
+    margin: 5px 0 0 0;
+    font-size: 0.9rem;
+}
+
+.channel-status.online {
+    color: #28a745;
+}
+
+.channel-status.offline {
+    color: #dc3545;
+}
+
+.close-modal-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.close-modal-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.player-options-body {
+    padding: 20px;
+    overflow-y: auto;
+    max-height: calc(80vh - 200px);
+}
+
+.options-title {
+    color: white;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.player-options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.player-option {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(66, 49, 143, 0.3);
+    border-radius: 15px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.player-option:hover {
+    background: rgba(66, 49, 143, 0.3);
+    border-color: #654FD4;
+    transform: translateX(-5px);
+}
+
+.option-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #42318F, #654FD4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.xpola-icon {
+    background: linear-gradient(135deg, #FF5200, #FF6B35);
+}
+
+.download-icon {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.option-details {
+    flex: 1;
+}
+
+.option-details h5 {
+    margin: 0 0 5px 0;
+    color: white;
+    font-size: 1.1rem;
+}
+
+.option-description {
+    margin: 0;
+    color: #B8B8B8;
+    font-size: 0.9rem;
+}
+
+.option-features {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.feature-badge {
+    background: rgba(101, 79, 212, 0.2);
+    color: #654FD4;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    border: 1px solid rgba(101, 79, 212, 0.5);
+}
+
+.option-arrow {
+    color: #654FD4;
+    font-size: 1.2rem;
+}
+
+.player-preferences {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.preference-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.preference-item label {
+    color: #B8B8B8;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.preference-item .form-select {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #42318F;
+    color: white;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    width: 150px;
+}
+
+.preference-item .form-select:focus {
+    border-color: #654FD4;
+    box-shadow: 0 0 0 0.2rem rgba(101, 79, 212, 0.25);
+}
+
+.player-options-footer {
+    padding: 15px 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.player-stats small {
+    color: #B8B8B8;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 768px) {
+    .player-options-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .player-options-header {
+        padding: 15px;
+    }
+    
+    .channel-details-modal h3 {
+        font-size: 1.1rem;
+    }
+    
+    .option-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .option-details h5 {
+        font-size: 1rem;
+    }
+    
+    .option-description {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .player-option {
+        padding: 12px;
+        gap: 10px;
+    }
+    
+    .player-options-body {
+        padding: 15px;
+    }
+    
+    .options-title {
+        font-size: 1.1rem;
+    }
+    
+    .player-preferences {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .preference-item .form-select {
+        width: 100%;
+    }
+}
+
+
