@@ -4,10 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم المشرف - إدارة الإشعارات</title>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <!-- إصدار أحدث من Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* أنماط CSS نفسها */
         :root {
             --primary-color: #4CAF50;
             --primary-dark: #45a049;
@@ -410,10 +413,41 @@
 </head>
 <body>
 
-    <div class="container">
+    <!-- نافذة تسجيل الدخول (مفتوحة افتراضياً) -->
+    <div id="loginModal" class="modal" style="display: flex;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-lock"></i> تسجيل الدخول</h3>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail" class="form-label">البريد الإلكتروني:</label>
+                    <input type="email" id="loginEmail" required placeholder="admin@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPassword" class="form-label">كلمة المرور:</label>
+                    <input type="password" id="loginPassword" required placeholder="كلمة المرور">
+                </div>
+                
+                <div id="loginError" class="error message-box" style="display: none;"></div>
+                
+                <div class="modal-actions">
+                    <button type="submit" class="btn" style="width: 100%;">
+                        <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="container" style="display: none;" id="mainContainer">
         <div class="header">
             <h1><i class="fas fa-bell"></i> لوحة تحكم الإشعارات</h1>
             <div class="header-actions">
+                <button class="btn btn-danger" onclick="logout()" id="logoutBtn" style="display: none;">
+                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                </button>
                 <button class="btn" onclick="showTab('send')">
                     <i class="fas fa-plus"></i> إرسال إشعار جديد
                 </button>
@@ -561,7 +595,7 @@
     </div>
 
     <script>
-        // تكوين Firebase - يجب أن يكون مطابقًا لما هو في firebase-notifications.js
+        // ========== تكوين Firebase ==========
         const firebaseConfig = {
             apiKey: "AIzaSyAkgEiYYlmpMe0NLewulheovlTQMz5C980",
             authDomain: "bein-42f9e.firebaseapp.com",
@@ -572,44 +606,176 @@
             measurementId: "G-JH198SKCFS"
         };
 
-        // تهيئة Firebase
+        // ========== تهيئة Firebase ==========
         let app;
         if (!firebase.apps.length) {
             app = firebase.initializeApp(firebaseConfig);
         } else {
-            app = firebase.apps[0];
+            app = firebase.app();
         }
         
-        // تهيئة Firestore
+        // ========== تهيئة الخدمات ==========
+        const auth = firebase.auth();
         const db = firebase.firestore();
-        db.settings({ ignoreUndefinedProperties: true });
         
-        // متغيرات عامة
+        // ========== متغيرات التطبيق ==========
         let allNotifications = [];
         let notificationToDelete = null;
-
-        // تهيئة الصفحة عند التحميل
-        document.addEventListener('DOMContentLoaded', function() {
-            loadDashboard();
+        
+        // ========== التحقق من حالة المصادقة ==========
+        auth.onAuthStateChanged(async (user) => {
+            console.log('حالة المصادقة:', user ? 'مسجل دخول' : 'غير مسجل');
             
-            // إضافة مستمع لزر إرسال الإشعار
-            document.getElementById('notificationForm').addEventListener('submit', sendNotification);
+            const loginModal = document.getElementById('loginModal');
+            const mainContainer = document.getElementById('mainContainer');
+            const logoutBtn = document.getElementById('logoutBtn');
             
-            // إضافة مستمع لزر تعديل الإشعار
-            document.getElementById('editForm').addEventListener('submit', updateNotification);
-            
-            // إضافة مستمع لزر تأكيد الحذف
-            document.getElementById('confirmDeleteButton').addEventListener('click', confirmDeleteNotification);
+            if (user) {
+                // المستخدم مسجل الدخول
+                console.log('المستخدم:', user.email);
+                
+                // إخفاء نافذة تسجيل الدخول
+                loginModal.style.display = 'none';
+                
+                // إظهار المحتوى الرئيسي
+                mainContainer.style.display = 'block';
+                
+                // إظهار زر تسجيل الخروج
+                if (logoutBtn) logoutBtn.style.display = 'inline-block';
+                
+                // تحميل البيانات
+                await loadDashboard();
+                
+                // تهيئة المستمعين للأحداث
+                initializeEventListeners();
+                
+            } else {
+                // المستخدم غير مسجل الدخول
+                console.log('لا يوجد مستخدم مسجل');
+                
+                // إظهار نافذة تسجيل الدخول
+                loginModal.style.display = 'flex';
+                
+                // إخفاء المحتوى الرئيسي
+                mainContainer.style.display = 'none';
+                
+                // إخفاء زر تسجيل الخروج
+                if (logoutBtn) logoutBtn.style.display = 'none';
+            }
         });
-
-        // تبديل التبويبات
+        
+        // ========== تسجيل الدخول ==========
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const loginError = document.getElementById('loginError');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            
+            // التحقق من المدخلات
+            if (!email || !password) {
+                loginError.textContent = 'يرجى ملء جميع الحقول';
+                loginError.style.display = 'block';
+                return;
+            }
+            
+            // تغيير حالة الزر
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري تسجيل الدخول...';
+            
+            try {
+                console.log('جاري تسجيل الدخول بـ:', email);
+                
+                // محاولة تسجيل الدخول
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                console.log('تم تسجيل الدخول بنجاح:', userCredential.user.email);
+                
+                // إخفاء رسالة الخطأ
+                loginError.style.display = 'none';
+                
+            } catch (error) {
+                console.error('خطأ في تسجيل الدخول:', error.code, error.message);
+                
+                // عرض رسالة الخطأ المناسبة
+                let errorMessage = 'خطأ في تسجيل الدخول: ';
+                
+                switch (error.code) {
+                    case 'auth/invalid-email':
+                        errorMessage += 'البريد الإلكتروني غير صحيح';
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage += 'هذا الحساب معطل';
+                        break;
+                    case 'auth/user-not-found':
+                        errorMessage += 'لا يوجد حساب بهذا البريد الإلكتروني';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage += 'كلمة المرور غير صحيحة';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage += 'محاولات تسجيل دخول كثيرة، حاول لاحقاً';
+                        break;
+                    default:
+                        errorMessage += error.message;
+                }
+                
+                loginError.textContent = errorMessage;
+                loginError.style.display = 'block';
+                
+            } finally {
+                // إعادة تعيين الزر
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+        
+        // ========== تسجيل الخروج ==========
+        function logout() {
+            if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                auth.signOut()
+                    .then(() => {
+                        console.log('تم تسجيل الخروج بنجاح');
+                        displayStatus('تم تسجيل الخروج بنجاح', 'info');
+                    })
+                    .catch(error => {
+                        console.error('خطأ في تسجيل الخروج:', error);
+                        displayStatus('خطأ في تسجيل الخروج', 'error');
+                    });
+            }
+        }
+        
+        // ========== تهيئة مستمعي الأحداث ==========
+        function initializeEventListeners() {
+            // إرسال إشعار جديد
+            const notificationForm = document.getElementById('notificationForm');
+            if (notificationForm) {
+                notificationForm.addEventListener('submit', sendNotification);
+            }
+            
+            // تعديل إشعار
+            const editForm = document.getElementById('editForm');
+            if (editForm) {
+                editForm.addEventListener('submit', updateNotification);
+            }
+            
+            // تأكيد الحذف
+            const confirmDeleteBtn = document.getElementById('confirmDeleteButton');
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.addEventListener('click', confirmDeleteNotification);
+            }
+        }
+        
+        // ========== دوال التبويبات ==========
         function showTab(tabName) {
             // إزالة النشاط من جميع التبويبات
             const tabs = document.querySelectorAll('.tab');
             tabs.forEach(tab => tab.classList.remove('active'));
             
             // إضافة النشاط للتبويب المحدد
-            event.target.classList.add('active');
+            const clickedTab = event.target;
+            clickedTab.classList.add('active');
             
             // إخفاء جميع المحتويات
             const contents = document.querySelectorAll('.tab-content');
@@ -625,10 +791,12 @@
                 loadDashboard();
             }
         }
-
-        // تحميل لوحة التحكم
+        
+        // ========== تحميل لوحة التحكم ==========
         async function loadDashboard() {
             try {
+                console.log('جاري تحميل لوحة التحكم...');
+                
                 const snapshot = await db.collection('notifications')
                     .orderBy('createdAt', 'desc')
                     .limit(10)
@@ -650,39 +818,30 @@
                         ...data
                     });
                     
-                    // حساب الإحصائيات
                     counts.total++;
                     if (data.type && counts[data.type] !== undefined) {
                         counts[data.type]++;
                     }
                 });
                 
-                // عرض الإحصائيات
                 displayStats(counts);
-                
-                // عرض الإشعارات الحديثة
                 displayRecentNotifications(notifications);
                 
             } catch (error) {
-                console.error('خطأ في تحميل الإشعارات:', error);
-                document.getElementById('recentNotifications').innerHTML = `
-                    <div class="error message-box">
-                        <i class="fas fa-exclamation-circle"></i> حدث خطأ في تحميل الإشعارات: ${error.message}
-                    </div>
-                `;
+                console.error('خطأ في تحميل لوحة التحكم:', error);
+                
+                // إذا كان الخطأ بسبب الصلاحيات
+                if (error.code === 'permission-denied') {
+                    displayStatus('❌ خطأ في الصلاحيات: تأكد من قواعد Firestore', 'error');
+                } else {
+                    displayStatus('❌ حدث خطأ في تحميل البيانات: ' + error.message, 'error');
+                }
             }
         }
         
-        // عرض الإحصائيات
+        // ========== عرض الإحصائيات ==========
         function displayStats(counts) {
             const statsContainer = document.getElementById('statsContainer');
-            
-            const typeLabels = {
-                info: 'معلومة',
-                warning: 'تحذير',
-                important: 'هام',
-                welcome: 'ترحيب'
-            };
             
             statsContainer.innerHTML = `
                 <div class="stat-card">
@@ -704,11 +863,11 @@
             `;
         }
         
-        // عرض الإشعارات الحديثة
+        // ========== عرض الإشعارات الحديثة ==========
         function displayRecentNotifications(notifications) {
             const container = document.getElementById('recentNotifications');
             
-            if (notifications.length === 0) {
+            if (!notifications || notifications.length === 0) {
                 container.innerHTML = `
                     <div class="no-data">
                         <i class="fas fa-bell-slash"></i>
@@ -726,19 +885,19 @@
                     formatDate(notification.createdAt.toDate()) : 'غير محدد';
                 
                 html += `
-                    <div class="notification-card ${notification.type}">
+                    <div class="notification-card ${notification.type || 'info'}">
                         <div class="notification-header">
                             <div>
-                                <span class="notification-title">${notification.title}</span>
-                                <span class="notification-type type-${notification.type}">
-                                    ${getTypeLabel(notification.type)}
+                                <span class="notification-title">${notification.title || 'بدون عنوان'}</span>
+                                <span class="notification-type type-${notification.type || 'info'}">
+                                    ${getTypeLabel(notification.type || 'info')}
                                 </span>
                             </div>
                             <div class="notification-date">
                                 <i class="far fa-calendar-alt"></i> ${date}
                             </div>
                         </div>
-                        <div class="notification-message">${notification.message}</div>
+                        <div class="notification-message">${notification.message || 'بدون محتوى'}</div>
                         <div class="notification-actions">
                             <button class="btn" onclick="editNotification('${notification.id}')">
                                 <i class="fas fa-edit"></i> تعديل
@@ -751,8 +910,8 @@
             html += '</div>';
             container.innerHTML = html;
         }
-
-        // تحميل جميع الإشعارات
+        
+        // ========== تحميل جميع الإشعارات ==========
         async function loadNotifications() {
             const container = document.getElementById('notificationsList');
             container.innerHTML = '<div class="loading">جاري تحميل الإشعارات...</div>';
@@ -782,7 +941,7 @@
             }
         }
         
-        // عرض جميع الإشعارات
+        // ========== عرض جميع الإشعارات ==========
         function displayAllNotifications(notifications) {
             const container = document.getElementById('notificationsList');
             
@@ -804,19 +963,19 @@
                     formatDate(notification.createdAt.toDate()) : 'غير محدد';
                 
                 html += `
-                    <div class="notification-card ${notification.type}">
+                    <div class="notification-card ${notification.type || 'info'}">
                         <div class="notification-header">
                             <div>
-                                <span class="notification-title">${notification.title}</span>
-                                <span class="notification-type type-${notification.type}">
-                                    ${getTypeLabel(notification.type)}
+                                <span class="notification-title">${notification.title || 'بدون عنوان'}</span>
+                                <span class="notification-type type-${notification.type || 'info'}">
+                                    ${getTypeLabel(notification.type || 'info')}
                                 </span>
                             </div>
                             <div class="notification-date">
                                 <i class="far fa-calendar-alt"></i> ${date}
                             </div>
                         </div>
-                        <div class="notification-message">${notification.message}</div>
+                        <div class="notification-message">${notification.message || 'بدون محتوى'}</div>
                         ${notification.actionUrl ? `
                             <div>
                                 <a href="${notification.actionUrl}" target="_blank" class="btn" style="font-size: 14px; padding: 5px 10px;">
@@ -828,7 +987,7 @@
                             <button class="btn" onclick="editNotification('${notification.id}')">
                                 <i class="fas fa-edit"></i> تعديل
                             </button>
-                            <button class="btn btn-danger" onclick="confirmDelete('${notification.id}', '${notification.title}')">
+                            <button class="btn btn-danger" onclick="confirmDelete('${notification.id}', '${notification.title || 'بدون عنوان'}')">
                                 <i class="fas fa-trash"></i> حذف
                             </button>
                         </div>
@@ -840,25 +999,7 @@
             container.innerHTML = html;
         }
         
-        // تصفية الإشعارات
-        function filterNotifications() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            
-            if (!searchTerm) {
-                displayAllNotifications(allNotifications);
-                return;
-            }
-            
-            const filteredNotifications = allNotifications.filter(notification => {
-                return notification.title.toLowerCase().includes(searchTerm) || 
-                       notification.message.toLowerCase().includes(searchTerm) ||
-                       getTypeLabel(notification.type).toLowerCase().includes(searchTerm);
-            });
-            
-            displayAllNotifications(filteredNotifications);
-        }
-
-        // إرسال إشعار جديد
+        // ========== إرسال إشعار جديد ==========
         async function sendNotification(e) {
             e.preventDefault();
             
@@ -880,7 +1021,12 @@
             statusMessage.style.display = 'none';
 
             try {
-                // بناء كائن الإشعار
+                // الحصول على معلومات المستخدم الحالي
+                const user = auth.currentUser;
+                if (!user) {
+                    throw new Error('يجب تسجيل الدخول أولاً');
+                }
+
                 const notificationData = {
                     title: title,
                     message: message,
@@ -889,10 +1035,11 @@
                     isActive: true,
                     type: type,
                     actionUrl: actionUrl,
-                    linkText: linkText
+                    linkText: linkText,
+                    createdBy: user.email,
+                    createdById: user.uid
                 };
 
-                // إرسال البيانات إلى مجموعة 'notifications'
                 await db.collection('notifications').add(notificationData);
 
                 displayStatus('✅ تم إرسال الإشعار بنجاح!', 'success');
@@ -910,7 +1057,7 @@
             }
         }
         
-        // فتح نافذة تعديل الإشعار
+        // ========== دوال أخرى (نفس الكود السابق) ==========
         async function editNotification(id) {
             try {
                 const doc = await db.collection('notifications').doc(id).get();
@@ -922,15 +1069,13 @@
                 
                 const notification = doc.data();
                 
-                // تعبئة النموذج
                 document.getElementById('editId').value = id;
-                document.getElementById('editTitle').value = notification.title;
-                document.getElementById('editMessage').value = notification.message;
+                document.getElementById('editTitle').value = notification.title || '';
+                document.getElementById('editMessage').value = notification.message || '';
                 document.getElementById('editType').value = notification.type || 'info';
                 document.getElementById('editActionUrl').value = notification.actionUrl || '';
                 document.getElementById('editLinkText').value = notification.linkText || '';
                 
-                // فتح النافذة
                 document.getElementById('editModal').style.display = 'flex';
                 
             } catch (error) {
@@ -939,7 +1084,6 @@
             }
         }
         
-        // تحديث الإشعار
         async function updateNotification(e) {
             e.preventDefault();
             
@@ -967,7 +1111,6 @@
                 displayStatus('✅ تم تحديث الإشعار بنجاح!', 'success');
                 closeEditModal();
                 
-                // تحديث القوائم
                 loadNotifications();
                 loadDashboard();
                 
@@ -977,14 +1120,12 @@
             }
         }
         
-        // تأكيد الحذف
         function confirmDelete(id, title) {
             notificationToDelete = id;
             document.getElementById('confirmMessage').textContent = `هل أنت متأكد من أنك تريد حذف الإشعار "${title}"؟`;
             document.getElementById('confirmModal').style.display = 'flex';
         }
         
-        // تأكيد حذف الإشعار
         async function confirmDeleteNotification() {
             if (!notificationToDelete) return;
             
@@ -994,7 +1135,6 @@
                 displayStatus('✅ تم حذف الإشعار بنجاح!', 'success');
                 closeConfirmModal();
                 
-                // تحديث القوائم
                 loadNotifications();
                 loadDashboard();
                 
@@ -1005,8 +1145,7 @@
             }
         }
         
-        // حذف الإشعار من نافذة التعديل
-        async function deleteNotification() {
+        function deleteNotification() {
             const id = document.getElementById('editId').value;
             const title = document.getElementById('editTitle').value;
             
@@ -1014,32 +1153,48 @@
             confirmDelete(id, title);
         }
         
-        // إغلاق نافذة التعديل
         function closeEditModal() {
             document.getElementById('editModal').style.display = 'none';
         }
         
-        // إغلاق نافذة التأكيد
         function closeConfirmModal() {
             document.getElementById('confirmModal').style.display = 'none';
             notificationToDelete = null;
         }
         
-        // عرض رسالة الحالة
+        function filterNotifications() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (!searchTerm) {
+                displayAllNotifications(allNotifications);
+                return;
+            }
+            
+            const filteredNotifications = allNotifications.filter(notification => {
+                return (notification.title?.toLowerCase() || '').includes(searchTerm) || 
+                       (notification.message?.toLowerCase() || '').includes(searchTerm) ||
+                       getTypeLabel(notification.type || '').toLowerCase().includes(searchTerm);
+            });
+            
+            displayAllNotifications(filteredNotifications);
+        }
+        
         function displayStatus(message, type) {
             const statusMessage = document.getElementById('statusMessage');
+            if (!statusMessage) return;
+            
             statusMessage.textContent = message;
             statusMessage.className = 'message-box ' + type;
             statusMessage.style.display = 'block';
             
-            // إخفاء الرسالة بعد 5 ثوان
             setTimeout(() => {
                 statusMessage.style.display = 'none';
             }, 5000);
         }
         
-        // تنسيق التاريخ
         function formatDate(date) {
+            if (!date) return 'غير محدد';
+            
             const options = {
                 year: 'numeric',
                 month: 'long',
@@ -1051,7 +1206,6 @@
             return date.toLocaleDateString('ar-SA', options);
         }
         
-        // الحصول على اسم النوع بالعربية
         function getTypeLabel(type) {
             const labels = {
                 info: 'معلومة',
@@ -1060,8 +1214,16 @@
                 welcome: 'ترحيب'
             };
             
-            return labels[type] || type;
+            return labels[type] || type || 'معلومة';
         }
+        
+        // ========== اختبار الاتصال ==========
+        window.addEventListener('load', () => {
+            console.log('الصفحة محملة، جاري اختبار الاتصال...');
+            
+            // اختبار بسيط للاتصال
+            auth.currentUser ? console.log('مستخدم مسجل') : console.log('لا يوجد مستخدم');
+        });
     </script>
 </body>
 </html>

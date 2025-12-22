@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل دخول المسؤول</title>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Tahoma, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            direction: rtl;
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: bold;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+        .btn-login {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-login:active {
+            transform: translateY(0);
+        }
+        
+        .btn-login:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .message-box {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .message-box.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .message-box.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .footer-links {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .footer-links a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .admin-note {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 25px;
+            border-right: 4px solid #667eea;
+        }
+        
+        .admin-note h4 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .admin-note ul {
+            padding-right: 20px;
+            color: #666;
+        }
+        
+        .admin-note li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="logo">
+            <h1>🔐 لوحة تحكم المسؤول</h1>
+            <p>تسجيل الدخول لإرسال الإشعارات</p>
+        </div>
+        
+        <div id="messageBox" class="message-box"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">البريد الإلكتروني:</label>
+                <input type="email" id="email" placeholder="admin@example.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">كلمة المرور:</label>
+                <input type="password" id="password" placeholder="********" required>
+            </div>
+            
+            <button type="submit" id="loginBtn" class="btn-login">
+                <span id="btnText">تسجيل الدخول</span>
+                <span id="btnLoading" class="loading" style="display:none;"></span>
+            </button>
+        </form>
+        
+        <div class="footer-links">
+            <a href="index.html" target="_blank">العودة للصفحة الرئيسية</a>
+        </div>
+        
+        <div class="admin-note">
+            <h4>ملاحظات للمسؤول:</h4>
+            <ul>
+                <li>يجب إنشاء مستخدم في Firebase Authentication أولاً</li>
+                <li>تأكد من تطابق UID مع القواعد الأمنية</li>
+                <li>بعد التسجيل سيتم توجيهك تلقائياً</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // تكوين Firebase - نفس تكوين مشروعك
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkgEiYYlmpMe0NLewulheovlTQMz5C980",
+            authDomain: "bein-42f9e.firebaseapp.com",
+            projectId: "bein-42f9e",
+            storageBucket: "bein-42f9e.firebasestorage.app",
+            messagingSenderId: "143741167050",
+            appId: "1:143741167050:web:922d3a0cddb40f67b21b33",
+            measurementId: "G-JH198SKCFS"
+        };
+
+        // تهيئة Firebase
+        let app;
+        if (!firebase.apps.length) {
+            app = firebase.initializeApp(firebaseConfig);
+        } else {
+            app = firebase.apps[0];
+        }
+        
+        // التحقق من حالة الدخول الحالية
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                // إذا كان المستخدم مسجل دخول بالفعل، توجيهه مباشرة
+                console.log("✅ المستخدم مسجل دخول بالفعل، التوجيه إلى send.html");
+                redirectToAdmin();
+            }
+        });
+
+        // معالجة نموذج تسجيل الدخول
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const messageBox = document.getElementById('messageBox');
+            const loginBtn = document.getElementById('loginBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoading = document.getElementById('btnLoading');
+            
+            // التحقق من المدخلات
+            if (!email || !password) {
+                showMessage('يرجى ملء جميع الحقول', 'error');
+                return;
+            }
+            
+            // تعطيل الزر وعرض مؤشر التحميل
+            loginBtn.disabled = true;
+            btnText.textContent = 'جاري تسجيل الدخول...';
+            btnLoading.style.display = 'inline-block';
+            
+            try {
+                // محاولة تسجيل الدخول
+                const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                console.log('✅ تسجيل الدخول ناجح:', user.uid);
+                
+                // عرض رسالة نجاح
+                showMessage('✅ تسجيل الدخول ناجح! يتم التوجيه...', 'success');
+                
+                // الانتظار قليلاً ثم التوجيه
+                setTimeout(() => {
+                    redirectToAdmin();
+                }, 1500);
+                
+            } catch (error) {
+                console.error('❌ خطأ تسجيل الدخول:', error.code, error.message);
+                
+                // عرض رسالة الخطأ المناسبة
+                let errorMessage = 'خطأ في تسجيل الدخول';
+                
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = 'البريد الإلكتروني غير مسجل';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'كلمة المرور غير صحيحة';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'البريد الإلكتروني غير صالح';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'تم تجاوز عدد المحاولات، حاول لاحقاً';
+                        break;
+                    default:
+                        errorMessage = error.message;
+                }
+                
+                showMessage('❌ ' + errorMessage, 'error');
+                
+                // إعادة تفعيل الزر
+                loginBtn.disabled = false;
+                btnText.textContent = 'تسجيل الدخول';
+                btnLoading.style.display = 'none';
+            }
+        });
+
+        // دالة لعرض الرسائل
+        function showMessage(message, type) {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message;
+            messageBox.className = 'message-box ' + type;
+        }
+
+        // دالة لتوجيه المستخدم إلى صفحة الإدارة
+        function redirectToAdmin() {
+            // حفظ حالة الدخول في localStorage (اختياري)
+            localStorage.setItem('admin_logged_in', 'true');
+            
+            // التوجيه إلى صفحة الإدارة
+            window.location.href = 'send.html';
+        }
+
+        // اختصار لوحة المفاتيح (Enter للدخول)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !document.getElementById('loginBtn').disabled) {
+                document.getElementById('loginForm').requestSubmit();
+            }
+        }); 
+
+        // نصائح للمستخدم
+        console.log("💡 تلميح: يمكنك إنشاء مستخدم في Firebase Console → Authentication → Users");
+    </script>
+</body>
+</html>

@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الصفحة الرئيسية للمشروع</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #4cc9f0;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4ade80;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            background-color: #f0f2f5;
+            color: var(--dark-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* ترويسة الصفحة */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo i {
+            font-size: 2rem;
+            color: var(--accent-color);
+        }
+        
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        /* قائمة التنقل */
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        nav a:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        nav a.active {
+            background-color: var(--accent-color);
+            color: var(--dark-color);
+        }
+        
+        /* المحتوى الرئيسي */
+        main {
+            flex: 1;
+            padding: 2rem 0;
+        }
+        
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2.5rem;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .hero h2 {
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+        
+        /* بطاقات الصفحات */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            padding: 1.5rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .card-header i {
+            font-size: 1.8rem;
+        }
+        
+        .card-content {
+            padding: 1.5rem;
+            flex: 1;
+        }
+        
+        .card-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.8rem;
+            color: var(--dark-color);
+        }
+        
+        .card-content p {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-footer {
+            padding: 1rem 1.5rem;
+            background-color: #f8f9fa;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border-radius: 30px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        /* قسم معلومات المشروع */
+        .project-info {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+        
+        .project-info h3 {
+            font-size: 1.8rem;
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .info-item i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.1);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* تذييل الصفحة */
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-top: auto;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-links a {
+            color: #ddd;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent-color);
+        }
+        
+        .copyright {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        /* تصميم متجاوب */
+        @media (max-width: 992px) {
+            .cards-container {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+            
+            .hero h2 {
+                font-size: 2.2rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            nav ul {
+                gap: 0.8rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .hero {
+                padding: 1.5rem;
+            }
+            
+            .hero h2 {
+                font-size: 1.8rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            .hero {
+                padding: 1rem;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+        
+        /* نافذة التنقل السريع */
+        .quick-nav-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+        
+        .quick-nav-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .quick-nav-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            transform: translateY(30px);
+            transition: var(--transition);
+        }
+        
+        .quick-nav-modal.active .quick-nav-content {
+            transform: translateY(0);
+        }
+        
+        .quick-nav-content h3 {
+            font-size: 1.8rem;
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+        }
+        
+        .quick-nav-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+        
+        /* زر التنقل السريع */
+        .quick-nav-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4);
+            z-index: 100;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .quick-nav-btn:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.1);
+        }
+        
+        /* رسائل التنبيه */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .alert-info {
+            background-color: rgba(76, 201, 240, 0.15);
+            color: #036;
+            border-right: 4px solid var(--accent-color);
+        }
+        
+        .alert-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: inherit;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- الترويسة -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-project-diagram"></i>
+                <h1>لوحة تحكم المشروع</h1>
+            </div>
+            
+            <nav>
+                <ul>
+                    <li><a href="#" class="active" data-page="home"><i class="fas fa-home"></i> الرئيسية</a></li>
+                    <li><a href="#" data-page="index"><i class="fas fa-globe"></i> الصفحة العامة</a></li>
+                    <li><a href="#" data-page="login"><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</a></li>
+                    <li><a href="#" data-page="admin"><i class="fas fa-user-cog"></i> لوحة الإدارة</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- المحتوى الرئيسي -->
+    <main class="container">
+        <!-- رسالة ترحيب -->
+        <div class="alert alert-info" id="welcomeAlert">
+            <div>
+                <i class="fas fa-info-circle"></i>
+                مرحبًا بك في الصفحة الرئيسية للمشروع. يمكنك التنقل بين صفحات المشروع باستخدام الأزرار أدناه.
+            </div>
+            <button class="alert-close" id="closeAlert">&times;</button>
+        </div>
+        
+        <!-- قسم البطاقات -->
+        <section class="hero">
+            <h2>مرحبًا بك في مشروعنا</h2>
+            <p>هذه الصفحة الرئيسية توفر وصولاً سريعًا ومُنظَّمًا لجميع أقسام المشروع. يمكنك الانتقال إلى أي قسم بضغطة زر واحدة.</p>
+            <button class="btn btn-primary" id="quickNavBtn">
+                <i class="fas fa-bolt"></i> التنقل السريع
+            </button>
+        </section>
+        
+        <!-- بطاقات الصفحات -->
+        <div class="cards-container">
+            <!-- بطاقة الصفحة الرئيسية -->
+            <div class="card">
+                <div class="card-header" style="background-color: var(--primary-color);">
+                    <i class="fas fa-globe"></i>
+                    <h3>الصفحة العامة</h3>
+                </div>
+                <div class="card-content">
+                    <p>الصفحة الرئيسية للموقع التي يراها جميع الزوار. تحتوي على محتوى عام حول المشروع ومزاياه.</p>
+                    <ul style="padding-right: 20px; color: #666; margin-bottom: 1.5rem;">
+                        <li>عرض محتوى المشروع</li>
+                        <li>معلومات عن الخدمات</li>
+                        <li>اتاحة التواصل مع الفريق</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="#" class="btn btn-primary" data-page="index">
+                        <i class="fas fa-external-link-alt"></i> الانتقال للصفحة
+                    </a>
+                    <span class="status active">متاحة</span>
+                </div>
+            </div>
+            
+            <!-- بطاقة تسجيل الدخول -->
+            <div class="card">
+                <div class="card-header" style="background-color: var(--success-color);">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <h3>تسجيل الدخول</h3>
+                </div>
+                <div class="card-content">
+                    <p>صفحة مخصصة لتسجيل دخول المستخدمين إلى النظام. تتطلب اسم مستخدم وكلمة مرور صحيحة.</p>
+                    <ul style="padding-right: 20px; color: #666; margin-bottom: 1.5rem;">
+                        <li>دخول المستخدمين المسجلين</li>
+                        <li>استعادة كلمة المرور</li>
+                        <li>تسجيل مستخدم جديد</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="#" class="btn btn-success" data-page="login">
+                        <i class="fas fa-external-link-alt"></i> الانتقال للصفحة
+                    </a>
+                    <span class="status active">متاحة</span>
+                </div>
+            </div>
+            
+            <!-- بطاقة لوحة الإدارة -->
+            <div class="card">
+                <div class="card-header" style="background-color: var(--warning-color);">
+                    <i class="fas fa-user-cog"></i>
+                    <h3>لوحة الإدارة</h3>
+                </div>
+                <div class="card-content">
+                    <p>لوحة تحكم إدارة المشروع المتاحة للمسؤولين فقط. تحتوي على أدوات متقدمة لإدارة المحتوى والمستخدمين.</p>
+                    <ul style="padding-right: 20px; color: #666; margin-bottom: 1.5rem;">
+                        <li>إدارة المستخدمين</li>
+                        <li>مراقبة الإحصائيات</li>
+                        <li>تعديل إعدادات النظام</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="#" class="btn btn-warning" data-page="admin">
+                        <i class="fas fa-external-link-alt"></i> الانتقال للصفحة
+                    </a>
+                    <span class="status">يتطلب صلاحيات</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- معلومات المشروع -->
+        <section class="project-info">
+            <h3><i class="fas fa-info-circle"></i> معلومات المشروع</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <i class="fas fa-code"></i>
+                    <div>
+                        <h4>تقنيات المستخدمة</h4>
+                        <p>HTML5, CSS3, JavaScript</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-sitemap"></i>
+                    <div>
+                        <h4>هيكل المشروع</h4>
+                        <p>4 صفحات رئيسية</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <div>
+                        <h4>آخر تحديث</h4>
+                        <p>ديسمبر 2023</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-users"></i>
+                    <div>
+                        <h4>الفريق</h4>
+                        <p>مطور ويب واحد</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- التذييل -->
+    <footer>
+        <div class="container footer-content">
+            <div class="logo">
+                <i class="fas fa-project-diagram"></i>
+                <h2>مشروع الويب</h2>
+            </div>
+            
+            <div class="footer-links">
+                <a href="#" data-page="home">الرئيسية</a>
+                <a href="#" data-page="index">الصفحة العامة</a>
+                <a href="#" data-page="login">تسجيل الدخول</a>
+                <a href="#" data-page="admin">لوحة الإدارة</a>
+            </div>
+            
+            <p class="copyright">جميع الحقوق محفوظة &copy; 2023 | مشروع تطوير الويب</p>
+        </div>
+    </footer>
+    
+    <!-- زر التنقل السريع -->
+    <button class="quick-nav-btn" id="floatingQuickNav">
+        <i class="fas fa-bolt"></i>
+    </button>
+    
+    <!-- نافذة التنقل السريع -->
+    <div class="quick-nav-modal" id="quickNavModal">
+        <button class="close-modal" id="closeModal">&times;</button>
+        <div class="quick-nav-content">
+            <h3><i class="fas fa-bolt"></i> التنقل السريع</h3>
+            <p>اختر الصفحة التي تريد الانتقال إليها:</p>
+            
+            <div class="quick-nav-buttons">
+                <button class="btn btn-primary" data-page="index" style="justify-content: center;">
+                    <i class="fas fa-globe"></i> الصفحة العامة (index.html)
+                </button>
+                
+                <button class="btn btn-success" data-page="login" style="justify-content: center;">
+                    <i class="fas fa-sign-in-alt"></i> تسجيل الدخول (login.html)
+                </button>
+                
+                <button class="btn btn-warning" data-page="admin" style="justify-content: center;">
+                    <i class="fas fa-user-cog"></i> لوحة الإدارة (admin.html)
+                </button>
+            </div>
+            
+            <p style="color: #666; font-size: 0.9rem;">سيتم توجيهك إلى الصفحة المحددة. تأكد من حفظ التغييرات أولاً.</p>
+        </div>
+    </div>
+
+    <script>
+        // عناصر DOM
+        const welcomeAlert = document.getElementById('welcomeAlert');
+        const closeAlertBtn = document.getElementById('closeAlert');
+        const quickNavBtn = document.getElementById('quickNavBtn');
+        const floatingQuickNav = document.getElementById('floatingQuickNav');
+        const quickNavModal = document.getElementById('quickNavModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const navLinks = document.querySelectorAll('nav a, .card-footer a, .footer-links a, .quick-nav-buttons button');
+        
+        // إغلاق رسالة الترحيب
+        closeAlertBtn.addEventListener('click', () => {
+            welcomeAlert.style.opacity = '0';
+            setTimeout(() => {
+                welcomeAlert.style.display = 'none';
+            }, 300);
+        });
+        
+        // فتح نافذة التنقل السريع
+        function openQuickNavModal() {
+            quickNavModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // إغلاق نافذة التنقل السريع
+        function closeQuickNavModal() {
+            quickNavModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // إضافة مستمعي الأحداث لأزرار التنقل السريع
+        quickNavBtn.addEventListener('click', openQuickNavModal);
+        floatingQuickNav.addEventListener('click', openQuickNavModal);
+        closeModalBtn.addEventListener('click', closeQuickNavModal);
+        
+        // إغلاق النافذة عند النقر خارج المحتوى
+        quickNavModal.addEventListener('click', (e) => {
+            if (e.target === quickNavModal) {
+                closeQuickNavModal();
+            }
+        });
+        
+        // محاكاة التنقل بين الصفحات
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // الحصول على الصفحة المستهدفة
+                const targetPage = link.getAttribute('data-page');
+                
+                // تحديث حالة التنقل النشط
+                document.querySelectorAll('nav a').forEach(navLink => {
+                    navLink.classList.remove('active');
+                });
+                
+                if (targetPage === 'home') {
+                    // إذا كنا في الصفحة الرئيسية بالفعل
+                    document.querySelector('nav a[data-page="home"]').classList.add('active');
+                    showAlert('أنت بالفعل في الصفحة الرئيسية.', 'info');
+                } else {
+                    // محاكاة الانتقال لصفحة أخرى
+                    const pageNames = {
+                                'index': 'الصفحة العامة (send.html)',
+                        'login': 'صفحة تسجيل الدخول (login.html)',
+                        'admin': 'لوحة الإدارة (admin.html)'
+                    };
+                    
+                    // إظهار رسالة محاكاة
+                    showAlert(`جاري توجيهك إلى ${pageNames[targetPage]}...`, 'info');
+                    
+                    // محاكاة التحميل
+                    setTimeout(() => {
+                        showAlert(`تم التحميل بنجاح! أنت الآن في ${pageNames[targetPage]}.`, 'success');
+                        
+                        // تحديث رابط التنقل النشط
+                        if (targetPage !== 'home') {
+                            document.querySelector(`nav a[data-page="${targetPage}"]`).classList.add('active');
+                        }
+                    }, 800);
+                    
+                    // إغلاق نافذة التنقل السريع إذا كانت مفتوحة
+                    closeQuickNavModal();
+                }
+            });
+        });
+        
+        // وظيفة لعرض رسائل التنبيه
+        function showAlert(message, type = 'info') {
+            // إنشاء عنصر التنبيه
+            const alertEl = document.createElement('div');
+            alertEl.className = `alert alert-${type}`;
+            
+            // تحديد الأيقونة بناءً على النوع
+            let icon = 'info-circle';
+            if (type === 'success') icon = 'check-circle';
+            if (type === 'warning') icon = 'exclamation-triangle';
+            if (type === 'danger') icon = 'times-circle';
+            
+            alertEl.innerHTML = `
+                <div>
+                    <i class="fas fa-${icon}"></i>
+                    ${message}
+                </div>
+                <button class="alert-close">&times;</button>
+            `;
+            
+            // إضافة التنبيه بعد رسالة الترحيب
+            welcomeAlert.parentNode.insertBefore(alertEl, welcomeAlert.nextSibling);
+            
+            // إضافة وظيفة الإغلاق للزر الجديد
+            alertEl.querySelector('.alert-close').addEventListener('click', () => {
+                alertEl.style.opacity = '0';
+                setTimeout(() => {
+                    alertEl.remove();
+                }, 300);
+            });
+            
+            // إزالة التنبيه تلقائيًا بعد 5 ثوانٍ
+            setTimeout(() => {
+                if (alertEl.parentNode) {
+                    alertEl.style.opacity = '0';
+                    setTimeout(() => {
+                        if (alertEl.parentNode) {
+                            alertEl.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+        
+        // إضافة تأثيرات عند التمرير
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.15)';
+            } else {
+                header.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+            }
+        });
+        
+        // رسالة ترحيب عند التحميل
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                showAlert('يمكنك استخدام زر "التنقل السريع" للوصول السريع إلى أي صفحة في المشروع.', 'info');
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار البث - وسيل لايف برو</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+    <style>
+        body {
+            background: #0f0f1e;
+            color: #fff;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .stream-test {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .test-result {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .test-success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+        }
+        
+        .test-error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+        }
+        
+        .test-warning {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="text-center mb-4"><i class="uil uil-search"></i> اختبار جودة البث</h1>
+        
+        <div id="testInfo" class="alert alert-info">
+            <i class="uil uil-info-circle"></i> جاري تحليل رابط البث...
+        </div>
+        
+        <div class="stream-test">
+            <h3>معلومات الرابط</h3>
+            <div id="urlInfo"></div>
+            
+            <h3 class="mt-4">نتائج الاختبار</h3>
+            <div id="testResults"></div>
+            
+            <div class="text-center mt-4">
+                <button id="closeTest" class="btn btn-primary">
+                    <i class="uil uil-check"></i> إنهاء الاختبار
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // الحصول على البيانات من URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const streamUrl = urlParams.get('url');
+        const channelName = urlParams.get('name');
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!streamUrl) {
+                showError('لم يتم تحديد رابط البث');
+                return;
+            }
+            
+            // عرض معلومات الرابط
+            document.getElementById('urlInfo').innerHTML = `
+                <div class="alert alert-dark">
+                    <strong>اسم القناة:</strong> ${channelName || 'غير محدد'}<br>
+                    <strong>الرابط:</strong> <small>${streamUrl.substring(0, 100)}...</small><br>
+                    <strong>نوع البث:</strong> ${getStreamType(streamUrl)}
+                </div>
+            `;
+            
+            // بدء اختبار البث
+            await testStream(streamUrl);
+            
+            // زر الإغلاق
+            document.getElementById('closeTest').addEventListener('click', () => {
+                window.close();
+            });
+        });
+        
+        function getStreamType(url) {
+            if (url.includes('.m3u8')) return 'HLS Stream';
+            if (url.includes('.mpd')) return 'DASH Stream';
+            if (url.includes('.mp4')) return 'MP4 Video';
+            if (url.includes('.mpeg')) return 'MPEG Stream';
+            return 'Direct Stream';
+        }
+        
+        async function testStream(url) {
+            showInfo('جاري اختبار البث...');
+            
+            try {
+                // اختبار HTTP Headers
+                const response = await fetch(url, { method: 'HEAD' });
+                
+                if (response.ok) {
+                    const contentType = response.headers.get('content-type');
+                    const contentLength = response.headers.get('content-length');
+                    
+                    showResult('success', `
+                        <h5><i class="uil uil-check-circle text-success"></i> الرابط يعمل بشكل صحيح</h5>
+                        <p><strong>نوع المحتوى:</strong> ${contentType || 'غير محدد'}</p>
+                        <p><strong>حجم المحتوى:</strong> ${contentLength ? formatBytes(contentLength) : 'غير محدد'}</p>
+                        <p><strong>الحالة:</strong> ${response.status} ${response.statusText}</p>
+                    `);
+                    
+                    // اختبار إضافي للـ HLS
+                    if (url.includes('.m3u8')) {
+                        showInfo('جاري تحليل ملف HLS...');
+                        await testHLSPlaylist(url);
+                    }
+                    
+                } else {
+                    showResult('error', `
+                        <h5><i class="uil uil-times-circle text-danger"></i> مشكلة في الرابط</h5>
+                        <p><strong>الحالة:</strong> ${response.status} ${response.statusText}</p>
+                        <p>الرابط لا يستجيب بشكل صحيح</p>
+                    `);
+                }
+                
+            } catch (error) {
+                showResult('error', `
+                    <h5><i class="uil uil-times-circle text-danger"></i> خطأ في الاتصال</h5>
+                    <p><strong>الخطأ:</strong> ${error.message}</p>
+                    <p>تعذر الوصول إلى رابط البث</p>
+                `);
+            }
+        }
+        
+        async function testHLSPlaylist(url) {
+            try {
+                const response = await fetch(url);
+                const playlist = await response.text();
+                
+                // تحليل ملف m3u8
+                const lines = playlist.split('\n');
+                const variants = lines.filter(line => line.includes('.m3u8')).length;
+                const segments = lines.filter(line => line.includes('.ts') || line.includes('.mp4')).length;
+                
+                showResult('success', `
+                    <h6><i class="uil uil-file-alt text-info"></i> تحليل ملف HLS</h6>
+                    <p><strong>عدد التنسيقات:</strong> ${variants}</p>
+                    <p><strong>عدد القطع:</strong> ${segments}</p>
+                    <p><strong>حجم الملف:</strong> ${formatBytes(playlist.length)}</p>
+                `);
+                
+            } catch (error) {
+                showResult('warning', `
+                    <h6><i class="uil uil-exclamation-triangle text-warning"></i> تعذر تحليل ملف HLS</h6>
+                    <p>${error.message}</p>
+                `);
+            }
+        }
+        
+        function showResult(type, html) {
+            const resultsDiv = document.getElementById('testResults');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result test-${type}`;
+            resultDiv.innerHTML = html;
+            resultsDiv.appendChild(resultDiv);
+        }
+        
+        function showInfo(message) {
+            document.getElementById('testInfo').innerHTML = `
+                <i class="uil uil-info-circle"></i> ${message}
+            `;
+        }
+        
+        function showError(message) {
+            document.getElementById('testResults').innerHTML = `
+                <div class="test-result test-error">
+                    <h5><i class="uil uil-times-circle"></i> خطأ</h5>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+        
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 بايت';
+            const k = 1024;
+            const sizes = ['بايت', 'كيلوبايت', 'ميجابايت', 'جيجابايت'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html>
