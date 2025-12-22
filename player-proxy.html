@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مشغل الوسيط - وسيل لايف برو</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2F2562, #42318F);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #654FD4;
+        }
+        
+        .header h1 {
+            font-size: 1.3rem;
+        }
+        
+        .close-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        .container {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .player-box {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .status {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: rgba(101, 79, 212, 0.2);
+            border: 1px solid #654FD4;
+        }
+        
+        .status h3 {
+            color: #654FD4;
+            margin-bottom: 10px;
+        }
+        
+        .url-display {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #B8B8B8;
+        }
+        
+        .methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .method {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(101, 79, 212, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .method:hover {
+            background: rgba(101, 79, 212, 0.2);
+            border-color: #654FD4;
+            transform: translateY(-2px);
+        }
+        
+        .method i {
+            font-size: 2.5rem;
+            color: #654FD4;
+            margin-bottom: 10px;
+        }
+        
+        .method h4 {
+            margin-bottom: 5px;
+            color: white;
+        }
+        
+        .method p {
+            color: #B8B8B8;
+            font-size: 0.9rem;
+        }
+        
+        .iframe-container {
+            width: 100%;
+            height: 400px;
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #000;
+        }
+        
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #654FD4;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 15px;
+            color: #B8B8B8;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+</head>
+<body>
+    <div class="header">
+        <h1>وسيل لايف برو - مشغل الوسيط</h1>
+        <button class="close-btn" onclick="window.close()">
+            <i class="uil uil-times"></i>
+        </button>
+    </div>
+    
+    <div class="container">
+        <div class="player-box">
+            <div class="status">
+                <h3><i class="uil uil-info-circle"></i> معلومات البث</h3>
+                <p>تم تحميل رابط البث بنجاح. اختر طريقة التشغيل المناسبة:</p>
+            </div>
+            
+            <div class="url-display" id="urlDisplay">
+                جاري التحميل...
+            </div>
+            
+            <div class="methods">
+                <!-- الطريقة 1: فتح في نافذة جديدة -->
+                <div class="method" onclick="openInNewWindow()">
+                    <i class="uil uil-external-link-alt"></i>
+                    <h4>نافذة جديدة</h4>
+                    <p>فتح الرابط مباشرة في نافذة متصفح جديدة</p>
+                </div>
+                
+                <!-- الطريقة 2: مشغل VLC -->
+                <div class="method" onclick="openInVLC()">
+                    <i class="uil uil-play-circle"></i>
+                    <h4>مشغل VLC</h4>
+                    <p>فتح في تطبيق VLC إذا كان مثبتاً</p>
+                </div>
+                
+                <!-- الطريقة 3: تحميل الملف -->
+                <div class="method" onclick="downloadFile()">
+                    <i class="uil uil-download-alt"></i>
+                    <h4>تحميل الملف</h4>
+                    <p>تحميل ملف m3u8 وتشغيله محلياً</p>
+                </div>
+                
+                <!-- الطريقة 4: iFrame تجريبي -->
+                <div class="method" onclick="tryIframe()">
+                    <i class="uil uil-tv-retro"></i>
+                    <h4>تجربة iFrame</h4>
+                    <p>محاولة تشغيل عبر iFrame (تجريبي)</p>
+                </div>
+            </div>
+            
+            <div class="iframe-container" id="iframeContainer" style="display: none;">
+                <iframe id="streamFrame" allow="autoplay" allowfullscreen></iframe>
+            </div>
+            
+            <div class="loading" id="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>جاري محاولة التشغيل...</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>وسيل لايف برو - إذا لم تعمل الطرق أعلاه، جرب تطبيق XPola Player</p>
+    </div>
+
+    <script>
+        // الحصول على رابط البث من URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const streamUrl = urlParams.get('stream');
+        
+        // عرض رابط البث
+        const urlDisplay = document.getElementById('urlDisplay');
+        urlDisplay.textContent = streamUrl || 'لم يتم تحديد رابط';
+        
+        // إذا كان هناك رابط، نجرب الطريقة الأولى تلقائياً
+        if (streamUrl) {
+            setTimeout(() => {
+                openInNewWindow();
+            }, 1000);
+        }
+        
+        function openInNewWindow() {
+            if (!streamUrl) {
+                alert('لا يوجد رابط بث');
+                return;
+            }
+            
+            console.log('🔗 فتح في نافذة جديدة:', streamUrl);
+            
+            // فتح في نافذة جديدة مع محاولة bypass لبعض القيود
+            const newWindow = window.open('', '_blank');
+            
+            // إنشاء صفحة بسيطة للنافذة الجديدة
+            const htmlContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>وسيل لايف برو - البث المباشر</title>
+                    <style>
+                        body { margin: 0; padding: 20px; background: #000; color: white; }
+                        .container { max-width: 1000px; margin: 0 auto; }
+                        h1 { color: #654FD4; }
+                        .player { width: 100%; height: 500px; background: #000; }
+                        video { width: 100%; height: 100%; }
+                        .info { background: rgba(101, 79, 212, 0.1); padding: 15px; border-radius: 8px; margin: 20px 0; }
+                        .buttons { margin-top: 20px; }
+                        button { background: #654FD4; color: white; border: none; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h1>🔴 البث المباشر - وسيل لايف برو</h1>
+                        
+                        <div class="info">
+                            <h3>تعليمات التشغيل:</h3>
+                            <ol>
+                                <li>إذا لم يبدأ التشغيل تلقائياً، انقر على زر التشغيل</li>
+                                <li>للتشغيل بكامل الشاشة، انقر على أيقونة Fullscreen</li>
+                                <li>إذا لم يعمل، جرب زر "فتح في مشغل خارجي"</li>
+                            </ol>
+                        </div>
+                        
+                        <div class="player">
+                            <video id="videoPlayer" controls autoplay playsinline>
+                                <source src="${streamUrl}" type="application/x-mpegURL">
+                                متصفحك لا يدعم تشغيل هذا النوع من البث.
+                            </video>
+                        </div>
+                        
+                        <div class="buttons">
+                            <button onclick="document.getElementById('videoPlayer').play()">
+                                ▶ تشغيل
+                            </button>
+                            <button onclick="document.getElementById('videoPlayer').requestFullscreen()">
+                                📺 ملء الشاشة
+                            </button>
+                            <button onclick="window.open('vlc://${streamUrl}')">
+                                🔗 فتح في VLC
+                            </button>
+                            <button onclick="window.close()">
+                                ✕ إغلاق
+                            </button>
+                        </div>
+                        
+                        <div style="margin-top: 30px; color: #888; font-size: 0.9rem;">
+                            <p>رابط البث: ${streamUrl}</p>
+                            <p>إذا استمرت المشكلة، نوصي باستخدام تطبيق XPola Player</p>
+                        </div>
+                    </div>
+                    
+                    <script>
+                        // محاولة التشغيل التلقائي
+                        const video = document.getElementById('videoPlayer');
+                        video.play().catch(e => {
+                            console.log('⚠️ يحتاج تفاعل:', e);
+                        });
+                        
+                        // إضافة headers إضافية إذا أمكن
+                        Object.defineProperty(HTMLMediaElement.prototype, 'src', {
+                            set: function(url) {
+                                if (url.includes('.m3u8')) {
+                                    // محاولة bypass لبعض القيود
+                                    const xhr = new XMLHttpRequest();
+                                    xhr.open('GET', url, true);
+                                    xhr.setRequestHeader('Accept', '*/*');
+                                    xhr.setRequestHeader('User-Agent', 'Mozilla/5.0');
+                                    xhr.onload = function() {
+                                        if (xhr.status === 200) {
+                                            const blob = new Blob([xhr.responseText], { type: 'application/vnd.apple.mpegurl' });
+                                            const blobUrl = URL.createObjectURL(blob);
+                                            this.setAttribute('src', blobUrl);
+                                        }
+                                    }.bind(this);
+                                    xhr.send();
+                                } else {
+                                    this.setAttribute('src', url);
+                                }
+                            }
+                        });
+                    <\/script>
+                </body>
+                </html>
+            `;
+            
+            newWindow.document.write(htmlContent);
+            newWindow.document.close();
+        }
+        
+        function openInVLC() {
+            if (!streamUrl) {
+                alert('لا يوجد رابط بث');
+                return;
+            }
+            
+            console.log('🎬 محاولة فتح في VLC');
+            
+            // محاولة فتح في VLC عبر protocol
+            const vlcUrl = `vlc://${streamUrl}`;
+            
+            // محاولة فتح في VLC
+            window.location.href = vlcUrl;
+            
+            // إذا فشل، نعرض رسالة
+            setTimeout(() => {
+                alert('إذا لم يفتح VLC تلقائياً:\n1. تأكد من تثبيت VLC\n2. انسخ الرابط وافتحه من داخل VLC\n3. أو استخدم طريقة أخرى');
+            }, 1000);
+        }
+        
+        function downloadFile() {
+            if (!streamUrl) {
+                alert('لا يوجد رابط بث');
+                return;
+            }
+            
+            console.log('⬇️ تحميل الملف');
+            
+            // إنشاء رابط تحميل
+            const link = document.createElement('a');
+            link.href = streamUrl;
+            link.download = 'bein_sport_stream.m3u8';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // عرض تعليمات
+            alert('تم بدء التحميل. بعد اكتمال التحميل:\n\n' +
+                  '1. افتح VLC Media Player\n' +
+                  '2. اضغط على Ctrl+O (أو Media > Open File)\n' +
+                  '3. اختر الملف الذي تم تحميله\n' +
+                  '4. استمتع بالمشاهدة!');
+        }
+        
+        function tryIframe() {
+            if (!streamUrl) {
+                alert('لا يوجد رابط بث');
+                return;
+            }
+            
+            console.log('🔲 محاولة iFrame');
+            
+            const iframeContainer = document.getElementById('iframeContainer');
+            const loading = document.getElementById('loading');
+            const iframe = document.getElementById('streamFrame');
+            
+            // إظهار التحميل
+            iframeContainer.style.display = 'block';
+            loading.style.display = 'flex';
+            
+            // إنشاء صفحة وسيطة للـ iframe
+            const proxyPage = createProxyPage(streamUrl);
+            
+            // تحويل إلى data URL
+            const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(proxyPage)}`;
+            
+            // تعيين مصدر الـ iframe
+            iframe.src = dataUrl;
+            
+            // إخفاء التحميل بعد وقت
+            setTimeout(() => {
+                loading.style.display = 'none';
+            }, 3000);
+        }
+        
+        function createProxyPage(url) {
+            return `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <meta name="referrer" content="no-referrer">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>مشغل البث</title>
+                    <style>
+                        body { 
+                            margin: 0; 
+                            padding: 0; 
+                            background: #000;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            min-height: 100vh;
+                        }
+                        
+                        .container {
+                            width: 100%;
+                            max-width: 800px;
+                            padding: 20px;
+                        }
+                        
+                        .player-container {
+                            width: 100%;
+                            background: #000;
+                            border-radius: 10px;
+                            overflow: hidden;
+                            margin-bottom: 20px;
+                        }
+                        
+                        video {
+                            width: 100%;
+                            height: auto;
+                            max-height: 400px;
+                            background: #000;
+                        }
+                        
+                        .controls {
+                            display: flex;
+                            gap: 10px;
+                            justify-content: center;
+                            flex-wrap: wrap;
+                            margin-bottom: 20px;
+                        }
+                        
+                        button {
+                            background: #654FD4;
+                            color: white;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 5px;
+                            cursor: pointer;
+                            font-size: 1rem;
+                        }
+                        
+                        button:hover {
+                            background: #42318F;
+                        }
+                        
+                        .info {
+                            background: rgba(101, 79, 212, 0.1);
+                            padding: 15px;
+                            border-radius: 8px;
+                            color: white;
+                            text-align: center;
+                        }
+                        
+                        .loading {
+                            color: white;
+                            text-align: center;
+                            padding: 40px;
+                        }
+                        
+                        .error {
+                            color: #ff6b6b;
+                            text-align: center;
+                            padding: 20px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="player-container">
+                            <video id="videoPlayer" controls playsinline>
+                                متصفحك لا يدعم تشغيل الفيديو.
+                            </video>
+                        </div>
+                        
+                        <div class="controls">
+                            <button onclick="playVideo()">▶ تشغيل</button>
+                            <button onclick="toggleFullscreen()">📺 ملء الشاشة</button>
+                            <button onclick="openInNewTab()">🔗 نافذة جديدة</button>
+                        </div>
+                        
+                        <div class="info">
+                            <h3>نصائح للتشغيل:</h3>
+                            <p>1. اضغط على زر "تشغيل" لبدء البث</p>
+                            <p>2. استخدم زر "ملء الشاشة" لأفضل مشاهدة</p>
+                            <p>3. إذا لم يعمل، جرب "نافذة جديدة"</p>
+                        </div>
+                        
+                        <div class="loading" id="loading">
+                            <p>⏳ جاهز للتشغيل. اضغط على زر التشغيل.</p>
+                        </div>
+                        
+                        <div class="error" id="error" style="display: none;"></div>
+                    </div>
+
+                    <script>
+                        const video = document.getElementById('videoPlayer');
+                        const loading = document.getElementById('loading');
+                        const errorDiv = document.getElementById('error');
+                        const streamUrl = '${url}';
+                        
+                        // دالة التشغيل
+                        function playVideo() {
+                            console.log('▶️ محاولة تشغيل:', streamUrl);
+                            
+                            // محاولة استخدام fetch مع headers
+                            fetch(streamUrl, {
+                                method: 'GET',
+                                mode: 'no-cors',
+                                headers: {
+                                    'Accept': '*/*',
+                                    'User-Agent': 'Mozilla/5.0'
+                                }
+                            }).then(response => {
+                                console.log('✅ استجابة:', response);
+                                
+                                // تعيين مصدر الفيديو
+                                video.src = streamUrl;
+                                video.type = 'application/x-mpegURL';
+                                
+                                // محاولة التشغيل
+                                video.play().then(() => {
+                                    console.log('✅ بدأ التشغيل');
+                                    loading.style.display = 'none';
+                                }).catch(e => {
+                                    console.log('⚠️ يحتاج تفاعل:', e);
+                                    errorDiv.textContent = 'انقر على الفيديو للبدء';
+                                    errorDiv.style.display = 'block';
+                                });
+                                
+                            }).catch(error => {
+                                console.error('❌ خطأ:', error);
+                                
+                                // محاولة بديلة
+                                video.src = streamUrl;
+                                video.type = 'application/x-mpegURL';
+                                
+                                errorDiv.textContent = 'تم تحميل الفيديو. اضغط على زر التشغيل في الفيديو.';
+                                errorDiv.style.display = 'block';
+                                loading.style.display = 'none';
+                            });
+                        }
+                        
+                        // دالة ملء الشاشة
+                        function toggleFullscreen() {
+                            if (!document.fullscreenElement) {
+                                video.requestFullscreen().catch(e => {
+                                    console.log('⚠️ فشل fullscreen:', e);
+                                });
+                            } else {
+                                document.exitFullscreen();
+                            }
+                        }
+                        
+                        // دالة نافذة جديدة
+                        function openInNewTab() {
+                            window.open(streamUrl, '_blank');
+                        }
+                        
+                        // محاولة التشغيل التلقائي عند التحميل
+                        window.addEventListener('load', function() {
+                            setTimeout(playVideo, 1000);
+                        });
+                        
+                        // إخفاء التحميل عند بدء التشغيل
+                        video.addEventListener('playing', function() {
+                            loading.style.display = 'none';
+                            errorDiv.style.display = 'none';
+                        });
+                    <\/script>
+                </body>
+                </html>
+            `;
+        }
+    </script>
+</body>
+</html>

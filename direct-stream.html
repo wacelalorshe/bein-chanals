@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تشغيل مباشر - وسيل لايف برو</title>
+    <style>
+        body { margin: 0; padding: 20px; background: #000; color: white; font-family: Arial; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { color: #654FD4; text-align: center; }
+        .player { width: 100%; background: #000; margin: 20px 0; }
+        video { width: 100%; height: auto; max-height: 70vh; }
+        .controls { text-align: center; margin: 20px 0; }
+        button { background: #654FD4; color: white; border: none; padding: 12px 24px; margin: 5px; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #42318F; }
+        .info { background: rgba(101, 79, 212, 0.1); padding: 15px; border-radius: 8px; margin: 20px 0; }
+        .url { background: #111; padding: 10px; border-radius: 5px; font-family: monospace; word-break: break-all; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔴 وسيل لايف برو - التشغيل المباشر</h1>
+        
+        <div class="info">
+            <h3>🎯 تعليمات سريعة:</h3>
+            <p>1. اضغط على زر ▶ <strong>تشغيل الآن</strong></p>
+            <p>2. إذا لم يعمل، جرب زر 🔗 <strong>فتح في نافذة جديدة</strong></p>
+            <p>3. للتشغيل بكامل الشاشة، اضغط على أيقونة 📺 في الفيديو</p>
+        </div>
+        
+        <div class="player">
+            <video id="videoPlayer" controls autoplay playsinline>
+                جاري تحميل البث...
+            </video>
+        </div>
+        
+        <div class="controls">
+            <button onclick="playStream()">▶ تشغيل الآن</button>
+            <button onclick="openStream()">🔗 فتح في نافذة جديدة</button>
+            <button onclick="fullscreen()">📺 ملء الشاشة</button>
+            <button onclick="window.close()">✕ إغلاق</button>
+        </div>
+        
+        <div class="info">
+            <h3>📡 رابط البث:</h3>
+            <div class="url" id="streamUrl"></div>
+            <p style="margin-top: 10px; color: #888;">
+                إذا استمرت المشكلة، نوصي بـ:<br>
+                1. استخدام تطبيق <strong>XPola Player</strong><br>
+                2. أو تنزيل <strong>VLC Media Player</strong>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // الحصول على رابط البث من URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const streamUrl = urlParams.get('stream');
+        
+        // عرض رابط البث
+        document.getElementById('streamUrl').textContent = streamUrl || 'لم يتم تحديد رابط';
+        
+        const video = document.getElementById('videoPlayer');
+        
+        // دالة التشغيل الرئيسية
+        function playStream() {
+            if (!streamUrl) {
+                alert('لا يوجد رابط بث');
+                return;
+            }
+            
+            console.log('🎬 محاولة تشغيل:', streamUrl);
+            
+            // طريقة 1: استخدام src مباشرة
+            video.src = streamUrl;
+            video.type = 'application/x-mpegURL';
+            
+            // محاولة التشغيل
+            video.play().then(() => {
+                console.log('✅ بدأ التشغيل بنجاح');
+            }).catch(error => {
+                console.log('⚠️ فشل التشغيل التلقائي:', error);
+                
+                // طريقة 2: استخدام blob
+                tryAlternativeMethod();
+            });
+        }
+        
+        function tryAlternativeMethod() {
+            console.log('🔄 تجربة طريقة بديلة');
+            
+            // محاولة fetch مع no-cors
+            fetch(streamUrl, {
+                mode: 'no-cors',
+                headers: {
+                    'Accept': '*/*',
+                    'User-Agent': 'Mozilla/5.0'
+                }
+            }).then(() => {
+                // إذا وصلنا هنا، الرابط يعمل
+                video.src = streamUrl;
+                video.load();
+                
+                alert('تم تحميل البث. اضغط على زر التشغيل في الفيديو.');
+            }).catch(() => {
+                // فشل جميع المحاولات
+                alert('تعذر الوصول للبث مباشرة. جرب "فتح في نافذة جديدة".');
+            });
+        }
+        
+        function openStream() {
+            if (!streamUrl) {
+                alert('لا يوجد رابط بث');
+                return;
+            }
+            
+            // فتح في نافذة جديدة جداً بسيطة
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head><title>البث المباشر</title></head>
+                <body style="margin:0;background:#000;">
+                    <video controls autoplay style="width:100vw;height:100vh;">
+                        <source src="${streamUrl}" type="application/x-mpegURL">
+                    </video>
+                    <script>
+                        document.querySelector('video').play().catch(e => console.log(e));
+                    <\/script>
+                </body>
+                </html>
+            `);
+            newWindow.document.close();
+        }
+        
+        function fullscreen() {
+            if (video.requestFullscreen) {
+                video.requestFullscreen();
+            } else if (video.webkitRequestFullscreen) {
+                video.webkitRequestFullscreen();
+            } else if (video.msRequestFullscreen) {
+                video.msRequestFullscreen();
+            }
+        }
+        
+        // التشغيل التلقائي عند تحميل الصفحة
+        window.addEventListener('load', function() {
+            setTimeout(playStream, 1000);
+        });
+    </script>
+</body>
+</html>
