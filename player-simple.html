@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مشغل بسيط - وسيل لايف برو</title>
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2F2562, #42318F);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #654FD4;
+        }
+        
+        .channel-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .channel-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #654FD4;
+        }
+        
+        .channel-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .channel-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .close-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .player-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .video-wrapper {
+            flex: 1;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        #videoPlayer {
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #654FD4;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .controls {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .controls-title {
+            color: #654FD4;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .methods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .method {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(101, 79, 212, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .method:hover {
+            background: rgba(101, 79, 212, 0.2);
+            border-color: #654FD4;
+            transform: translateY(-2px);
+        }
+        
+        .method-icon {
+            font-size: 2rem;
+            color: #654FD4;
+            margin-bottom: 10px;
+        }
+        
+        .method-title {
+            color: white;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+        
+        .method-desc {
+            color: #B8B8B8;
+            font-size: 0.9rem;
+        }
+        
+        .url-display {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            word-break: break-all;
+        }
+        
+        .url-label {
+            color: #B8B8B8;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .url-text {
+            color: #654FD4;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 15px;
+            color: #B8B8B8;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .player-container {
+                padding: 10px;
+            }
+            
+            .methods-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .channel-name {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="channel-info">
+            <div class="channel-logo" id="channelLogo">
+                <img src="" alt="Channel Logo">
+            </div>
+            <div class="channel-name" id="channelName">جاري التحميل...</div>
+        </div>
+        <button class="close-btn" onclick="window.close()">
+            <i class="uil uil-times"></i>
+        </button>
+    </div>
+    
+    <div class="player-container">
+        <div class="url-display">
+            <span class="url-label">رابط البث:</span>
+            <code class="url-text" id="streamUrl">جاري التحميل...</code>
+        </div>
+        
+        <div class="video-wrapper">
+            <video id="videoPlayer" controls autoplay playsinline>
+                متصفحك لا يدعم تشغيل الفيديو.
+            </video>
+            
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>جاري تحميل البث...</p>
+                <small>يرجى الانتظار</small>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <h3 class="controls-title">
+                <i class="uil uil-setting"></i> خيارات التشغيل
+            </h3>
+            
+            <div class="methods-grid">
+                <!-- الطريقة 1: HLS.js -->
+                <div class="method" onclick="playWithHLS()">
+                    <div class="method-icon">
+                        <i class="uil uil-tv-retro"></i>
+                    </div>
+                    <h4 class="method-title">HLS.js Player</h4>
+                    <p class="method-desc">استخدام مكتبة HLS.js للتشغيل (مباشر)</p>
+                </div>
+                
+                <!-- الطريقة 2: Native HLS -->
+                <div class="method" onclick="playNative()">
+                    <div class="method-icon">
+                        <i class="uil uil-play-circle"></i>
+                    </div>
+                    <h4 class="method-title">تشغيل أصلي</h4>
+                    <p class="method-desc">استخدام مشغل المتصفح الأصلي</p>
+                </div>
+                
+                <!-- الطريقة 3: External Player -->
+                <div class="method" onclick="openExternal()">
+                    <div class="method-icon">
+                        <i class="uil uil-external-link-alt"></i>
+                    </div>
+                    <h4 class="method-title">مشغل خارجي</h4>
+                    <p class="method-desc">فتح الرابط في مشغل خارجي</p>
+                </div>
+                
+                <!-- الطريقة 4: Download -->
+                <div class="method" onclick="downloadStream()">
+                    <div class="method-icon">
+                        <i class="uil uil-download-alt"></i>
+                    </div>
+                    <h4 class="method-title">تحميل الملف</h4>
+                    <p class="method-desc">تحميل ملف m3u8 وتشغيله محلياً</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>وسيل لايف برو - مشغل البث البسيط</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.10/dist/hls.min.js"></script>
+    <script>
+        // الحصول على البيانات من URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const streamUrl = urlParams.get('stream');
+        const channelName = urlParams.get('name') || 'بث مباشر';
+        const channelLogo = urlParams.get('logo');
+        
+        // تحديث الواجهة
+        document.getElementById('channelName').textContent = channelName;
+        document.getElementById('streamUrl').textContent = streamUrl || 'غير محدد';
+        
+        if (channelLogo) {
+            document.getElementById('channelLogo').innerHTML = `
+                <img src="${channelLogo}" alt="${channelName}"
+                     onerror="this.src='https://via.placeholder.com/50/2F2562/FFFFFF?text=TV'">
+            `;
+        }
+        
+        const video = document.getElementById('videoPlayer');
+        const loading = document.getElementById('loading');
+        
+        // محاولة التشغيل التلقائي
+        setTimeout(() => {
+            playWithHLS();
+        }, 1000);
+        
+        function playWithHLS() {
+            if (!streamUrl) {
+                alert('لا يوجد رابط بث');
+                return;
+            }
+            
+            console.log('🎬 محاولة التشغيل بـ HLS.js:', streamUrl);
+            loading.style.display = 'block';
+            
+            if (Hls.isSupported()) {
+                const hls = new Hls({
+                    enableWorker: true,
+                    lowLatencyMode: true,
+                    xhrSetup: function(xhr, url) {
+                        xhr.withCredentials = false;
+                        xhr.setRequestHeader('Accept', '*/*');
+                        xhr.setRequestHeader('Accept-Language', 'ar,en;q=0.9');
+                        xhr.setRequestHeader('Cache-Control', 'no-cache');
+                        xhr.setRequestHeader('Pragma', 'no-cache');
+                        xhr.setRequestHeader('User-Agent', 
+                            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
+                    }
+                });
+                
+                hls.loadSource(streamUrl);
+                hls.attachMedia(video);
+                
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    console.log('✅ تم تحميل البث بنجاح');
+                    loading.style.display = 'none';
+                    
+                    video.play().catch(e => {
+                        console.log('⚠️ يحتاج تفاعل:', e);
+                        video.controls = true;
+                    });
+                });
+                
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    console.error('❌ خطأ HLS:', data);
+                    loading.style.display = 'none';
+                    
+                    if (data.fatal) {
+                        alert('فشل تحميل البث باستخدام HLS.js. جرب طريقة أخرى.');
+                    }
+                });
+                
+            } else {
+                loading.style.display = 'none';
+                alert('المتصفح لا يدعم HLS.js');
+            }
+        }
+        
+        function playNative() {
+            if (!streamUrl) {
+                alert('لا يوجد رابط بث');
+                return;
+            }
+            
+            console.log('🎬 محاولة التشغيل الأصلي');
+            loading.style.display = 'block';
+            
+            video.src = streamUrl;
+            video.type = 'application/x-mpegURL';
+            
+            video.addEventListener('loadedmetadata', function() {
+                console.log('✅ تم تحميل البيانات');
+                loading.style.display = 'none';
+                
+                video.play().catch(e => {
+                    console.log('⚠️ يحتاج تفاعل:', e);
+                    video.controls = true;
+                });
+            });
+            
+            video.addEventListener('error', function(e) {
+                console.error('❌ خطأ في الفيديو:', e);
+                loading.style.display = 'none';
+                alert('فشل التشغيل الأصلي. جرب طريقة أخرى.');
+            });
+        }
+        
+        function openExternal() {
+            if (!streamUrl) {
+                alert('لا يوجد رابط بث');
+                return;
+            }
+            
+            window.open(streamUrl, '_blank');
+        }
+        
+        function downloadStream() {
+            if (!streamUrl) {
+                alert('لا يوجد رابط بث');
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.href = streamUrl;
+            link.download = 'stream.m3u8';
+            link.target = '_blank';
+            link.click();
+            
+            alert('تم فتح صفحة التحميل. افتح الملف باستخدام VLC أو أي مشغل يدعم m3u8');
+        }
+        
+        // إخفاء التحميل عند بدء التشغيل
+        video.addEventListener('playing', function() {
+            loading.style.display = 'none';
+        });
+        
+        // عرض التحميل عند الانتظار
+        video.addEventListener('waiting', function() {
+            loading.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
