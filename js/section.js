@@ -474,36 +474,49 @@ class SectionChannelsApp {
         this.showMessage('تم فتح صفحة تحميل التطبيق. يرجى تثبيته ثم العودة لتشغيل القنوات.');
     }
 
-    openInternalPlayer(channel) {
-        // استخدام المشغل الداخلي (player.html)
-        let playerUrl = 'player.html?';
-        
-        if (channel.url) {
-            playerUrl += `stream=${encodeURIComponent(channel.url)}`;
-        } else if (channel.id) {
-            playerUrl += `channel=${encodeURIComponent(channel.id)}`;
+    // في دالة openInternalPlayer في section.js
+openInternalPlayer(channel) {
+    // استخدام المشغل الداخلي (player.html)
+    let playerUrl = 'player.html?';
+    
+    // إضافة رابط البث إذا كان موجوداً
+    if (channel.url && channel.url !== '#') {
+        // إذا كان الرابط HTTP، نضيف معلمة خاصة
+        let streamUrl = channel.url;
+        if (streamUrl.startsWith('http://')) {
+            // إضافة معلمة لمعالجة HTTP
+            playerUrl += `http_stream=true&`;
         }
         
-        if (channel.name) {
-            playerUrl += `&name=${encodeURIComponent(channel.name)}`;
-        }
-        
-        if (channel.image || channel.logo) {
-            playerUrl += `&logo=${encodeURIComponent(channel.image || channel.logo)}`;
-        }
-        
-        // إضافة معلومات إضافية للمشغل
-        playerUrl += `&section=${encodeURIComponent(this.section?.name || 'غير معروف')}`;
-        
-        // فتح المشغل في نافذة جديدة أو نفس الصفحة
-        const playerWindow = window.open(playerUrl, '_blank', 
-            'width=1200,height=700,resizable=yes,scrollbars=yes');
-        
-        if (!playerWindow) {
-            // إذا تم منع النوافذ المنبثقة، افتح في نفس الصفحة
-            window.location.href = playerUrl;
-        }
+        playerUrl += `stream=${encodeURIComponent(streamUrl)}`;
     }
+    
+    // إضافة الاسم
+    if (channel.name) {
+        playerUrl += `&name=${encodeURIComponent(channel.name)}`;
+    }
+    
+    // إضافة اللوجو
+    if (channel.image || channel.logo) {
+        const logoUrl = channel.image || channel.logo;
+        playerUrl += `&logo=${encodeURIComponent(logoUrl)}`;
+    }
+    
+    // إضافة معلومات إضافية
+    playerUrl += `&section=${encodeURIComponent(this.section?.name || 'قسم غير معروف')}`;
+    playerUrl += `&timestamp=${Date.now()}`;
+    playerUrl += `&try_cors=true`; // إضافة معلمة لمحاولة CORS
+    
+    console.log('🔗 رابط المشغل:', playerUrl);
+    
+    // فتح المشغل
+    const playerWindow = window.open(playerUrl, '_blank', 
+        'width=1200,height=700,resizable=yes,scrollbars=yes');
+    
+    if (!playerWindow) {
+        window.location.href = playerUrl;
+    }
+}
 
     openXpolaPlayer(channel) {
         // فتح رابط البث مباشرة (سيتم التعامل معه من قبل XPola إذا كان مثبتاً)
