@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -11,385 +10,154 @@
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
+    <!-- Video.js CSS -->
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/player.css">
-    
-    <!-- Video.js CSS -->
-    <link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet" />
-    
-    <!-- HLS.js -->
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.10/dist/hls.min.js"></script>
 </head>
-<body class="player-page">
+<body>
     <!-- Header -->
     <header class="player-header">
-        <div class="header-left">
-            <a href="javascript:history.back()" class="back-button">
-                <i class="uil uil-arrow-left"></i>
+        <div class="header-title">
+            <a href="javascript:history.back()" class="text-box">
+                <span id="channelTitle">جاري التحميل...</span>
             </a>
-            <div class="channel-info">
-                <div id="channelLogo" class="channel-logo-small"></div>
-                <div class="channel-details">
-                    <h2 id="channelName">جاري التحميل...</h2>
-                    <p id="channelStatus" class="status">◉ متصل</p>
-                </div>
-            </div>
         </div>
         
-        <div class="header-right">
-            <button id="qualityBtn" class="player-control" title="جودة الفيديو">
-                <i class="uil uil-setting"></i> جودة
+        <div class="player-controls">
+            <button class="btn-control" id="qualityBtn" title="الجودة">
+                <i class="uil uil-setting"></i>
             </button>
-            <button id="fullscreenBtn" class="player-control" title="ملء الشاشة">
-                <i class="uil uil-expand-arrows-alt"></i>
+            <button class="btn-control" id="fullscreenBtn" title="ملء الشاشة">
+                <i class="uil uil-expand-arrows"></i>
             </button>
-            <button id="shareBtn" class="player-control" title="مشاركة">
-                <i class="uil uil-share-alt"></i>
+            <button class="btn-control" id="pipBtn" title="صورة داخل صورة">
+                <i class="uil uil-picture"></i>
             </button>
         </div>
     </header>
     
-    <!-- Main Player Container -->
-    <main class="player-main">
-        <!-- Video Player -->
-        <div class="video-container">
+    <!-- Main Video Player -->
+    <main class="video-container">
+        <div class="video-wrapper">
             <video 
-                id="videoPlayer" 
+                id="mainVideoPlayer"
                 class="video-js vjs-default-skin vjs-big-play-centered"
-                controls 
+                controls
                 preload="auto"
-                poster="img/loading-poster.jpg"
-                data-setup='{}'
-            >
+                playsinline
+                webkit-playsinline
+                x5-playsinline
+                x5-video-player-type="h5"
+                x5-video-player-fullscreen="true"
+                x5-video-orientation="landscape"
+                data-setup='{}'>
                 <p class="vjs-no-js">
-                    لمشاهدة هذا الفيديو، يرجى تمكين JavaScript والنظر في الترقية إلى
-                    متصفح ويب يدعم <a href="https://videojs.com/html5-video-support/" target="_blank">HTML5 video</a>
+                    لتشغيل الفيديو، يرجى تمكين JavaScript أو تحديث المتصفح.
                 </p>
             </video>
             
             <!-- Loading Overlay -->
             <div id="loadingOverlay" class="loading-overlay">
-                <div class="spinner">
-                    <div class="double-bounce1"></div>
-                    <div class="double-bounce2"></div>
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">جاري التحميل...</span>
                 </div>
-                <p>جاري تحميل البث...</p>
-                <div class="loading-progress">
-                    <div class="progress-bar"></div>
-                    <span id="loadingPercentage">0%</span>
-                </div>
+                <p class="mt-2">جاري تحميل الفيديو...</p>
             </div>
             
             <!-- Error Overlay -->
-            <div id="errorOverlay" class="error-overlay">
+            <div id="errorOverlay" class="error-overlay" style="display: none;">
                 <i class="uil uil-exclamation-triangle"></i>
-                <h3>حدث خطأ في التشغيل</h3>
-                <p id="errorMessage">تعذر تحميل الفيديو. يرجى المحاولة مرة أخرى.</p>
+                <h3 id="errorTitle">حدث خطأ</h3>
+                <p id="errorMessage">فشل في تشغيل الفيديو</p>
                 <div class="error-actions">
-                    <button id="retryBtn" class="btn-primary">
+                    <button class="btn btn-primary" id="retryBtn">
                         <i class="uil uil-redo"></i> إعادة المحاولة
                     </button>
-                    <button id="reportBtn" class="btn-secondary">
-                        <i class="uil uil-exclamation-circle"></i> الإبلاغ عن مشكلة
+                    <button class="btn btn-secondary" id="changePlayerBtn">
+                        <i class="uil uil-exchange"></i> تغيير المشغل
+                    </button>
+                    <button class="btn btn-light" onclick="history.back()">
+                        <i class="uil uil-arrow-left"></i> العودة
                     </button>
                 </div>
             </div>
         </div>
         
-        <!-- Player Controls Overlay -->
-        <div class="player-controls-overlay">
-            <div class="controls-top">
-                <button id="backBtn" class="control-btn">
-                    <i class="uil uil-angle-left"></i>
-                </button>
-                <div class="time-display">
-                    <span id="currentTime">00:00</span> / <span id="duration">00:00</span>
+        <!-- Video Info -->
+        <div class="video-info">
+            <div class="channel-info">
+                <div class="channel-logo-small" id="channelLogo">
+                    <img src="" alt="Channel Logo">
                 </div>
-            </div>
-            
-            <div class="controls-center">
-                <button id="rewindBtn" class="control-btn large">
-                    <i class="uil uil-step-backward"></i>
-                </button>
-                <button id="playPauseBtn" class="control-btn large play-btn">
-                    <i class="uil uil-play"></i>
-                </button>
-                <button id="forwardBtn" class="control-btn large">
-                    <i class="uil uil-step-forward"></i>
-                </button>
-            </div>
-            
-            <div class="controls-bottom">
-                <div class="volume-control">
-                    <button id="muteBtn" class="control-btn">
-                        <i class="uil uil-volume-up"></i>
-                    </button>
-                    <input type="range" id="volumeSlider" min="0" max="100" value="100">
-                </div>
-                <div class="progress-control">
-                    <input type="range" id="progressSlider" min="0" max="100" value="0">
-                </div>
-                <button id="settingsBtn" class="control-btn">
-                    <i class="uil uil-setting"></i>
-                </button>
-            </div>
-        </div>
-        
-        <!-- Channel Info Sidebar -->
-        <aside class="channel-sidebar">
-            <div class="sidebar-header">
-                <h3><i class="uil uil-tv-retro"></i> معلومات القناة</h3>
-            </div>
-            
-            <div class="channel-card-full">
-                <div id="channelLogoFull" class="channel-logo-full"></div>
-                <div class="channel-info-full">
-                    <h2 id="channelNameFull">القناة</h2>
-                    <div class="channel-meta">
-                        <span class="badge live-badge" id="liveStatus">◉ مباشر</span>
-                        <span class="badge quality-badge" id="qualityBadge">HD</span>
-                    </div>
-                    <p id="channelDescription">وصف القناة يظهر هنا</p>
-                    
-                    <div class="channel-stats">
-                        <div class="stat">
+                <div>
+                    <h3 id="videoTitle">جاري التحميل...</h3>
+                    <div class="video-meta">
+                        <span class="meta-item">
                             <i class="uil uil-eye"></i>
-                            <span>مشاهدات: <strong id="viewCount">0</strong></span>
-                        </div>
-                        <div class="stat">
-                            <i class="uil uil-heart"></i>
-                            <span>الإعجابات: <strong id="likeCount">0</strong></span>
-                        </div>
+                            <span id="viewCount">0</span> مشاهدة
+                        </span>
+                        <span class="meta-item">
+                            <i class="uil uil-clock"></i>
+                            <span id="videoTime">--:--</span>
+                        </span>
+                        <span class="meta-item" id="qualityIndicator">
+                            <i class="uil uil-tachometer-fast"></i>
+                            <span>جودة تلقائية</span>
+                        </span>
                     </div>
                 </div>
             </div>
             
-            <div class="sidebar-section">
-                <h4><i class="uil uil-calendar-alt"></i> جدول البث</h4>
-                <div id="scheduleList" class="schedule-list">
-                    <div class="schedule-item">
-                        <span class="time">20:00</span>
-                        <span class="program">مباراة الدوري السعودي</span>
+            <!-- Quality Selection Modal -->
+            <div id="qualityModal" class="quality-modal">
+                <div class="quality-modal-content">
+                    <div class="modal-header">
+                        <h5><i class="uil uil-setting"></i> اختيار الجودة</h5>
+                        <button class="close-btn" id="closeQualityModal">&times;</button>
+                    </div>
+                    <div class="modal-body" id="qualityOptions">
+                        <div class="quality-option" data-quality="auto">
+                            <div class="quality-check">
+                                <i class="uil uil-check-circle"></i>
+                            </div>
+                            <div class="quality-info">
+                                <h6>تلقائي (مستحسن)</h6>
+                                <p>يتكيف مع سرعة الإنترنت لديك</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="sidebar-section">
-                <h4><i class="uil uil-link"></i> روابط سريعة</h4>
-                <div class="quick-links">
-                    <a href="index.html" class="quick-link">
-                        <i class="uil uil-home"></i> الرئيسية
-                    </a>
-                    <a href="matches.html" class="quick-link">
-                        <i class="uil uil-calendar-alt"></i> المباريات
-                    </a>
-                    <a href="https://t.me/wacelalorshepro" class="quick-link" target="_blank">
-                        <i class="uil uil-telegram-alt"></i> تليجرام
-                    </a>
-                </div>
+        </div>
+        
+        <!-- Related Channels -->
+        <div class="related-channels" id="relatedChannels">
+            <h4><i class="uil uil-play-circle"></i> قنوات مشابهة</h4>
+            <div class="channels-grid" id="relatedChannelsGrid">
+                <!-- سيتم ملؤها جافاسكريبت -->
             </div>
-        </aside>
+        </div>
     </main>
-    
-    <!-- Quality Selection Modal -->
-    <div id="qualityModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="uil uil-setting"></i> إعدادات الجودة</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="quality-options">
-                    <button class="quality-option active" data-quality="auto">
-                        <i class="uil uil-bolt"></i>
-                        <span>تلقائي (موصى به)</span>
-                        <span class="quality-badge">Auto</span>
-                    </button>
-                    <button class="quality-option" data-quality="1080">
-                        <i class="uil uil-desktop"></i>
-                        <span>عالية الجودة</span>
-                        <span class="quality-badge">1080p</span>
-                    </button>
-                    <button class="quality-option" data-quality="720">
-                        <i class="uil uil-tablet"></i>
-                        <span>جودة متوسطة</span>
-                        <span class="quality-badge">720p</span>
-                    </button>
-                    <button class="quality-option" data-quality="480">
-                        <i class="uil uil-mobile-android"></i>
-                        <span>جودة منخفضة</span>
-                        <span class="quality-badge">480p</span>
-                    </button>
-                </div>
-                
-                <div class="advanced-settings">
-                    <h4><i class="uil uil-sliders-v-alt"></i> إعدادات متقدمة</h4>
-                    <div class="setting-item">
-                        <label>
-                            <input type="checkbox" id="autoPlayNext" checked>
-                            <span>التشغيل التلقائي للقناة التالية</span>
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <label>
-                            <input type="checkbox" id="showSubtitles">
-                            <span>عرض الترجمة (إذا متوفرة)</span>
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <label>
-                            <input type="checkbox" id="lowLatency" checked>
-                            <span>وضع الكمون المنخفض</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Share Modal -->
-    <div id="shareModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="uil uil-share-alt"></i> مشاركة القناة</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="share-options">
-                    <button class="share-option" data-app="whatsapp">
-                        <i class="uil uil-whatsapp"></i>
-                        <span>واتساب</span>
-                    </button>
-                    <button class="share-option" data-app="telegram">
-                        <i class="uil uil-telegram-alt"></i>
-                        <span>تليجرام</span>
-                    </button>
-                    <button class="share-option" data-app="facebook">
-                        <i class="uil uil-facebook-f"></i>
-                        <span>فيسبوك</span>
-                    </button>
-                    <button class="share-option" data-app="twitter">
-                        <i class="uil uil-twitter"></i>
-                        <span>تويتر</span>
-                    </button>
-                </div>
-                
-                <div class="share-link">
-                    <h4>رابط المشاركة</h4>
-                    <div class="link-container">
-                        <input type="text" id="shareUrl" readonly>
-                        <button id="copyLink" class="btn-primary">
-                            <i class="uil uil-copy"></i> نسخ
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="share-qr">
-                    <h4>رمز QR</h4>
-                    <div id="qrcode"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="uil uil-setting"></i> إعدادات المشغل</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="settings-section">
-                    <h4><i class="uil uil-play-circle"></i> إعدادات التشغيل</h4>
-                    <div class="setting-item">
-                        <label>سرعة التشغيل</label>
-                        <select id="playbackSpeed">
-                            <option value="0.5">0.5x</option>
-                            <option value="0.75">0.75x</option>
-                            <option value="1" selected>عادي (1x)</option>
-                            <option value="1.25">1.25x</option>
-                            <option value="1.5">1.5x</option>
-                            <option value="2">2x</option>
-                        </select>
-                    </div>
-                    <div class="setting-item">
-                        <label>التقدم التلقائي</label>
-                        <select id="autoSkip">
-                            <option value="0" selected>لا يوجد</option>
-                            <option value="5">5 ثواني</option>
-                            <option value="10">10 ثواني</option>
-                            <option value="15">15 ثواني</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="settings-section">
-                    <h4><i class="uil uil-video"></i> إعدادات الفيديو</h4>
-                    <div class="setting-item">
-                        <label>السطوع</label>
-                        <input type="range" id="brightness" min="0" max="100" value="50">
-                    </div>
-                    <div class="setting-item">
-                        <label>التناقض</label>
-                        <input type="range" id="contrast" min="0" max="100" value="50">
-                    </div>
-                </div>
-                
-                <div class="settings-section">
-                    <h4><i class="uil uil-preferences"></i> التفضيلات</h4>
-                    <div class="setting-item">
-                        <label>
-                            <input type="checkbox" id="autoFullscreen" checked>
-                            <span>ملء الشاشة تلقائياً</span>
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <label>
-                            <input type="checkbox" id="showControls" checked>
-                            <span>إظهار عناصر التحكم</span>
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <label>
-                            <input type="checkbox" id="rememberQuality" checked>
-                            <span>تذكر إعدادات الجودة</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <button id="resetSettings" class="btn-secondary">
-                    <i class="uil uil-redo"></i> إعادة التعيين
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Toast Notifications -->
-    <div id="toastContainer" class="toast-container"></div>
     
     <!-- Footer -->
     <div class="player-footer">
-        <p class="copyright">جميع الحقوق محفوظة &copy; <span id="currentYear"></span> وسيل لايف برو TV</p>
         <div class="player-stats">
-            <span><i class="uil uil-signal"></i> <span id="bitrate">0</span> kbps</span>
-            <span><i class="uil uil-clock"></i> <span id="bufferTime">0</span>s</span>
-            <span><i class="uil uil-wifi"></i> <span id="connectionStatus">متصل</span></span>
+            <span><i class="uil uil-wifi"></i> <span id="bandwidth">--</span> kbps</span>
+            <span><i class="uil uil-buffer"></i> <span id="buffer">0</span>% محفوظ</span>
+            <span><i class="uil uil-signal"></i> <span id="connection">--</span></span>
         </div>
+        <p class="copyright">وسيل لايف برو TV &copy; <span id="currentYear"></span></p>
     </div>
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- JavaScript Libraries -->
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.10/dist/hls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Video.js -->
-    <script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
-    
-    <!-- QR Code Generator -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-    
-    <!-- Custom Player JS -->
+    <!-- Custom JS -->
     <script src="js/player.js"></script>
 </body>
 </html>
