@@ -304,29 +304,38 @@ class SectionChannelsApp {
     setupPlayerOptionsModal() {
         // إغلاق عند النقر خارج الصندوق
         const modal = document.getElementById('playerOptionsModal');
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                this.closePlayerOptions();
-            }
-        });
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    this.closePlayerOptions();
+                }
+            });
+        }
         
         // إعداد تفضيلات المستخدم
         const rememberChoice = document.getElementById('rememberChoice');
         const defaultPlayerSelect = document.getElementById('defaultPlayer');
         
         // تحميل التفضيلات المحفوظة
-        rememberChoice.checked = localStorage.getItem('remember_player_choice') === 'true';
-        defaultPlayerSelect.value = this.defaultPlayer;
+        if (rememberChoice) {
+            rememberChoice.checked = localStorage.getItem('remember_player_choice') === 'true';
+        }
         
-        // حفظ التفضيلات عند التغيير
-        rememberChoice.addEventListener('change', (e) => {
-            localStorage.setItem('remember_player_choice', e.target.checked);
-        });
+        if (defaultPlayerSelect) {
+            defaultPlayerSelect.value = this.defaultPlayer;
+            
+            // حفظ التفضيلات عند التغيير
+            defaultPlayerSelect.addEventListener('change', (e) => {
+                this.defaultPlayer = e.target.value;
+                localStorage.setItem('default_player', e.target.value);
+            });
+        }
         
-        defaultPlayerSelect.addEventListener('change', (e) => {
-            this.defaultPlayer = e.target.value;
-            localStorage.setItem('default_player', e.target.value);
-        });
+        if (rememberChoice) {
+            rememberChoice.addEventListener('change', (e) => {
+                localStorage.setItem('remember_player_choice', e.target.checked);
+            });
+        }
     }
 
     showPlayerOptions(channel) {
@@ -336,42 +345,56 @@ class SectionChannelsApp {
         const defaultImage = 'https://via.placeholder.com/200x100/2F2562/FFFFFF?text=TV';
         const channelImage = channel.image || defaultImage;
         
-        const logoElement = document.getElementById('selectedChannelLogo').querySelector('img');
-        logoElement.src = channelImage;
-        logoElement.alt = channel.name;
-        logoElement.onerror = function() {
-            this.src = defaultImage;
-        };
+        const logoElement = document.getElementById('selectedChannelLogo');
+        if (logoElement) {
+            const img = logoElement.querySelector('img');
+            if (img) {
+                img.src = channelImage;
+                img.alt = channel.name;
+                img.onerror = function() {
+                    this.src = defaultImage;
+                };
+            }
+        }
         
-        document.getElementById('selectedChannelName').textContent = channel.name;
+        const nameElement = document.getElementById('selectedChannelName');
+        if (nameElement) {
+            nameElement.textContent = channel.name;
+        }
         
         // التحقق من حالة القناة
         const statusElement = document.getElementById('selectedChannelStatus');
-        if (channel.status === 'online') {
-            statusElement.textContent = '◉ متصل';
-            statusElement.className = 'channel-status online';
-        } else if (channel.status === 'offline') {
-            statusElement.textContent = '◉ غير متصل';
-            statusElement.className = 'channel-status offline';
-        } else {
-            statusElement.textContent = '◉ متاح للبث';
-            statusElement.className = 'channel-status';
+        if (statusElement) {
+            if (channel.status === 'online') {
+                statusElement.textContent = '◉ متصل';
+                statusElement.className = 'channel-status online';
+            } else if (channel.status === 'offline') {
+                statusElement.textContent = '◉ غير متصل';
+                statusElement.className = 'channel-status offline';
+            } else {
+                statusElement.textContent = '◉ متاح للبث';
+                statusElement.className = 'channel-status';
+            }
         }
         
         // عرض الـ Modal
         const modal = document.getElementById('playerOptionsModal');
-        modal.style.display = 'flex';
-        setTimeout(() => {
-            modal.classList.add('show');
-        }, 10);
+        if (modal) {
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 10);
+        }
     }
 
     closePlayerOptions() {
         const modal = document.getElementById('playerOptionsModal');
-        modal.classList.remove('show');
-        setTimeout(() => {
-            modal.style.display = 'none';
-        }, 300);
+        if (modal) {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
         this.selectedChannel = null;
     }
 
@@ -469,6 +492,9 @@ class SectionChannelsApp {
             playerUrl += `&logo=${encodeURIComponent(channel.image || channel.logo)}`;
         }
         
+        // إضافة معلومات إضافية للمشغل
+        playerUrl += `&section=${encodeURIComponent(this.section?.name || 'غير معروف')}`;
+        
         // فتح المشغل في نافذة جديدة أو نفس الصفحة
         const playerWindow = window.open(playerUrl, '_blank', 
             'width=1200,height=700,resizable=yes,scrollbars=yes');
@@ -500,8 +526,12 @@ class SectionChannelsApp {
 
     showInstallModal(channel) {
         const modal = document.getElementById('installModal');
+        if (!modal) return;
+        
         const confirmBtn = document.getElementById('confirmInstall');
         const cancelBtn = document.getElementById('cancelInstall');
+        
+        if (!confirmBtn || !cancelBtn) return;
         
         // إزالة المستمعين السابقين
         confirmBtn.replaceWith(confirmBtn.cloneNode(true));
@@ -613,6 +643,104 @@ class SectionChannelsApp {
         }, 3000);
     }
 
+    // ====== إضافة جديدة: دالة عرض رسالة الخطأ عند فشل المشغل الداخلي ======
+    showStreamError(channel, errorMessage) {
+        // إنشاء عنصر رسالة الخطأ
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'stream-error-alert';
+        errorDiv.innerHTML = `
+            <div class="error-content">
+                <i class="uil uil-exclamation-triangle"></i>
+                <div class="error-details">
+                    <h5>فشل تشغيل ${channel.name}</h5>
+                    <p>${errorMessage}</p>
+                    <div class="error-actions">
+                        <button class="btn btn-sm btn-primary" onclick="window.sectionApp.tryXpolaInstead('${channel.id}')">
+                            <i class="uil uil-external-link-alt"></i> جرب XPola Player
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="this.parentElement.parentElement.parentElement.remove()">
+                            <i class="uil uil-times"></i> إغلاق
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // إضافة CSS إذا لم يكن موجوداً
+        if (!document.querySelector('#stream-error-styles')) {
+            const style = document.createElement('style');
+            style.id = 'stream-error-styles';
+            style.textContent = `
+                .stream-error-alert {
+                    position: fixed;
+                    top: 100px;
+                    right: 20px;
+                    z-index: 9999;
+                    background: linear-gradient(135deg, #2F2562, #42318F);
+                    border: 1px solid #654FD4;
+                    border-radius: 10px;
+                    padding: 15px;
+                    max-width: 400px;
+                    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+                    animation: slideInRight 0.3s ease;
+                }
+                .error-content {
+                    display: flex;
+                    gap: 15px;
+                    align-items: flex-start;
+                }
+                .error-content i {
+                    font-size: 2rem;
+                    color: #ffc107;
+                    margin-top: 5px;
+                }
+                .error-details h5 {
+                    margin: 0 0 5px 0;
+                    color: white;
+                }
+                .error-details p {
+                    margin: 0 0 10px 0;
+                    color: #B8B8B8;
+                    font-size: 0.9rem;
+                }
+                .error-actions {
+                    display: flex;
+                    gap: 10px;
+                }
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        document.body.appendChild(errorDiv);
+        
+        // إزالة تلقائية بعد 10 ثواني
+        setTimeout(() => {
+            if (errorDiv.parentNode) {
+                errorDiv.remove();
+            }
+        }, 10000);
+    }
+    
+    // ====== إضافة جديدة: دالة محاولة XPola بدلاً من المشغل الداخلي ======
+    tryXpolaInstead(channelId) {
+        const channel = this.channels.find(c => c.id === channelId);
+        if (!channel) return;
+        
+        console.log(`🎮 محاولة تشغيل ${channel.name} في XPola Player`);
+        this.playInXpolaPlayer(channel);
+        
+        // إزالة رسالة الخطأ
+        const errorAlert = document.querySelector('.stream-error-alert');
+        if (errorAlert) {
+            errorAlert.remove();
+        }
+    }
+    // ====== نهاية الإضافة الجديدة ======
+
     saveToLocalStorage() {
         try {
             // لا نحتاج لحفظ شيء هنا لأن البيانات محفوظة مسبقاً في main.js
@@ -651,5 +779,15 @@ function goToMatchesWithCheck() {
 window.reloadSectionData = function() {
     if (window.sectionApp) {
         window.sectionApp.retryLoadData();
+    }
+};
+
+// دالة لاختبار فشل المشغل الداخلي (يمكنك استدعاؤها من player.js عند حدوث خطأ)
+window.reportPlayerError = function(channelId, errorMessage) {
+    if (window.sectionApp && window.sectionApp.showStreamError) {
+        const channel = window.sectionApp.channels?.find(c => c.id === channelId);
+        if (channel) {
+            window.sectionApp.showStreamError(channel, errorMessage);
+        }
     }
 };
