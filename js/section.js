@@ -10,13 +10,16 @@ const firebaseConfig = {
     measurementId: "G-JH198SKCFS"
 };
 
-// تطبيق عرض القنوات في القسم
+// تطبيق عرض القنوات في القسم مع خيارات التشغيل
 class SectionChannelsApp {
     constructor() {
         this.section = null;
         this.channels = [];
         this.hasInstalledApp = localStorage.getItem('app_installed') === 'true';
         this.currentSectionId = null;
+        this.selectedChannel = null;
+        this.defaultPlayer = localStorage.getItem('default_player') || 'ask';
+        
         this.init();
     }
 
@@ -42,6 +45,9 @@ class SectionChannelsApp {
         
         // إعداد نقرات الأزرار
         this.setupEventListeners();
+        
+        // إعداد Modal خيارات التشغيل
+        this.setupPlayerOptionsModal();
         
         console.log('✅ تم تهيئة صفحة القسم بنجاح');
     }
@@ -279,12 +285,217 @@ class SectionChannelsApp {
         
         console.log(`📺 نقر على القناة: ${channel.name}`);
         
-        // التحقق من التثبيت
-        if (!this.hasInstalledApp) {
+        // التحقق من تثبيت التطبيق إذا كان الافتراضي XPola
+        if (this.defaultPlayer === 'xpola' && !this.hasInstalledApp) {
             this.showInstallModal(channel);
-        } else {
-            this.openChannel(channel);
+            return;
         }
+        
+        // إذا كان الافتراضي "اسألني دائماً" أو internal، اعرض خيارات التشغيل
+        if (this.defaultPlayer === 'ask') {
+            this.showPlayerOptions(channel);
+        } else if (this.defaultPlayer === 'internal') {
+            this.playInInternalPlayer(channel);
+        } else if (this.defaultPlayer === 'xpola') {
+            this.playInXpolaPlayer(channel);
+        }
+    }
+
+    setupPlayerOptionsModal() {
+        // إغلاق عند النقر خارج الصندوق
+        const modal = document.getElementById('playerOptionsModal');
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this.closePlayerOptions();
+            }
+        });
+        
+        // إعداد تفضيلات المستخدم
+        const rememberChoice = document.getElementById('rememberChoice');
+        const defaultPlayerSelect = document.getElementById('defaultPlayer');
+        
+        // تحميل التفضيلات المحفوظة
+        rememberChoice.checked = localStorage.getItem('remember_player_choice') === 'true';
+        defaultPlayerSelect.value = this.defaultPlayer;
+        
+        // حفظ التفضيلات عند التغيير
+        rememberChoice.addEventListener('change', (e) => {
+            localStorage.setItem('remember_player_choice', e.target.checked);
+        });
+        
+        defaultPlayerSelect.addEventListener('change', (e) => {
+            this.defaultPlayer = e.target.value;
+            localStorage.setItem('default_player', e.target.value);
+        });
+    }
+
+    showPlayerOptions(channel) {
+        this.selectedChannel = channel;
+        
+        // تحديث معلومات القناة في الـ Modal
+        const defaultImage = 'https://via.placeholder.com/200x100/2F2562/FFFFFF?text=TV';
+        const channelImage = channel.image || defaultImage;
+        
+        const logoElement = document.getElementById('selectedChannelLogo').querySelector('img');
+        logoElement.src = channelImage;
+        logoElement.alt = channel.name;
+        logoElement.onerror = function() {
+            this.src = defaultImage;
+        };
+        
+        document.getElementById('selectedChannelName').textContent = channel.name;
+        
+        // التحقق من حالة القناة
+        const statusElement = document.getElementById('selectedChannelStatus');
+        if (channel.status === 'online') {
+            statusElement.textContent = '◉ متصل';
+            statusElement.className = 'channel-status online';
+        } else if (channel.status === 'offline') {
+            statusElement.textContent = '◉ غير متصل';
+            statusElement.className = 'channel-status offline';
+        } else {
+            statusElement.textContent = '◉ متاح للبث';
+            statusElement.className = 'channel-status';
+        }
+        
+        // عرض الـ Modal
+        const modal = document.getElementById('playerOptionsModal');
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+    }
+
+    closePlayerOptions() {
+        const modal = document.getElementById('playerOptionsModal');
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+        this.selectedChannel = null;
+    }
+
+    playInInternalPlayer(channel = null) {
+        const targetChannel = channel || this.selectedChannel;
+        if (!targetChannel) return;
+        
+        console.log(`▶️ تشغيل القناة في المشغل الداخلي: ${targetChannel.name}`);
+        
+        // حفظ التفضيل إذا كان مطلوباً
+        const rememberChoice = document.getElementById('rememberChoice');
+        if (rememberChoice && rememberChoice.checked) {
+            localStorage.setItem('last_player_choice', 'internal');
+        }
+        
+        // إغلاق الـ Modal
+        this.closePlayerOptions();
+        
+        // التحقق من رابط البث
+        if (!targetChannel.url || targetChannel.url === '#') {
+            this.showError('رابط البث غير متوفر حالياً');
+            return;
+        }
+        
+        // فتح المشغل الداخلي
+        this.openInternalPlayer(targetChannel);
+        
+        // تسجيل النشاط
+        this.logChannelView(targetChannel, 'internal');
+    }
+
+    playInXpolaPlayer(channel = null) {
+        const targetChannel = channel || this.selectedChannel;
+        if (!targetChannel) return;
+        
+        console.log(`▶️ تشغيل القناة في XPola Player: ${targetChannel.name}`);
+        
+        // حفظ التفضيل إذا كان مطلوباً
+        const rememberChoice = document.getElementById('rememberChoice');
+        if (rememberChoice && rememberChoice.checked) {
+            localStorage.setItem('last_player_choice', 'xpola');
+        }
+        
+        // إغلاق الـ Modal
+        this.closePlayerOptions();
+        
+        // التحقق من تثبيت التطبيق
+        if (!this.hasInstalledApp) {
+            this.showInstallModal(targetChannel);
+            return;
+        }
+        
+        // فتح في XPola Player
+        this.openXpolaPlayer(targetChannel);
+        
+        // تسجيل النشاط
+        this.logChannelView(targetChannel, 'xpola');
+    }
+
+    downloadXpolaApp() {
+        console.log('📱 تحميل تطبيق XPola Player...');
+        
+        // رابط تحميل التطبيق
+        const appUrl = 'https://play.google.com/store/apps/details?id=com.xpola.player';
+        
+        // فتح رابط التحميل
+        window.open(appUrl, '_blank');
+        
+        // تحديث حالة التثبيت
+        this.hasInstalledApp = true;
+        localStorage.setItem('app_installed', 'true');
+        
+        // إغلاق الـ Modal
+        this.closePlayerOptions();
+        
+        // رسالة تأكيد
+        this.showMessage('تم فتح صفحة تحميل التطبيق. يرجى تثبيته ثم العودة لتشغيل القنوات.');
+    }
+
+    openInternalPlayer(channel) {
+        // استخدام المشغل الداخلي (player.html)
+        let playerUrl = 'player.html?';
+        
+        if (channel.url) {
+            playerUrl += `stream=${encodeURIComponent(channel.url)}`;
+        } else if (channel.id) {
+            playerUrl += `channel=${encodeURIComponent(channel.id)}`;
+        }
+        
+        if (channel.name) {
+            playerUrl += `&name=${encodeURIComponent(channel.name)}`;
+        }
+        
+        if (channel.image || channel.logo) {
+            playerUrl += `&logo=${encodeURIComponent(channel.image || channel.logo)}`;
+        }
+        
+        // فتح المشغل في نافذة جديدة أو نفس الصفحة
+        const playerWindow = window.open(playerUrl, '_blank', 
+            'width=1200,height=700,resizable=yes,scrollbars=yes');
+        
+        if (!playerWindow) {
+            // إذا تم منع النوافذ المنبثقة، افتح في نفس الصفحة
+            window.location.href = playerUrl;
+        }
+    }
+
+    openXpolaPlayer(channel) {
+        // فتح رابط البث مباشرة (سيتم التعامل معه من قبل XPola إذا كان مثبتاً)
+        if (!channel.url || channel.url === '#') {
+            this.showError('رابط البث غير متوفر حالياً');
+            return;
+        }
+        
+        // محاولة فتح في XPola عبر intent
+        const xpolaUrl = `intent://play?url=${encodeURIComponent(channel.url)}#Intent;package=com.xpola.player;scheme=xpola;end`;
+        
+        // محاولة الفتح عبر intent
+        window.location.href = xpolaUrl;
+        
+        // إذا فشل intent، افتح الرابط مباشرة
+        setTimeout(() => {
+            window.open(channel.url, '_blank');
+        }, 500);
     }
 
     showInstallModal(channel) {
@@ -301,7 +512,8 @@ class SectionChannelsApp {
         
         // إضافة مستمعين جدد
         newConfirmBtn.addEventListener('click', () => {
-            this.installApp(channel);
+            this.downloadXpolaApp();
+            modal.style.display = 'none';
         });
         
         newCancelBtn.addEventListener('click', () => {
@@ -319,45 +531,27 @@ class SectionChannelsApp {
         });
     }
 
-    installApp(channel) {
-        console.log('📱 تثبيت التطبيق...');
-        
-        const modal = document.getElementById('installModal');
-        modal.style.display = 'none';
-        
-        // فتح رابط تحميل التطبيق
-        const appUrl = channel.appUrl || 'https://play.google.com/store/apps/details?id=com.xpola.player';
-        window.open(appUrl, '_blank');
-        
-        // تحديث حالة التثبيت
-        this.hasInstalledApp = true;
-        localStorage.setItem('app_installed', 'true');
-        
-        // فتح القناة بعد ثواني
-        setTimeout(() => {
-            this.openChannel(channel);
-        }, 2000);
-    }
-
-    openChannel(channel) {
-        console.log(`▶️ فتح القناة: ${channel.name}`);
-        
-        if (!channel.url || channel.url === '#') {
-            this.showError('رابط البث غير متوفر حالياً');
-            return;
-        }
-        
-        // فتح رابط البث في نافذة جديدة
-        window.open(channel.url, '_blank');
-        
-        // تسجيل النشاط
-        this.logChannelView(channel);
-    }
-
-    logChannelView(channel) {
+    logChannelView(channel, playerType) {
         try {
             // يمكنك إضافة كود لتسجيل المشاهدات هنا
-            console.log(`📊 تسجيل مشاهدة القناة: ${channel.name}`);
+            console.log(`📊 تسجيل مشاهدة القناة: ${channel.name} - المشغل: ${playerType}`);
+            
+            // حفظ سجل المشاهدة
+            const watchHistory = JSON.parse(localStorage.getItem('watch_history') || '[]');
+            watchHistory.unshift({
+                channelId: channel.id,
+                channelName: channel.name,
+                playerType: playerType,
+                timestamp: new Date().toISOString()
+            });
+            
+            // حفظ فقط آخر 50 مشاهدة
+            if (watchHistory.length > 50) {
+                watchHistory.splice(50);
+            }
+            
+            localStorage.setItem('watch_history', JSON.stringify(watchHistory));
+            
         } catch (error) {
             console.warn('⚠️ فشل تسجيل المشاهدة:', error);
         }
@@ -391,6 +585,32 @@ class SectionChannelsApp {
                 </div>
             `;
         }
+    }
+
+    showMessage(message, type = 'info') {
+        // إنشاء رسالة مؤقتة
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        messageDiv.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 300px;
+        `;
+        messageDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+        `;
+        
+        document.body.appendChild(messageDiv);
+        
+        // إزالة تلقائية بعد 3 ثواني
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.remove();
+            }
+        }, 3000);
     }
 
     saveToLocalStorage() {
