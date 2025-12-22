@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>اختبار البث المباشر</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.10/dist/hls.min.js"></script>
+</head>
+<body>
+    <video id="testVideo" controls width="600"></video>
+    
+    <script>
+    const video = document.getElementById('testVideo');
+    const streamUrl = 'http://135.125.109.73:9000/beinsport1_.m3u8';
+    
+    if (Hls.isSupported()) {
+        console.log('HLS مدعوم');
+        const hls = new Hls();
+        hls.loadSource(streamUrl);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            console.log('✅ Manifest محمل');
+            video.play();
+        });
+        hls.on(Hls.Events.ERROR, (event, data) => {
+            console.error('❌ خطأ HLS:', data);
+            if (data.fatal) {
+                switch(data.type) {
+                    case Hls.ErrorTypes.NETWORK_ERROR:
+                        console.log('🔌 خطأ في الشبكة');
+                        break;
+                    case Hls.ErrorTypes.MEDIA_ERROR:
+                        console.log('🎞️ خطأ في الوسائط');
+                        break;
+                }
+            }
+        });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        console.log('✅ Safari يدعم HLS مباشرة');
+        video.src = streamUrl;
+        video.play();
+    } else {
+        console.error('❌ HLS غير مدعوم في هذا المتصفح');
+    }
+    </script>
+</body>
+</html>
