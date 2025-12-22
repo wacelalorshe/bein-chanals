@@ -1,0 +1,794 @@
+
+
+/* =========================================== */
+/* الحل النهائي للعرض الأفقي - إضافة في بداية CSS */
+/* =========================================== */
+
+/* حل بديل باستخدام grid-template-areas */
+.match-info-horizontal {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-areas: 
+        "channel date league" !important; /* تحديد الترتيب هنا */
+    gap: 12px !important;
+    width: 100% !important;
+    margin-bottom: 2px !important;
+}
+
+.info-item.channel {
+    grid-area: channel !important;
+    background: linear-gradient(135deg, rgba(255, 152, 0, 0.1), rgba(255, 82, 0, 0.1)) !important;
+    border-color: rgba(255, 152, 0, 0.3) !important;
+}
+
+.info-item.date {
+    grid-area: date !important;
+    background: linear-gradient(135deg, rgba(184, 184, 184, 0.1), rgba(79, 195, 247, 0.1)) !important;
+    border-color: rgba(79, 195, 247, 0.3) !important;
+}
+
+.info-item.league {
+    grid-area: league !important;
+    background: linear-gradient(135deg, rgba(66, 49, 143, 0.3), rgba(101, 79, 212, 0.2)) !important;
+    border-color: rgba(255, 215, 0, 0.3) !important;
+}
+
+/* matches.css - النسخة النهائية مع تعديل العرض الأفقي */
+
+/* =========================================== */
+/* 1. تنسيقات الحاوية الرئيسية */
+/* =========================================== */
+
+.matches-container {
+    padding: 2px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.matches-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+/* =========================================== */
+/* 2. تنسيقات بطاقة المباراة */
+/* =========================================== */
+
+.match-card {
+    background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
+    border-radius: 20px;
+    padding: 20px;
+    width: 100%;
+    border: 2px solid #42318F;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 0px 10px rgba(255, 255, 255, 0.8);
+    margin-top: 22px;
+}
+
+.match-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #FF5200, #654FD4, #42318F);
+    z-index: 2;
+}
+
+.match-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(101, 79, 212, 0.3);
+    border-color: #654FD4;
+}
+
+/* =========================================== */
+/* 3. تنسيقات أسماء الفرقين */
+/* =========================================== */
+
+.match-teams {
+	background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
+  border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px;
+    width: 100%;
+    position: relative;
+    
+    border-bottom: 1px double  #fff; 
+    border-top: 1px double #fff; 
+    border-left: 0px ridge #2F2562;
+    border-right: 0px groove #2F2562;
+}
+
+.teams-container {
+    display: flex;
+    
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.team {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 12px 8px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.team:hover {
+    transform: translateY(-5px);
+}
+
+.team-logo-container {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background-image: linear-gradient(to right, #000, #654FD4, #322769, #2F2562, #2F2562, #2F2562, #2F2562,#2F2562, #2F2562, #2F2562, #2F2562, #2F2562, #2F2562, #2F2562, #2F2562,#2F2562, #322769, #654FD4,#000);
+  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+}
+
+.team:hover .team-logo-container {
+    border-color: #FF5200;
+    transform: scale(1.1);
+    box-shadow: 0 8px 16px rgba(255, 82, 0, 0.3);
+}
+
+.team-logo-container i {
+    font-size: 22px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.team-name {
+	
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    text-align: center;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    font-family: 'Tajawal', 'Segoe UI', sans-serif;
+    max-width: 130px;
+    line-height: 1.4;
+    padding: 0 5px;
+    transition: all 0.3s ease;
+}
+
+.team:hover .team-name {
+    color: #FF5200;
+}
+
+.vs-container {
+	
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 15px;
+    position: relative;
+    z-index: 1;
+}
+
+.vs {
+    color: #FF5200;
+    font-weight: 900;
+    font-size: 18px;
+    text-shadow: 0 0 8px rgba(255, 82, 0, 0.6);
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+}
+
+.match-time-small {
+    font-size: 12px;
+    color: #B8B8B8;
+    background: rgba(50, 39, 105, 0.4);
+    padding: 4px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(101, 79, 212, 0.4);
+    font-weight: 600;
+    min-width: 70px;
+    text-align: center;
+}
+
+/* =========================================== */
+/* 4. تنسيقات معلومات المباراة (أفقية - التعديل الأساسي هنا) */
+/* =========================================== */
+
+.match-info-horizontal {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 أعمدة متساوية */
+    grid-template-rows: auto;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+/* تنسيق عام لكل عنصر معلومات */
+.info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(50, 39, 105, 0.25);
+    border-radius: 12px;
+    padding: 12px 8px;
+    border: 1px solid rgba(101, 79, 212, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 90px;
+    text-align: center;
+}
+
+.info-item:hover {
+    background: rgba(101, 79, 212, 0.2);
+    border-color: #654FD4;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(101, 79, 212, 0.3);
+}
+
+/* أيقونة العنصر */
+.info-icon {
+    font-size: 22px;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+.info-item:hover .info-icon {
+    transform: scale(1.2);
+}
+
+/* تسمية العنصر */
+.info-label {
+    font-size: 11px;
+    color: #B8B8B8;
+    margin-bottom: 5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* قيمة العنصر */
+.info-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+    line-height: 1.3;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* تنسيقات خاصة لكل عنصر */
+
+/* عنصر القناة */
+.info-item.channel {
+    background: linear-gradient(135deg, rgba(255, 152, 0, 0.1), rgba(255, 82, 0, 0.1));
+    border-color: rgba(255, 152, 0, 0.3);
+}
+
+.info-item.channel .info-icon {
+    color: #FF9800;
+}
+
+.info-item.channel .info-value {
+    color: #FF9800;
+}
+
+.info-item.channel:hover {
+    background: linear-gradient(135deg, rgba(255, 152, 0, 0.2), rgba(255, 82, 0, 0.2));
+    border-color: #FF9800;
+}
+
+/* عنصر التاريخ */
+.info-item.date {
+    background: linear-gradient(135deg, rgba(184, 184, 184, 0.1), rgba(79, 195, 247, 0.1));
+    border-color: rgba(79, 195, 247, 0.3);
+}
+
+.info-item.date .info-icon {
+    color: #4FC3F7;
+}
+
+.info-item.date .info-value {
+    color: #4FC3F7;
+}
+
+.info-item.date:hover {
+    background: linear-gradient(135deg, rgba(184, 184, 184, 0.15), rgba(79, 195, 247, 0.2));
+    border-color: #4FC3F7;
+}
+
+/* عنصر البطولة */
+.info-item.league {
+    background: linear-gradient(135deg, rgba(66, 49, 143, 0.3), rgba(101, 79, 212, 0.2));
+    border-color: rgba(255, 215, 0, 0.3);
+}
+
+.info-item.league .info-icon {
+    color: #FFD700;
+}
+
+.info-item.league .info-value {
+    color: #FFD700;
+    font-weight: 700;
+}
+
+.info-item.league:hover {
+    background: linear-gradient(135deg, rgba(66, 49, 143, 0.4), rgba(101, 79, 212, 0.3));
+    border-color: #FFD700;
+}
+
+/* =========================================== */
+/* 5. تنسيقات زر المشاهدة */
+/* =========================================== */
+
+.watch-btn-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1px 0;
+    padding: 10px 0;
+    width: 100%;
+    
+}
+
+.watch-btn {
+    background: linear-gradient(135deg, #FF0005, #FF5200);
+    /* الحدود: أخضر شفاف يتناسق مع الخلفية */
+    border: 2px solid rgba(0, 255, 24, 0.4); 
+    
+    color: #fff;
+    animation: live-pulse 1s infinite;
+    animation-color-live-pulse: #fff;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    
+    
+    
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    min-width: 200px;
+    justify-content: center;
+    letter-spacing: 0.5px;
+}
+
+
+
+
+
+
+.watch-btn::before {
+    content: '';
+    position: absolute;
+    
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #00B318, #006C3E);
+    transition: left 0.5s ease;
+    z-index: -1;
+}
+
+.watch-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 10px 30px rgba(255, 82, 0, 0.5);
+}
+
+.watch-btn:hover::before {
+    left: 0;
+}
+
+.watch-btn i {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+       * إلى: border: 2px solid rgba(101, 79, 212, 0.4); 
+}
+
+.watch-btn:hover i {
+    transform: scale(1.2);
+}
+
+/* =========================================== */
+/* 6. تنسيقات حالة المباراة */
+/* =========================================== */
+
+.match-status-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+.match-status {
+    padding: 0px 0px;
+    border-radius: 15px;
+    font-size: 10px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.9);
+    font-family: 'Tajawal', 'Segoe UI', sans-serif;
+}
+
+/* حالة المباراة المباشرة */
+.match-status.live {
+    background: linear-gradient(135deg, #00B318, #006C3E);
+    color: white; /* لون النص يبقى أبيض */
+    
+    /* الحدود: أخضر شفاف يتناسق مع الخلفية */
+    border: 2px solid rgba(0, 255, 24, 0.4); 
+    
+    /* التوهج: تطبيق توهج أبيض ناصع مع تكرار لا نهائي */
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.6), 0 0 0 5px rgba(255, 255, 255, 0); 
+    
+    /* تطبيق تأثير النبض */
+    animation: live-pulse 2s infinite;
+}
+
+/* 2. تعريف تأثير النبض (Pulse Animation) - تم تغيير لون التوهج إلى الأبيض */
+@keyframes live-pulse {
+    0% {
+        box-shadow: 0 0 10 10 rgba(255, 255, 255, 0.7); /* بداية النبض: توهج أبيض قوي */
+    }
+    70% {
+        box-shadow: 0 0 10 15px rgba(255, 255, 255, 0.9); /* ذروة النبض: انتشار التوهج الأبيض واختفاؤه */
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
+}
+
+}
+
+/* حالة المباراة القادمة */
+.match-status.upcoming {
+    background: linear-gradient(135deg, #FFC107, #FF9800);
+    color: #1a1a2e;
+    border: 2px solid rgba(255, 193, 7, 0.4);
+}
+
+/* حالة المباراة المنتهية */
+.match-status.finished {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    color: white;
+    border: 2px solid rgba(108, 117, 125, 0.4);
+}
+
+.match-status i {
+    font-size: 14px;
+}
+
+/* =========================================== */
+/* 7. تنسيقات الفلتر التاريخي */
+/* =========================================== */
+
+.date-filter {
+    position: fixed;
+    overflow: hidden;
+    display: flex; 
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 5px;
+    width: 80%;
+    background-image: linear-gradient(to right, #000, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
+    border-radius: 0px;
+  border-bottom: 1px double  #000; 
+    border-top: 1px double #000; 
+    border-left: 0px ridge #2F2562;
+    border-right: 0px groove #2F2562;;
+    z-index: 9999;
+    margin-top: 2px;
+}
+
+.date-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+    padding: 6px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.date-btn.active {
+    background: linear-gradient(135deg, #42318F, #654FD4);
+    color: white;
+    border-color: #654FD4;
+    box-shadow: 0 4px 12px rgba(101, 79, 212, 0.4);
+}
+
+.date-btn:hover:not(.active) {
+    background: rgba(66, 49, 143, 0.3);
+    border-color: #654FD4;
+    transform: translateY(-2px);
+}
+
+/* =========================================== */
+/* 8. الرسوم المتحركة */
+/* =========================================== */
+
+@keyframes live-pulse {
+    0% { 
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(255, 0, 5, 0.7);
+    }
+    50% { 
+        opacity: 0.9;
+        box-shadow: 0 0 0 10px rgba(255, 0, 5, 0);
+    }
+    100% { 
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(255, 0, 5, 0);
+    }
+}
+
+@keyframes button-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* =========================================== */
+/* 9. رسالة عدم وجود مباريات */
+/* =========================================== */
+
+.no-matches {
+    text-align: center;
+    padding: 60px 20px;
+    color: #B8B8B8;
+    grid-column: 1 / -1;
+}
+
+.no-matches i {
+    font-size: 70px;
+    margin-bottom: 25px;
+    color: #6c757d;
+    opacity: 0.7;
+}
+
+.no-matches h4 {
+    color: #fff;
+    margin-bottom: 15px;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.no-matches p {
+    color: #B8B8B8;
+    font-size: 16px;
+    max-width: 500px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* =========================================== */
+/* 10. تحسينات للشاشات الصغيرة */
+/* =========================================== */
+
+@media (max-width: 768px) {
+    .matches-container {
+        padding: 15px;
+    }
+    
+    .matches-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 15px;
+    }
+    
+    .match-card {
+        padding: 15px;
+        border-radius: 18px;
+    }
+    
+    .watch-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+        min-width: 170px;
+    }
+    
+    .team-name {
+        font-size: 14px;
+        max-width: 110px;
+    }
+    
+    .team-logo-container {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .team-logo-container i {
+        font-size: 18px;
+    }
+    
+    .match-status {
+        padding: 7px 20px;
+        font-size: 12px;
+    }
+    
+    /* تعديلات للمعلومات الأفقية على الشاشات الصغيرة */
+    .match-info-horizontal {
+        grid-template-columns: 1fr; /* عمود واحد على الشاشات الصغيرة */
+        gap: 10px;
+    }
+    
+    .info-item {
+        min-height: 70px;
+        padding: 10px;
+    }
+    
+    .info-icon {
+        font-size: 20px;
+        margin-bottom: 6px;
+    }
+    
+    .info-label {
+        font-size: 10px;
+    }
+    
+    .info-value {
+        font-size: 12px;
+    }
+    
+    .date-filter {
+        width: 96%;
+        padding: 8px;
+        gap: 8px;
+    }
+    
+    .date-btn {
+        padding: 5px 12px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .matches-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .match-card {
+        border-radius: 16px;
+    }
+    
+    .team-name {
+        max-width: 100px;
+        font-size: 13px;
+    }
+    
+    .vs {
+        font-size: 16px;
+    }
+    
+    .match-time-small {
+        font-size: 11px;
+        padding: 3px 8px;
+    }
+    
+    .match-info-horizontal {
+        gap: 8px;
+    }
+    
+    .info-item {
+        min-height: 65px;
+        padding: 8px;
+    }
+}
+
+/* =========================================== */
+/* 11. تنسيقات خاصة للمباريات المباشرة */
+/* =========================================== */
+
+.match-card.live-match .watch-btn {
+    background: linear-gradient(135deg, #FF0005, #FF0000);
+    box-shadow: 0 6px 20px rgba(255, 0, 5, 0.4);
+    animation: button-pulse 2s infinite;
+}
+
+.match-card.live-match .watch-btn:hover {
+    animation: none;
+}
+
+/* =========================================== */
+/* 12. تأثيرات إضافية */
+/* =========================================== */
+
+/* تأثير التوهج عند التمرير */
+.match-card:hover::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+        transparent 0%, 
+        rgba(101, 79, 212, 0.05) 50%, 
+        transparent 100%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* تأثير النص المتوهج للفرق */
+.team-name.glow {
+    text-shadow: 0 0 10px rgba(255, 82, 0, 0.5);
+}
+
+/* تأثير الحدود المتوهجة */
+.match-card.glow-border {
+    box-shadow: 0 0 20px rgba(101, 79, 212, 0.5);
+}
+
+/* =========================================== */
+/* 13. تنسيقات التحميل */
+/* =========================================== */
+
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    width: 100%;
+    grid-column: 1 / -1;
+}
+
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid #654FD4;
+    border-top: 4px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+

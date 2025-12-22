@@ -1,0 +1,241 @@
+/* css/section.css */
+
+/* Section Page Specific Styles */
+.section-title {
+    text-align: center;
+    /* إزالة position: fixed وتكرارات العرض لجعله أكثر مرونة، إذا كنت تريده غير ثابت، أزل position: fixed */
+    position: fixed; /* إذا أردته ثابتًا */
+    top: 80px;
+    left: 0;
+    right: 0;
+    width: 100%; /* العرض الكامل للشاشة */
+    max-width: 90%; /* لكن لا يتجاوز 90% من عرضه الأصلي (أو قيمة ثابتة للمحافظة على التصميم) */
+    margin: 0 auto 20px; /* لمركزته مع left:0 و right:0 عندما يكون fixed أو عند استبدال fixed بـ relative/static */
+    overflow: hidden;
+    display: flex;
+    justify-content: center; /* لمركزة المحتوى داخله */
+    align-items: center;
+    background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
+    padding: 5px 1px;
+    border-radius: 0px;
+    color: white;
+    font-size: 1.0rem; /* وحدة نسبية */
+    border-bottom: 3px groove #151825;
+    z-index: 1000; /* تأكد من ظهوره فوق العناصر الأخرى */
+}
+
+.section-description {
+    /* إزالة تكرارات العرض والخصائص المتعارضة */
+    position: fixed; /* إذا أردته ثابتًا */
+    top: 111px;
+    left: 0;
+    right: 0;
+    width: 100%; /* العرض الكامل للشاشة */
+    max-width: 90%; /* الحد الأقصى للعرض */
+    margin: 0 auto 100px; /* لمركزته */
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
+    padding: 5px;
+    z-index: 999;
+    border-bottom: 0px groove #fff;
+    font-size: 13px; /* يمكن استخدام 0.8rem */
+    color: #b8d4f5;
+}
+
+/* Channels Grid - الجزء الأكثر أهمية للتكيف */
+.channels-container {
+    /* استخدام minmax و auto-fill لإنشاء تخطيط شبكي متجاوب بالكامل */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* يتكيف تلقائيًا */
+    gap: 20px;
+    padding: 20px 20px; /* إضافة padding أفقي للشاشات الصغيرة */
+    justify-items: center;
+    /* إضافة هامش علوي أكبر للتعويض عن العناصر الثابتة */
+    margin-top: 100px; 
+}
+
+.channel-card {
+    background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
+    padding: 15px;
+    margin: 10px 0; /* إزالة الهامش الأفقي ليتسع بشكل أفضل داخل الشبكة */
+    height: 90%; /* يمكن استخدام min-height: 150px; للتكيف */
+    width: 90%; /* عرض نسبي داخل عمود الشبكة */
+    max-width: 250px; /* تحديد حد أقصى للحجم في الشاشات الكبيرة */
+    border-bottom: 4px groove #fff;
+    border-top: 4px groove #fff;
+    border-left: 0px ridge rgb(255 0 0 / 100%);
+    border-right: 0px ridge #f1f8e9;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-sizing: border-box; /* التأكد من أن padding و border لا يغيران حجم العنصر */
+}
+
+.channel-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.channel-logo {
+    width: 100%;
+    height: auto; /* إزالة الارتفاع الثابت */
+    margin: 0 auto 10px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+}
+
+.channel-logo img {
+    background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
+    /* استخدام وحدات نسبية أو الحد الأقصى للعرض داخل العنصر الأب */
+    width: 80%;
+    height: auto; /* للحفاظ على نسبة العرض إلى الارتفاع */
+    max-width: 100px; /* تحديد حد أقصى لصورة اللوجو */
+    aspect-ratio: 1 / 1; /* للحفاظ على الشكل المربع */
+    margin: 0 auto 10px;
+    border-radius: 10px 20px 10px 20px;
+    border-bottom: 5px double rgba(255, 255, 255, 0.7); 
+    border-top: 5px double rgba(255, 255, 255, 0.7); 
+    border-left: 0px ridge #2F2562;
+    border-right: 0px groove #2F2562;
+    padding: 3px;
+    display: block;
+    pointer-events: none;
+}
+
+.channel-name {
+    background-image: linear-gradient(to right, #000, #151825, #151825, #151825, #151825, #151825, #151825, #151825, #151825,#151825, #151825, #151825, #151825, #151825, #151825, #151825, #151825, #000);
+    padding: 3px 0;
+    box-shadow: 0 0px 100px rgba(255, 255, 255, 100);
+    border-top: 2px groove rgba(0, 0, 0, 100);
+    border-left: 0px ridge #6D42B8;
+    border-right: 0px groove #6D42B8;
+    border-bottom: 3px groove rgba(0, 0, 0, 5);
+    color: #fff;
+    border-radius: 10px;
+    margin-top: 30px;
+    font-weight: bold; 
+    font-family: Arial, sans-serif; 
+    box-shadow: 0 0px 5px rgba(255, 255, 255, 100);
+    text-align: center;
+    font-size: 0.8rem; /* وحدة نسبية */
+}
+.channel-description {
+    color: #E1E1E1;
+    font-size: 0.7rem; /* وحدة نسبية */
+    margin-top: 5px;
+    text-align: center;
+    line-height: 1.3;
+}
+
+/* Modal Styles */
+/* لا تحتاج إلى تغييرات كبيرة في الـ Modal لأنها تستخدم النسبة المئوية والعرض الأقصى */
+#installModal, .modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding-top: 10vh; /* استخدام vh بدلاً من px */
+    animation: fadeIn 0.3s;
+}
+
+.modal-content {
+    background: linear-gradient(to right, var(--dark-bg), #3A4266);
+    margin: auto;
+    padding: 20px;
+    border: 3px groove #fff;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 15px;
+    text-align: center;
+    color: var(--text-light);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    animation: slideIn 0.3s;
+}
+
+/* ... بقية أنماط الـ Modal والـ Connection Error (محتفظ بها كما هي) ... */
+
+/* Media Queries المعدلة */
+/* إزالة استعلام الوسائط (min-width: 1024px) القديم الذي يحتوي على قيم ثابتة */
+
+/* الأجهزة اللوحية (Tablets) وما شابه (من 768px إلى 1024px) */
+@media (max-width: 1024px) {
+    .channels-container {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 15px;
+    }
+    
+    .channel-card {
+        padding: 10px;
+    }
+}
+
+/* الهواتف الذكية (Small Phones) */
+@media (max-width: 480px) {
+    .section-title {
+        top: 80px; /* تغيير موقع العنوان في الشاشات الصغيرة */
+        font-size: 0.9rem;
+        padding: 4px 1px;
+    }
+
+    .section-description {
+        top: 110px;
+        font-size: 11px;
+        padding: 4px;
+    }
+
+    .channels-container {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+        padding: 10px;
+        margin-top: 40px; /* لتعويض موقع العنوان والوصف الجديد */
+    }
+    
+    .channel-card {
+        padding: 8px;
+        margin: 10px 0;
+    }
+    
+    .channel-logo img {
+        max-width: 70px;
+    }
+    
+    .channel-name {
+        font-size: 0.7rem;
+        margin-top: 15px;
+    }
+
+    .channel-description {
+        font-size: 0.65rem;
+    }
+
+    .modal-content {
+        width: 95%; /* زيادة عرض الـ Modal قليلاً */
+        padding: 15px;
+    }
+}
+/* css/section.css */
+/* تحديث ليدعم فتح المشغل */
+
+/* إضافة هذا الجزء */
+.channel-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.channel-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(101, 79, 212, 0.3);
+}
