@@ -477,7 +477,7 @@ class SectionChannelsApp {
     // تعديل دالة openInternalPlayer في section.js
 // في دالة openInternalPlayer في section.js
 openInternalPlayer(channel) {
-    console.log(`▶️ محاولة تشغيل ${channel.name}`);
+    console.log(`▶️ تشغيل ${channel.name} في المشغل الداخلي`);
     
     // حفظ التفضيل
     const rememberChoice = document.getElementById('rememberChoice');
@@ -494,19 +494,18 @@ openInternalPlayer(channel) {
         return;
     }
     
-    // استخدام المشغل الوسيط
-    this.openProxyPlayer(channel);
+    // فتح المشغل الاحترافي
+    this.openProfessionalPlayer(channel);
+    
+    // تسجيل النشاط
+    this.logChannelView(channel, 'internal');
 }
 
-openProxyPlayer(channel) {
-    // إنشاء رابط للمشغل الوسيط
-    let playerUrl = 'player-proxy.html?';
+openProfessionalPlayer(channel) {
+    // إنشاء رابط للمشغل الاحترافي
+    const playerUrl = `player.html?stream=${encodeURIComponent(channel.url)}&channel=${channel.id}&name=${encodeURIComponent(channel.name)}`;
     
-    if (channel.url) {
-        playerUrl += `stream=${encodeURIComponent(channel.url)}`;
-    }
-    
-    console.log('🔗 رابط المشغل الوسيط:', playerUrl);
+    console.log('🔗 رابط المشغل الاحترافي:', playerUrl);
     
     // فتح في نافذة جديدة
     const playerWindow = window.open(playerUrl, '_blank', 
@@ -517,7 +516,6 @@ openProxyPlayer(channel) {
         window.location.href = playerUrl;
     }
 }
-
     openXpolaPlayer(channel) {
         // فتح رابط البث مباشرة (سيتم التعامل معه من قبل XPola إذا كان مثبتاً)
         if (!channel.url || channel.url === '#') {
