@@ -49,7 +49,126 @@
         </div>
     </div>
     
-    <!-- Install Modal -->
+    <!-- Modal اختيار طريقة التشغيل -->
+    <div id="playerOptionsModal" class="player-options-modal">
+        <div class="player-options-content">
+            <!-- Header -->
+            <div class="player-options-header">
+                <div class="channel-info-modal">
+                    <div id="selectedChannelLogo" class="channel-logo-modal">
+                        <img src="" alt="Channel Logo">
+                    </div>
+                    <div class="channel-details-modal">
+                        <h3 id="selectedChannelName">القناة</h3>
+                        <p id="selectedChannelStatus" class="channel-status">◉ متاحة للبث</p>
+                    </div>
+                </div>
+                <button class="close-modal-btn" onclick="window.sectionApp.closePlayerOptions()">
+                    <i class="uil uil-times"></i>
+                </button>
+            </div>
+            
+            <!-- Options -->
+            <div class="player-options-body">
+                <h4 class="options-title">
+                    <i class="uil uil-play-circle"></i> اختر طريقة التشغيل
+                </h4>
+                
+                <div class="player-options-grid">
+                    <!-- الخيار 1: المشغل الداخلي -->
+                    <div class="player-option" data-option="internal" onclick="window.sectionApp.playInInternalPlayer()">
+                        <div class="option-icon">
+                            <i class="uil uil-tv-retro"></i>
+                        </div>
+                        <div class="option-details">
+                            <h5>المشغل الداخلي</h5>
+                            <p class="option-description">
+                                تشغيل مباشر داخل التطبيق مع جودة عالية
+                            </p>
+                            <div class="option-features">
+                                <span class="feature-badge">HD</span>
+                                <span class="feature-badge">متعدد الجودة</span>
+                            </div>
+                        </div>
+                        <div class="option-arrow">
+                            <i class="uil uil-angle-left"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- الخيار 2: مشغل XPola -->
+                    <div class="player-option" data-option="xpola" onclick="window.sectionApp.playInXpolaPlayer()">
+                        <div class="option-icon xpola-icon">
+                            <i class="uil uil-external-link-alt"></i>
+                        </div>
+                        <div class="option-details">
+                            <h5>مشغل XPola</h5>
+                            <p class="option-description">
+                                افتح في تطبيق XPola Player الخارجي
+                            </p>
+                            <div class="option-features">
+                                <span class="feature-badge">التطبيق الخارجي</span>
+                                <span class="feature-badge">أداء أفضل</span>
+                            </div>
+                        </div>
+                        <div class="option-arrow">
+                            <i class="uil uil-angle-left"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- الخيار 3: تحميل XPola -->
+                    <div class="player-option" data-option="download" onclick="window.sectionApp.downloadXpolaApp()">
+                        <div class="option-icon download-icon">
+                            <i class="uil uil-download-alt"></i>
+                        </div>
+                        <div class="option-details">
+                            <h5>تحميل التطبيق</h5>
+                            <p class="option-description">
+                                تثبيت تطبيق XPola Player على جهازك
+                            </p>
+                            <div class="option-features">
+                                <span class="feature-badge">تحديثات</span>
+                                <span class="feature-badge">دعم فني</span>
+                            </div>
+                        </div>
+                        <div class="option-arrow">
+                            <i class="uil uil-angle-left"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- تفضيلات المستخدم -->
+                <div class="player-preferences">
+                    <div class="preference-item">
+                        <input type="checkbox" id="rememberChoice" checked>
+                        <label for="rememberChoice">تذكر اختياري للقنوات القادمة</label>
+                    </div>
+                    <div class="preference-item">
+                        <select id="defaultPlayer" class="form-select form-select-sm">
+                            <option value="ask">اسألني دائماً</option>
+                            <option value="internal">المشغل الداخلي</option>
+                            <option value="xpola">مشغل XPola</option>
+                        </select>
+                        <label for="defaultPlayer">المشغل الافتراضي</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="player-options-footer">
+                <button class="btn btn-secondary btn-sm" onclick="window.sectionApp.closePlayerOptions()">
+                    إلغاء
+                </button>
+                <div class="player-stats">
+                    <small>
+                        <i class="uil uil-info-circle"></i>
+                        يمكنك تغيير الخيارات من الإعدادات لاحقاً
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal تثبيت التطبيق (للخلفية) -->
     <div id="installModal" class="modal">
         <div class="modal-content">
             <p>لمشاهدة القنوات يجب عليك أولاً تثبيت تطبيق مشغل القنوات الخاص بالتطبيق</p>
