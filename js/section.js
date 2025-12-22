@@ -475,6 +475,7 @@ class SectionChannelsApp {
     }
 
     // تعديل دالة openInternalPlayer في section.js
+// في دالة openInternalPlayer في section.js
 openInternalPlayer(channel) {
     console.log(`▶️ محاولة تشغيل ${channel.name}`);
     
@@ -493,32 +494,23 @@ openInternalPlayer(channel) {
         return;
     }
     
-    // فتح المشغل البسيط
-    this.openSimplePlayer(channel);
+    // استخدام المشغل الوسيط
+    this.openProxyPlayer(channel);
 }
 
-openSimplePlayer(channel) {
-    // إنشاء رابط للمشغل البسيط
-    let playerUrl = 'player-simple.html?';
+openProxyPlayer(channel) {
+    // إنشاء رابط للمشغل الوسيط
+    let playerUrl = 'player-proxy.html?';
     
     if (channel.url) {
         playerUrl += `stream=${encodeURIComponent(channel.url)}`;
     }
     
-    if (channel.name) {
-        playerUrl += `&name=${encodeURIComponent(channel.name)}`;
-    }
-    
-    if (channel.image || channel.logo) {
-        const logoUrl = channel.image || channel.logo;
-        playerUrl += `&logo=${encodeURIComponent(logoUrl)}`;
-    }
-    
-    console.log('🔗 رابط المشغل البسيط:', playerUrl);
+    console.log('🔗 رابط المشغل الوسيط:', playerUrl);
     
     // فتح في نافذة جديدة
     const playerWindow = window.open(playerUrl, '_blank', 
-        'width=1000,height=700,resizable=yes,scrollbars=yes');
+        'width=1000,height=800,resizable=yes,scrollbars=yes');
     
     if (!playerWindow) {
         // إذا تم منع النوافذ، افتح في نفس الصفحة
