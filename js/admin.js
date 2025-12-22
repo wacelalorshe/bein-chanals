@@ -680,86 +680,106 @@ class AdminManager {
     }
 
     loadChannelsTab() {
-        return `
-            <!-- 🔹 نموذج إضافة/تعديل قناة -->
-            <div class="card mb-5">
-                <div class="card-header card-header-custom">
-                    <h4 class="mb-0 text-white">
-                        <i class="uil uil-plus-circle"></i> 
-                        <span id="channelFormTitle">إضافة قناة جديدة</span>
-                    </h4>
-                </div>
-                <div class="card-body">
-                    <form id="channelForm" onsubmit="adminManager.saveChannel(event)">
-                        <input type="hidden" id="channelId">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label">اسم القناة *</label>
-                                    <input type="text" id="channelName" class="form-control" required placeholder="أدخل اسم القناة">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">القسم *</label>
-                                    <select id="channelSection" class="form-control" required>
-                                        <option value="">اختر القسم</option>
-                                    </select>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">رابط الصورة</label>
-                                    <input type="text" id="channelImage" class="form-control" placeholder="https://example.com/image.jpg" oninput="adminManager.updateImagePreview(this.value, 'channelImagePreview')">
-                                    <img id="channelImagePreview" class="section-image-preview" alt="معاينة الصورة">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label">رابط البث *</label>
-                                    <textarea id="channelUrl" class="form-control" rows="3" required placeholder="أدخل رابط البث"></textarea>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">ترتيب العرض</label>
-                                    <input type="number" id="channelOrder" class="form-control" value="1" min="1">
-                                    <small class="text-muted" id="orderHelpText">الترتيب داخل القسم</small>
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label class="form-label">رابط التطبيق</label>
-                                    <input type="text" id="channelAppUrl" class="form-control" value="https://play.google.com/store/apps/details?id=com.xpola.player">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success flex-fill py-3">
-                                <i class="uil uil-save"></i> 
-                                <span id="channelSaveButton">حفظ القناة</span>
-                            </button>
-                            <button type="button" class="btn btn-secondary" onclick="adminManager.cancelEditChannel()" id="cancelChannelEdit" style="display: none;">
-                                <i class="uil uil-times"></i> إلغاء
-                            </button>
-                        </div>
-                    </form>
-                </div>
+    return `
+        <!-- 🔹 نموذج إضافة/تعديل قناة -->
+        <div class="card mb-5">
+            <div class="card-header card-header-custom">
+                <h4 class="mb-0 text-white">
+                    <i class="uil uil-plus-circle"></i> 
+                    <span id="channelFormTitle">إضافة قناة جديدة</span>
+                </h4>
             </div>
-            
-            <!-- 🔹 قائمة القنوات -->
-            <div class="card">
-                <div class="card-header card-header-custom">
-                    <h4 class="mb-0 text-white">
-                        <i class="uil uil-tv"></i> جميع القنوات
-                        <span id="channelsCount" class="badge bg-primary ms-2">0</span>
-                    </h4>
-                </div>
-                <div class="card-body">
-                    <div id="channelsList">
-                        <div class="text-center py-5">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">جاري التحميل...</span>
+            <div class="card-body">
+                <form id="channelForm" onsubmit="adminManager.saveChannel(event)">
+                    <input type="hidden" id="channelId">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label">اسم القناة *</label>
+                                <input type="text" id="channelName" class="form-control" required placeholder="أدخل اسم القناة">
                             </div>
-                            <p class="mt-3 text-muted">جاري تحميل القنوات...</p>
+                            <div class="form-group mb-3">
+                                <label class="form-label">القسم *</label>
+                                <select id="channelSection" class="form-control" required>
+                                    <option value="">اختر القسم</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label class="form-label">رابط الصورة</label>
+                                <input type="text" id="channelImage" class="form-control" placeholder="https://example.com/image.jpg" oninput="adminManager.updateImagePreview(this.value, 'channelImagePreview')">
+                                <img id="channelImagePreview" class="section-image-preview" alt="معاينة الصورة">
+                            </div>
                         </div>
+                        <div class="col-md-6">
+                            <!-- 🔹 نوع الرابط -->
+                            <div class="form-group mb-3">
+                                <label class="form-label">نوع رابط التشغيل *</label>
+                                <select id="streamType" class="form-control" required onchange="adminManager.toggleStreamType()">
+                                    <option value="">اختر نوع الرابط</option>
+                                    <option value="xmtv">رابط XPOLA (xmtv://)</option>
+                                    <option value="direct">رابط مباشر للمشغل</option>
+                                </select>
+                            </div>
+                            
+                            <!-- 🔹 رابط XPOLA -->
+                            <div class="form-group mb-3" id="xmtvUrlGroup" style="display: none;">
+                                <label class="form-label">رابط XPOLA *</label>
+                                <textarea id="channelXmtvUrl" class="form-control" rows="3" placeholder="xmtv://XPOLA808SzJ4ZGRgYyo/P3EhPnFgez1xYHk+c399P3FgeT9zeHF+"></textarea>
+                                <small class="text-muted">صيغة: xmtv://كود_التشفير</small>
+                            </div>
+                            
+                            <!-- 🔹 رابط مباشر -->
+                            <div class="form-group mb-3" id="directUrlGroup" style="display: none;">
+                                <label class="form-label">رابط البث المباشر *</label>
+                                <textarea id="channelDirectUrl" class="form-control" rows="3" placeholder="http://135.125.109.73:9000/beinsport1_.m3u8"></textarea>
+                                <small class="text-muted">صيغة: http:// أو https:// أو rtmp://</small>
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label class="form-label">ترتيب العرض</label>
+                                <input type="number" id="channelOrder" class="form-control" value="1" min="1">
+                                <small class="text-muted" id="orderHelpText">الترتيب داخل القسم</small>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label class="form-label">رابط التطبيق</label>
+                                <input type="text" id="channelAppUrl" class="form-control" value="https://play.google.com/store/apps/details?id=com.xpola.player">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success flex-fill py-3">
+                            <i class="uil uil-save"></i> 
+                            <span id="channelSaveButton">حفظ القناة</span>
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="adminManager.cancelEditChannel()" id="cancelChannelEdit" style="display: none;">
+                            <i class="uil uil-times"></i> إلغاء
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- 🔹 قائمة القنوات -->
+        <div class="card">
+            <div class="card-header card-header-custom">
+                <h4 class="mb-0 text-white">
+                    <i class="uil uil-tv"></i> جميع القنوات
+                    <span id="channelsCount" class="badge bg-primary ms-2">0</span>
+                </h4>
+            </div>
+            <div class="card-body">
+                <div id="channelsList">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">جاري التحميل...</span>
+                        </div>
+                        <p class="mt-3 text-muted">جاري تحميل القنوات...</p>
                     </div>
                 </div>
             </div>
-        `;
-    }
+        </div>
+    `;
+}
 
     loadMatchesTab() {
         return `
@@ -1365,88 +1385,96 @@ class AdminManager {
     }
 
     renderChannelsList() {
-        const container = document.getElementById('channelsList');
-        const countElement = document.getElementById('channelsCount');
-        
-        if (!container) {
-            console.error('❌ عنصر channelsList غير موجود');
-            return;
+    const container = document.getElementById('channelsList');
+    const countElement = document.getElementById('channelsCount');
+    
+    if (!container) {
+        console.error('❌ عنصر channelsList غير موجود');
+        return;
+    }
+    
+    if (this.channels.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-5">
+                <i class="uil uil-tv-retro" style="font-size: 80px; color: #6c757d;"></i>
+                <h5 class="mt-3 text-muted">لا توجد قنوات مضافة</h5>
+            </div>
+        `;
+        if (countElement) countElement.textContent = '0';
+        return;
+    }
+    
+    const sortedChannels = [...this.channels].sort((a, b) => {
+        if (a.sectionId === b.sectionId) {
+            return (a.order || 999) - (b.order || 999);
         }
+        return a.name.localeCompare(b.name);
+    });
+    
+    container.innerHTML = sortedChannels.map(channel => {
+        const section = this.sections.find(s => s.id === channel.sectionId);
         
-        if (this.channels.length === 0) {
-            container.innerHTML = `
-                <div class="text-center py-5">
-                    <i class="uil uil-tv-retro" style="font-size: 80px; color: #6c757d;"></i>
-                    <h5 class="mt-3 text-muted">لا توجد قنوات مضافة</h5>
-                </div>
-            `;
-            if (countElement) countElement.textContent = '0';
-            return;
-        }
-        
-        const sortedChannels = [...this.channels].sort((a, b) => {
-            if (a.sectionId === b.sectionId) {
-                return (a.order || 999) - (b.order || 999);
-            }
-            return a.name.localeCompare(b.name);
-        });
-        
-        container.innerHTML = sortedChannels.map(channel => {
-            const section = this.sections.find(s => s.id === channel.sectionId);
-            
-            return `
-            <div class="channel-item" data-channel-id="${channel.id}" data-order="${channel.order}">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <div class="channel-order-badge-main me-2" title="الترتيب في القسم: ${channel.order || 1}">
-                            <span>${channel.order || 1}</span>
-                        </div>
-                        <img src="${channel.image || 'https://via.placeholder.com/60x40/2F2562/FFFFFF?text=TV'}" 
-                             alt="${channel.name}" 
-                             class="rounded me-3 channel-thumbnail"
-                             onerror="this.src='https://via.placeholder.com/60x40/2F2562/FFFFFF?text=TV'">
-                        <div>
-                            <h6 class="text-white mb-1">${channel.name}</h6>
-                            <div class="text-muted">
-                                <small>الترتيب في القسم: ${channel.order || 1}</small>
-                                ${section ? `
-                                    <span class="mx-2">•</span>
-                                    <small class="section-badge" onclick="adminManager.viewSection('${section.id}')" style="cursor: pointer;" title="عرض القسم">
-                                        ${section.name}
-                                    </small>
-                                ` : ''}
+        return `
+        <div class="channel-item" data-channel-id="${channel.id}" data-order="${channel.order}">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <div class="channel-order-badge-main me-2" title="الترتيب في القسم: ${channel.order || 1}">
+                        <span>${channel.order || 1}</span>
+                    </div>
+                    <img src="${channel.image || 'https://via.placeholder.com/60x40/2F2562/FFFFFF?text=TV'}" 
+                         alt="${channel.name}" 
+                         class="rounded me-3 channel-thumbnail"
+                         onerror="this.src='https://via.placeholder.com/60x40/2F2562/FFFFFF?text=TV'">
+                    <div>
+                        <h6 class="text-white mb-1">${channel.name}</h6>
+                        <div class="text-muted">
+                            <small>الترتيب في القسم: ${channel.order || 1}</small>
+                            ${section ? `
                                 <span class="mx-2">•</span>
-                                <small class="${channel.url ? 'text-success' : 'text-danger'}">
-                                    ${channel.url ? '🔗 رابط متاح' : '❌ بدون رابط'}
+                                <small class="section-badge" onclick="adminManager.viewSection('${section.id}')" style="cursor: pointer;" title="عرض القسم">
+                                    ${section.name}
                                 </small>
-                            </div>
+                            ` : ''}
+                            <span class="mx-2">•</span>
+                            <small class="badge ${channel.streamType === 'xmtv' ? 'bg-warning' : 'bg-success'}">
+                                ${channel.streamType === 'xmtv' ? 'XPOLA' : 'مباشر'}
+                            </small>
+                            <span class="mx-2">•</span>
+                            <small class="${channel.url ? 'text-success' : 'text-danger'}">
+                                ${channel.url ? '🔗 رابط متاح' : '❌ بدون رابط'}
+                            </small>
                         </div>
                     </div>
-                    <div class="action-buttons">
-                        <!-- 🔹 زر التشغيل الجديد -->
-                        <button class="btn btn-success btn-sm me-1" onclick="adminManager.playChannel('${channel.id}')" 
-                                title="تشغيل القناة" ${!channel.url ? 'disabled' : ''}>
-                            <i class="uil uil-play"></i>
-                        </button>
-                        
-                        <button class="btn btn-warning btn-sm me-1" onclick="adminManager.editChannel('${channel.id}', event)" title="تعديل القناة">
-                            <i class="uil uil-edit"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm" onclick="adminManager.deleteChannel('${channel.id}')" title="حذف القناة">
-                            <i class="uil uil-trash-alt"></i>
-                        </button>
-                    </div>
                 </div>
-                <div class="mt-2 text-muted small">
-                    <span class="badge bg-secondary">#${channel.id.substring(0, 8)}</span>
-                    ${channel.createdAt ? `<span class="mx-2">•</span><small>تم الإنشاء: ${new Date(channel.createdAt).toLocaleDateString('ar-SA')}</small>` : ''}
+                <div class="action-buttons">
+                    <!-- 🔹 زر التشغيل الجديد -->
+                    <button class="btn btn-success btn-sm me-1" onclick="adminManager.playChannel('${channel.id}')" 
+                            title="تشغيل القناة" ${!channel.url ? 'disabled' : ''}>
+                        <i class="uil uil-play"></i>
+                    </button>
+                    
+                    <button class="btn btn-warning btn-sm me-1" onclick="adminManager.editChannel('${channel.id}', event)" title="تعديل القناة">
+                        <i class="uil uil-edit"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="adminManager.deleteChannel('${channel.id}')" title="حذف القناة">
+                        <i class="uil uil-trash-alt"></i>
+                    </button>
                 </div>
             </div>
-            `;
-        }).join('');
-        
-        if (countElement) countElement.textContent = sortedChannels.length;
-    }
+            <div class="mt-2 text-muted small">
+                <span class="badge bg-secondary">#${channel.id.substring(0, 8)}</span>
+                ${channel.streamType === 'xmtv' ? 
+                    `<span class="mx-2">•</span><small class="text-warning"><i class="uil uil-android"></i> XPOLA</small>` : 
+                    `<span class="mx-2">•</span><small class="text-info"><i class="uil uil-browser"></i> مباشر</small>`
+                }
+                ${channel.createdAt ? `<span class="mx-2">•</span><small>تم الإنشاء: ${new Date(channel.createdAt).toLocaleDateString('ar-SA')}</small>` : ''}
+            </div>
+        </div>
+        `;
+    }).join('');
+    
+    if (countElement) countElement.textContent = sortedChannels.length;
+}
 
     renderMatchesList() {
         const container = document.getElementById('matchesList');
@@ -2069,114 +2097,162 @@ class AdminManager {
     // القسم 12: إدارة القنوات (التعديل والحذف)
     // ============================================
     async saveChannel(event) {
-        if (event) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    try {
+        const channelName = document.getElementById('channelName').value;
+        const channelSection = document.getElementById('channelSection').value;
+        const streamType = document.getElementById('streamType').value;
         
-        try {
-            const channelName = document.getElementById('channelName').value;
-            const channelSection = document.getElementById('channelSection').value;
-            const channelUrl = document.getElementById('channelUrl').value;
-            
-            if (!channelName || !channelSection || !channelUrl) {
-                this.showAlert('يرجى ملء جميع الحقول المطلوبة', 'error');
-                return false;
-            }
-            
-            const channelData = {
-                name: channelName,
-                sectionId: channelSection,
-                image: document.getElementById('channelImage').value,
-                url: channelUrl,
-                order: parseInt(document.getElementById('channelOrder').value) || 1,
-                appUrl: document.getElementById('channelAppUrl').value || 'https://play.google.com/store/apps/details?id=com.xpola.player',
-                updatedAt: new Date()
-            };
-            
-            const channelId = document.getElementById('channelId').value;
-            
-            if (channelId) {
-                // تحديث قناة موجودة
-                if (this.firestoreAvailable) {
-                    const db = this.getDB();
-                    await db.collection('channels').doc(channelId).update(channelData);
-                }
-                
-                const index = this.channels.findIndex(c => c.id === channelId);
-                if (index !== -1) {
-                    this.channels[index] = { ...this.channels[index], ...channelData };
-                }
-                
-                this.showAlert('تم تحديث القناة بنجاح', 'success');
-            } else {
-                // إضافة قناة جديدة
-                channelData.createdAt = new Date();
-                let newChannelId;
-                
-                if (this.firestoreAvailable) {
-                    const db = this.getDB();
-                    const docRef = await db.collection('channels').add(channelData);
-                    newChannelId = docRef.id;
-                } else {
-                    newChannelId = 'local_' + Date.now();
-                    channelData.id = newChannelId;
-                }
-                
-                this.channels.push({
-                    id: newChannelId,
-                    ...channelData
-                });
-                
-                this.showAlert('تم إضافة القناة بنجاح', 'success');
-            }
-            
-            this.saveToLocalStorage();
-            this.renderData();
-            this.updateBackupStats();
-            this.resetChannelForm();
-            
-            return true;
-            
-        } catch (error) {
-            console.error('❌ خطأ في حفظ القناة:', error);
-            this.showAlert('خطأ في حفظ القناة: ' + error.message, 'error');
+        if (!channelName || !channelSection || !streamType) {
+            this.showAlert('يرجى ملء جميع الحقول المطلوبة', 'error');
             return false;
         }
+        
+        // التحقق من نوع الرابط
+        let channelUrl = '';
+        let xmtvUrl = '';
+        let directUrl = '';
+        
+        if (streamType === 'xmtv') {
+            xmtvUrl = document.getElementById('channelXmtvUrl').value;
+            if (!xmtvUrl || !xmtvUrl.startsWith('xmtv://')) {
+                this.showAlert('رابط XPOLA يجب أن يبدأ بـ xmtv://', 'error');
+                return false;
+            }
+            // إنشاء رابط فتح XPOLA
+            channelUrl = this.createXpolaOpenUrl(xmtvUrl);
+        } else if (streamType === 'direct') {
+            directUrl = document.getElementById('channelDirectUrl').value;
+            if (!directUrl) {
+                this.showAlert('يرجى إدخال رابط البث المباشر', 'error');
+                return false;
+            }
+            channelUrl = directUrl;
+        }
+        
+        const channelData = {
+            name: channelName,
+            sectionId: channelSection,
+            image: document.getElementById('channelImage').value,
+            url: channelUrl, // الرابط النهائي للفتح
+            xmtvUrl: xmtvUrl, // حفظ رابط XPOLA الأصلي
+            directUrl: directUrl, // حفظ الرابط المباشر
+            streamType: streamType, // حفظ نوع الرابط
+            order: parseInt(document.getElementById('channelOrder').value) || 1,
+            appUrl: document.getElementById('channelAppUrl').value || 'https://play.google.com/store/apps/details?id=com.xpola.player',
+            updatedAt: new Date()
+        };
+        
+        const channelId = document.getElementById('channelId').value;
+        
+        if (channelId) {
+            // تحديث قناة موجودة
+            if (this.firestoreAvailable) {
+                const db = this.getDB();
+                await db.collection('channels').doc(channelId).update(channelData);
+            }
+            
+            const index = this.channels.findIndex(c => c.id === channelId);
+            if (index !== -1) {
+                this.channels[index] = { ...this.channels[index], ...channelData };
+            }
+            
+            this.showAlert('تم تحديث القناة بنجاح', 'success');
+        } else {
+            // إضافة قناة جديدة
+            channelData.createdAt = new Date();
+            let newChannelId;
+            
+            if (this.firestoreAvailable) {
+                const db = this.getDB();
+                const docRef = await db.collection('channels').add(channelData);
+                newChannelId = docRef.id;
+            } else {
+                newChannelId = 'local_' + Date.now();
+                channelData.id = newChannelId;
+            }
+            
+            this.channels.push({
+                id: newChannelId,
+                ...channelData
+            });
+            
+            this.showAlert('تم إضافة القناة بنجاح', 'success');
+        }
+        
+        this.saveToLocalStorage();
+        this.renderData();
+        this.updateBackupStats();
+        this.resetChannelForm();
+        
+        return true;
+        
+    } catch (error) {
+        console.error('❌ خطأ في حفظ القناة:', error);
+        this.showAlert('خطأ في حفظ القناة: ' + error.message, 'error');
+        return false;
     }
+}
 
     editChannel(channelId, e) {
-        if (e) e.stopPropagation();
-        
-        const channel = this.channels.find(c => c.id === channelId);
-        if (!channel) {
-            this.showAlert('القناة غير موجودة', 'error');
-            return;
-        }
-        
-        this.editingChannel = channel;
-        
-        document.getElementById('channelId').value = channel.id;
-        document.getElementById('channelName').value = channel.name;
-        document.getElementById('channelSection').value = channel.sectionId;
-        document.getElementById('channelImage').value = channel.image || '';
-        document.getElementById('channelUrl').value = channel.url || '';
-        document.getElementById('channelOrder').value = channel.order || 1;
-        document.getElementById('channelAppUrl').value = channel.appUrl || 'https://play.google.com/store/apps/details?id=com.xpola.player';
-        
-        document.getElementById('channelFormTitle').textContent = 'تعديل القناة';
-        document.getElementById('channelSaveButton').textContent = 'تحديث القناة';
-        document.getElementById('cancelChannelEdit').style.display = 'block';
-        
-        this.updateImagePreview(channel.image, 'channelImagePreview');
-        
-        this.populateSectionDropdown();
-        
-        const form = document.getElementById('channelForm');
-        if (form) {
-            form.scrollIntoView({ behavior: 'smooth' });
+    if (e) e.stopPropagation();
+    
+    const channel = this.channels.find(c => c.id === channelId);
+    if (!channel) {
+        this.showAlert('القناة غير موجودة', 'error');
+        return;
+    }
+    
+    this.editingChannel = channel;
+    
+    document.getElementById('channelId').value = channel.id;
+    document.getElementById('channelName').value = channel.name;
+    document.getElementById('channelSection').value = channel.sectionId;
+    document.getElementById('channelImage').value = channel.image || '';
+    document.getElementById('channelOrder').value = channel.order || 1;
+    document.getElementById('channelAppUrl').value = channel.appUrl || 'https://play.google.com/store/apps/details?id=com.xpola.player';
+    
+    // تعيين نوع الرابط
+    if (channel.xmtvUrl) {
+        document.getElementById('streamType').value = 'xmtv';
+        document.getElementById('channelXmtvUrl').value = channel.xmtvUrl;
+        document.getElementById('channelDirectUrl').value = '';
+    } else if (channel.directUrl) {
+        document.getElementById('streamType').value = 'direct';
+        document.getElementById('channelDirectUrl').value = channel.directUrl;
+        document.getElementById('channelXmtvUrl').value = '';
+    } else {
+        // إذا كان رابط قديم
+        if (channel.url && channel.url.includes('xmtv://')) {
+            document.getElementById('streamType').value = 'xmtv';
+            document.getElementById('channelXmtvUrl').value = channel.url;
+            document.getElementById('channelDirectUrl').value = '';
+        } else {
+            document.getElementById('streamType').value = 'direct';
+            document.getElementById('channelDirectUrl').value = channel.url || '';
+            document.getElementById('channelXmtvUrl').value = '';
         }
     }
+    
+    // تفعيل نوع الرابط المحدد
+    this.toggleStreamType();
+    
+    document.getElementById('channelFormTitle').textContent = 'تعديل القناة';
+    document.getElementById('channelSaveButton').textContent = 'تحديث القناة';
+    document.getElementById('cancelChannelEdit').style.display = 'block';
+    
+    this.updateImagePreview(channel.image, 'channelImagePreview');
+    this.populateSectionDropdown();
+    
+    const form = document.getElementById('channelForm');
+    if (form) {
+        form.scrollIntoView({ behavior: 'smooth' });
+    }
+}
 
     cancelEditChannel() {
         this.editingChannel = null;
@@ -2184,19 +2260,26 @@ class AdminManager {
     }
 
     resetChannelForm() {
-        const form = document.getElementById('channelForm');
-        if (form) form.reset();
-        
-        document.getElementById('channelId').value = '';
-        document.getElementById('channelFormTitle').textContent = 'إضافة قناة جديدة';
-        document.getElementById('channelSaveButton').textContent = 'حفظ القناة';
-        document.getElementById('cancelChannelEdit').style.display = 'none';
-        document.getElementById('channelImagePreview').style.display = 'none';
-        document.getElementById('channelOrder').value = 1;
-        document.getElementById('channelAppUrl').value = 'https://play.google.com/store/apps/details?id=com.xpola.player';
-        
-        this.populateSectionDropdown();
-    }
+    const form = document.getElementById('channelForm');
+    if (form) form.reset();
+    
+    document.getElementById('channelId').value = '';
+    document.getElementById('channelFormTitle').textContent = 'إضافة قناة جديدة';
+    document.getElementById('channelSaveButton').textContent = 'حفظ القناة';
+    document.getElementById('cancelChannelEdit').style.display = 'none';
+    document.getElementById('channelImagePreview').style.display = 'none';
+    document.getElementById('channelOrder').value = 1;
+    document.getElementById('channelAppUrl').value = 'https://play.google.com/store/apps/details?id=com.xpola.player';
+    
+    // إعادة تعيين حقول الروابط
+    document.getElementById('streamType').value = '';
+    document.getElementById('channelXmtvUrl').value = '';
+    document.getElementById('channelDirectUrl').value = '';
+    document.getElementById('xmtvUrlGroup').style.display = 'none';
+    document.getElementById('directUrlGroup').style.display = 'none';
+    
+    this.populateSectionDropdown();
+}
 
     async deleteChannel(channelId) {
         if (event) event.stopPropagation();
@@ -3096,28 +3179,87 @@ class AdminManager {
         window.location.href = 'index.html';
     }
 
+
+toggleStreamType() {
+    const streamType = document.getElementById('streamType').value;
+    const xmtvGroup = document.getElementById('xmtvUrlGroup');
+    const directGroup = document.getElementById('directUrlGroup');
+    
+    if (streamType === 'xmtv') {
+        xmtvGroup.style.display = 'block';
+        directGroup.style.display = 'none';
+        document.getElementById('channelXmtvUrl').required = true;
+        document.getElementById('channelDirectUrl').required = false;
+    } else if (streamType === 'direct') {
+        xmtvGroup.style.display = 'none';
+        directGroup.style.display = 'block';
+        document.getElementById('channelXmtvUrl').required = false;
+        document.getElementById('channelDirectUrl').required = true;
+    } else {
+        xmtvGroup.style.display = 'none';
+        directGroup.style.display = 'none';
+        document.getElementById('channelXmtvUrl').required = false;
+        document.getElementById('channelDirectUrl').required = false;
+    }
+}
+
+// 🔹 دالة إنشاء رابط فتح XPOLA
+createXpolaOpenUrl(xmtvUrl) {
+    // رابط لفتح تطبيق XPOLA مباشرة
+    return `intent://play#Intent;package=com.xpola.player;scheme=xmtv;S.url=${encodeURIComponent(xmtvUrl)};end`;
+}
+
     // ============================================
     // القسم 17: تشغيل القنوات
     // ============================================
 
     playChannel(channelId) {
-        const channel = this.channels.find(c => c.id === channelId);
-        
-        if (!channel) {
-            this.showAlert('القناة غير موجودة', 'error');
-            return;
-        }
-        
-        if (!channel.url || channel.url === '#') {
-            this.showAlert('رابط البث غير متوفر لهذه القناة', 'error');
-            return;
-        }
-        
-        console.log(`▶️ محاولة تشغيل القناة: ${channel.name}`);
-        
-        // طرق التشغيل المتعددة
+    const channel = this.channels.find(c => c.id === channelId);
+    
+    if (!channel) {
+        this.showAlert('القناة غير موجودة', 'error');
+        return;
+    }
+    
+    if (!channel.url) {
+        this.showAlert('رابط البث غير متوفر لهذه القناة', 'error');
+        return;
+    }
+    
+    console.log(`▶️ محاولة تشغيل القناة: ${channel.name}`);
+    console.log(`📡 نوع البث: ${channel.streamType}`);
+    
+    // إذا كان رابط XPOLA، فتح مباشرة
+    if (channel.streamType === 'xmtv' && channel.xmtvUrl) {
+        this.openXpolaChannel(channel);
+    } else {
+        // عرض خيارات التشغيل للرابط المباشر
         this.showPlayOptions(channel);
     }
+}
+
+// 🔹 دالة لفتح قناة XPOLA مباشرة
+openXpolaChannel(channel) {
+    if (!channel.xmtvUrl) return;
+    
+    // طريقة 1: محاولة فتح تطبيق XPOLA
+    const xpolaIntent = `intent://play#Intent;package=com.xpola.player;scheme=xmtv;S.url=${encodeURIComponent(channel.xmtvUrl)};end`;
+    
+    // طريقة 2: رابط fallback
+    const fallbackUrl = 'https://play.google.com/store/apps/details?id=com.xpola.player';
+    
+    // محاولة فتح التطبيق
+    window.location.href = xpolaIntent;
+    
+    // إذا فشل، توجيه لتحميل التطبيق بعد 2 ثانية
+    setTimeout(() => {
+        if (!document.hidden) {
+            this.showAlert('تطبيق XPOLA غير مثبت، جاري توجيهك لتحميله', 'warning');
+            window.open(fallbackUrl, '_blank');
+        }
+    }, 2000);
+}
+
 
     showPlayOptions(channel) {
         const optionsHTML = `
